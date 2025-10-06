@@ -1,0 +1,271 @@
+spring:
+  application:
+    name: ty-multiverse-gateway
+  profiles:
+    active: "@env@"
+  cloud:
+    gateway:
+      # Global CORS configuration
+      globalcors:
+        cors-configurations:
+          "[/**]":
+            allowedOrigins:
+              - "@PUBLIC_FRONTEND_URL@"
+              - "http://localhost:4321"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+            maxAge: 3600
+
+      # Route configurations - 將所有請求轉發到 backend
+      # 前端請求格式：http://localhost:8082/tymgateway/tymb/**
+      # Gateway 轉發到：http://localhost:8080/tymb/**
+      routes:
+        # People module routes (only for non-GET requests)
+        - id: people-route
+          uri: "@BACKEND_SERVICE_URL@"
+          predicates:
+            - Path=/tymgateway/tymb/people/**
+            - Method=POST,PUT,DELETE
+          filters:
+            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        # People Images routes
+        - id: people-images-route
+          uri: "@BACKEND_SERVICE_URL@"
+          predicates:
+            - Path=/tymgateway/tymb/people-images/**
+          filters:
+            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        # Weapons routes
+        - id: weapons-route
+          uri: "@BACKEND_SERVICE_URL@"
+          predicates:
+            - Path=/tymgateway/tymb/weapons/**
+          filters:
+            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        # Gallery routes
+        - id: gallery-route
+          uri: "@BACKEND_SERVICE_URL@"
+          predicates:
+            - Path=/tymgateway/tymb/gallery/**
+          filters:
+            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        # CKEditor routes
+        - id: ckeditor-route
+          uri: "@BACKEND_SERVICE_URL@"
+          predicates:
+            - Path=/tymgateway/tymb/ckeditor/**
+          filters:
+            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        # Blackjack routes
+        - id: blackjack-route
+          uri: "@BACKEND_SERVICE_URL@"
+          predicates:
+            - Path=/tymgateway/tymb/deckofcards/blackjack/**
+          filters:
+            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        # Guardian routes (Authentication)
+        - id: guardian-route
+          uri: "@BACKEND_SERVICE_URL@"
+          predicates:
+            - Path=/tymgateway/tymb/guardian/**
+          filters:
+            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        # Keycloak routes
+        - id: keycloak-route
+          uri: "@BACKEND_SERVICE_URL@"
+          predicates:
+            - Path=/tymgateway/tymb/keycloak/**
+          filters:
+            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        # Async API routes
+        - id: async-request-status-route
+          uri: "@BACKEND_SERVICE_URL@"
+          predicates:
+            - Path=/tymgateway/tymb/api/request-status/**
+          filters:
+            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        - id: async-test-route
+          uri: "@BACKEND_SERVICE_URL@"
+          predicates:
+            - Path=/tymgateway/tymb/api/test/async/**
+          filters:
+            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        # JavaDoc routes
+        - id: docs-route
+          uri: "@BACKEND_SERVICE_URL@"
+          predicates:
+            - Path=/tymgateway/tymb/docs/**
+          filters:
+            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        # Actuator routes
+        - id: actuator-route
+          uri: "@BACKEND_SERVICE_URL@"
+          predicates:
+            - Path=/tymgateway/tymb/actuator/**
+          filters:
+            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
+
+        # Swagger/OpenAPI routes
+        - id: swagger-route
+          uri: "@BACKEND_SERVICE_URL@"
+          predicates:
+            - Path=/tymgateway/tymb/swagger-ui/**,/tymgateway/tymb/v3/api-docs/**
+          filters:
+            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - name: CircuitBreaker
+              args:
+                name: backendCircuitBreaker
+                fallbackUri: forward:/fallback
+
+      # Default filters applied to all routes
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+        - AddResponseHeader=X-Gateway-Response, TYM-Gateway
+
+  # Redis configuration for rate limiting (currently disabled)
+  # data:
+  #   redis:
+  #     host: '@REDIS_HOST@'
+  #     port: '@REDIS_CUSTOM_PORT@'
+  #     password: '@REDIS_PASSWORD@'
+  #     database: 1  # Use different database from backend
+  #     timeout: 5000ms
+  #     lettuce:
+  #       pool:
+  #         max-active: 8
+  #         max-idle: 8
+  #         min-idle: 2
+  #         max-wait: 5000ms
+
+# Server configuration
+server:
+  port: 8082
+  # Note: Gateway uses WebFlux, not Servlet. Context path is handled via route predicates.
+
+# Circuit Breaker Configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 100
+        minimumNumberOfCalls: 10
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+    instances:
+      backendCircuitBreaker:
+        baseConfig: default
+
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 30s
+
+# Actuator configuration
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info,metrics,prometheus,gateway
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+      probes:
+        enabled: true
+    gateway:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: INFO
+    org.springframework.web: INFO
+    reactor.netty: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# gRPC Client Configuration
+grpc:
+  client:
+    enabled: ${GRPC_CLIENT_ENABLED:false}
+    backend:
+      host: ${GRPC_BACKEND_HOST:localhost}
+      port: ${GRPC_BACKEND_PORT:50051}
