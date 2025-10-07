@@ -86,19 +86,19 @@ class PeopleGrpcClientTest {
     void testInsertPeople() {
         // 創建測試數據
         PeopleData testPeople = PeopleData.newBuilder()
-            .setName("測試人物")
-            .setNameOriginal("Test Person")
+            .setName("Maya")
+            .setNameOriginal("Maya")
             .setRace("人類")
-            .setGender("男")
+            .setGender("女")
             .setAge(25)
-            .setHeightCm(175)
-            .setWeightKg(70)
+            .setHeightCm(165)
+            .setWeightKg(55)
             .build();
 
         try {
             PeopleData result = peopleGrpcClient.insertPeople(testPeople);
             assertNotNull(result, "應該返回插入後的人物數據");
-            assertEquals("測試人物", result.getName(), "名稱應該匹配");
+            assertEquals("Maya", result.getName(), "名稱應該匹配");
         } catch (Exception e) {
             // 預期的行為：如果後端沒有運行，會拋出異常
             assertTrue(e.getMessage().contains("Failed") ||
