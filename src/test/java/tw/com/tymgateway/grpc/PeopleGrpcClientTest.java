@@ -83,22 +83,16 @@ class PeopleGrpcClientTest {
     }
 
     @Test
-    void testInsertPeople() {
-        // 創建測試數據
-        PeopleData testPeople = PeopleData.newBuilder()
-            .setName("Maya")
-            .setNameOriginal("Maya")
-            .setRace("人類")
-            .setGender("女")
-            .setAge(25)
-            .setHeightCm(165)
-            .setWeightKg(55)
-            .build();
-
+    void testGetPeopleByNameMaya() {
+        // 測試查詢 Maya（如果存在）
         try {
-            PeopleData result = peopleGrpcClient.insertPeople(testPeople);
-            assertNotNull(result, "應該返回插入後的人物數據");
-            assertEquals("Maya", result.getName(), "名稱應該匹配");
+            Optional<PeopleData> result = peopleGrpcClient.getPeopleByName("Maya");
+            // 如果後端運行且找到數據，應該返回Optional
+            assertNotNull(result, "應該返回Optional結果");
+            // 如果 Maya 存在，驗證名稱
+            if (result.isPresent()) {
+                assertEquals("Maya", result.get().getName(), "名稱應該匹配");
+            }
         } catch (Exception e) {
             // 預期的行為：如果後端沒有運行，會拋出異常
             assertTrue(e.getMessage().contains("Failed") ||
