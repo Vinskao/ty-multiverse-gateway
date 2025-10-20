@@ -2,6 +2,46 @@
 
 API Gateway for TY Multiverse system using Spring Cloud Gateway.
 
+## 🔧 開發環境設定
+
+### 依賴管理架構
+
+本專案使用 **統一的依賴管理架構**，透過 Maven 從本地或遠端倉庫引用共用程式庫 `ty-multiverse-common`。
+
+#### 架構說明
+- **統一 common 模組**：所有共用程式碼集中在單一專案中管理
+- **自動依賴解析**：Maven 自動處理模組間的依賴關係
+- **版本同步**：所有專案使用相同版本的 common 模組
+
+#### 開發環境設定
+```bash
+# 確保 common 模組已建置並安裝到本地倉庫
+cd ../ty-multiverse-common
+mvn clean install
+
+# 檢查依賴關係
+mvn dependency:tree | grep ty-multiverse-common
+```
+
+#### Common 模組更新流程
+```bash
+# 1. 在 common 目錄中進行開發
+cd ../ty-multiverse-common
+git checkout -b feature/new-enhancement
+# ... 修改程式碼 ...
+
+# 2. 建置並安裝到本地倉庫
+mvn clean install
+
+# 3. 提交並推送變更
+git add .
+git commit -m "Add new enhancement"
+git push origin feature/new-enhancement
+
+# 4. 其他專案會自動使用更新後的版本
+mvn clean compile  # 自動使用新版本的 common
+```
+
 ## 🚀 本地開發啟動
 
 ### 啟動指令
@@ -18,6 +58,95 @@ mvn spring-boot:run
 - **路由資訊**: `http://localhost:8082/actuator/gateway/routes`
 
 **測試 gRPC 調用：**
+
+## 🛡️ Gateway Middleware/Filter 架構
+
+### Spring Cloud Gateway 中間件設計
+
+Gateway 作為系統的入口點，負責請求路由、負載均衡和各種橫切關注點的處理。
+
+#### 1. Global Filter 層級
+
+**LoggingGlobalFilter** - 全局請求日誌記錄：
+```java
+@Component
+public class LoggingGlobalFilter implements GlobalFilter, Ordered {
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        // 記錄所有進入 Gateway 的請求
+        // 包括請求路徑、方法、響應時間等
+        return chain.filter(exchange);
+    }
+}
+```
+- **位置**：Spring Cloud Gateway 的 Global Filter 鏈
+- **職責**：統一記錄所有請求響應日誌
+
+#### 2. CORS 處理
+
+**Spring Cloud Gateway CORS Filter**：
+```yaml
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedMethods: GET,POST,PUT,DELETE,OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+```
+- **位置**：Gateway 內建 CORS 處理
+- **職責**：跨域資源共享控制
+
+#### 3. Rate Limiting Filter
+
+**Redis 分散式限流**（可選配置）：
+```yaml
+spring:
+  cloud:
+    gateway:
+      routes:
+      - id: people_route
+        uri: http://backend-service:8080
+        filters:
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 10
+            redis-rate-limiter.burstCapacity: 20
+            key-resolver: "#{@userKeyResolver}"
+```
+- **位置**：路由級別 Filter
+- **職責**：基於 Redis 的分散式請求限流
+
+### Gateway vs Backend 中間件對比
+
+| 層級 | Gateway (入口) | Backend (業務) |
+|------|---------------|---------------|
+| **Filter** | GlobalFilter (響應式) | Servlet Filter (阻塞式) |
+| **認證** | JWT 驗證轉發 | JWT Token 解析 |
+| **限流** | 分散式限流 | 方法級限流 |
+| **日誌** | 全域請求日誌 | 業務邏輯日誌 |
+| **錯誤處理** | Gateway 異常處理 | @ControllerAdvice |
+
+### 架構優勢
+
+1. **統一入口**：所有請求都經過 Gateway，便於集中管理
+2. **負載均衡**：自動分發請求到多個 Backend 實例
+3. **安全性**：在請求到達業務服務前進行安全檢查
+4. **可觀察性**：集中記錄和監控所有服務調用
+5. **靈活性**：動態路由和過濾器配置
+
+### 監控端點
+
+- **路由資訊**: `GET /actuator/gateway/routes`
+- **全局過濾器**: `GET /actuator/gateway/globalfilters`
+- **路由過濾器**: `GET /actuator/gateway/routefilters`
+
+**相關文件：**
+- `src/main/java/tw/com/tymgateway/config/GatewayConfig.java`
+- `src/main/java/tw/com/tymgateway/filter/LoggingGlobalFilter.java`
 
 ### 查看 API 文檔
 ```bash
@@ -411,13 +540,39 @@ spring:
 - 熔斷器狀態
 - 限流統計
 
-### 3. 日誌記錄
+### 3. 日誌記錄系統
 
-所有請求和響應都會被記錄：
+#### 3.1 統一請求響應日誌記錄（AOP）
+
+本專案使用統一的請求響應日誌記錄系統，自動記錄所有 Controller 方法的請求和響應：
+
+**日誌輸出範例：**
+```
+🚀 [abc12345] GET /tymgateway/tymb/people/get-all - Started
+📝 [abc12345] Request parameters: []
+📋 [abc12345] Request headers: User-Agent: Mozilla/5.0..., Content-Type: application/json
+✅ [abc12345] GET /tymgateway/tymb/people/get-all - Completed in 150ms
+📤 [abc12345] Response: {"success":true,"message":"People retrieved successfully via gRPC","people":[...],"count":153}
+```
+
+**功能特點：**
+- **自動化記錄**：無需在每個 Controller 中手動添加日誌程式碼
+- **請求追蹤**：每個請求都有唯一 ID，方便問題追蹤
+- **效能監控**：自動記錄響應時間，幫助發現效能問題
+- **安全性**：自動過濾敏感資訊，避免洩露機密資料
+- **可配置**：通過日誌級別控制記錄詳情程度
+
+#### 3.2 現有日誌過濾器
+
+所有請求和響應也會被現有的 `LoggingGlobalFilter` 記錄：
 ```
 2024-10-02 15:51:02 Gateway Request: GET /tymb/weapons from /192.168.1.100
 2024-10-02 15:51:02 Gateway Response: GET /tymb/weapons - Status: 200 - Duration: 45ms
 ```
+
+**兩種日誌記錄的區別：**
+- **AOP 日誌**：結構化記錄每個 Controller 方法的詳細請求響應資訊
+- **Filter 日誌**：記錄網路層級的請求響應資訊，適用於所有路由
 
 ## 安全特性
 

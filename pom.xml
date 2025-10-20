@@ -28,6 +28,26 @@
     </properties>
     
     <dependencies>
+        <!-- Common module for shared error handling and AOP logging -->
+        <dependency>
+            <groupId>tw.com.ty</groupId>
+            <artifactId>ty-multiverse-common</artifactId>
+            <version>1.1</version>
+        </dependency>
+
+        <!-- AOP support for common module logging aspect -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <!-- AspectJ runtime for AOP support -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>1.9.20</version>
+        </dependency>
+
         <!-- Spring Cloud Gateway with gRPC compatibility -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -124,7 +144,24 @@
             <version>1.3.2</version>
         </dependency>
     </dependencies>
-    
+
+    <!-- GitHub Packages 發布配置 -->
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/Vinskao/ty-multiverse-gateway</url>
+        </repository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/Vinskao/ty-multiverse-common</url>
+        </repository>
+    </repositories>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -224,6 +261,12 @@
     </build>
     
     <profiles>
+        <profile>
+            <id>github</id>
+            <properties>
+                <!-- GitHub Packages deployment profile -->
+            </properties>
+        </profile>
         <profile>
             <id>platform</id>
             <properties>
