@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tw.com.tymgateway.grpc.client.PeopleGrpcClient;
-import tw.com.tymgateway.grpc.people.PeopleData;
+import tw.com.tymgateway.dto.PeopleData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -281,28 +281,28 @@ public class PeopleController {
      * 將 Map 轉換成 PeopleData
      */
     private PeopleData convertToPeopleData(Map<String, Object> map) {
-        PeopleData.Builder builder = PeopleData.newBuilder();
-        
+        PeopleData peopleData = new PeopleData();
+
         // 基本信息
-        if (map.containsKey("name")) builder.setName((String) map.get("name"));
-        if (map.containsKey("name_original")) builder.setNameOriginal((String) map.get("name_original"));
-        if (map.containsKey("code_name")) builder.setCodeName((String) map.get("code_name"));
-        
+        if (map.containsKey("name")) peopleData.setName((String) map.get("name"));
+        if (map.containsKey("name_original")) peopleData.setNameOriginal((String) map.get("name_original"));
+        if (map.containsKey("code_name")) peopleData.setCodeName((String) map.get("code_name"));
+
         // 力量屬性
-        if (map.containsKey("physic_power")) builder.setPhysicPower(((Number) map.get("physic_power")).intValue());
-        if (map.containsKey("magic_power")) builder.setMagicPower(((Number) map.get("magic_power")).intValue());
-        if (map.containsKey("utility_power")) builder.setUtilityPower(((Number) map.get("utility_power")).intValue());
-        
+        if (map.containsKey("physic_power")) peopleData.setPhysicPower(((Number) map.get("physic_power")).intValue());
+        if (map.containsKey("magic_power")) peopleData.setMagicPower(((Number) map.get("magic_power")).intValue());
+        if (map.containsKey("utility_power")) peopleData.setUtilityPower(((Number) map.get("utility_power")).intValue());
+
         // 其他基本信息
-        if (map.containsKey("dob")) builder.setDob((String) map.get("dob"));
-        if (map.containsKey("race")) builder.setRace((String) map.get("race"));
-        if (map.containsKey("attributes")) builder.setAttributes((String) map.get("attributes"));
-        if (map.containsKey("gender")) builder.setGender((String) map.get("gender"));
-        if (map.containsKey("profession")) builder.setProfession((String) map.get("profession"));
-        if (map.containsKey("age")) builder.setAge(((Number) map.get("age")).intValue());
-        
+        if (map.containsKey("dob")) peopleData.setDob((String) map.get("dob"));
+        if (map.containsKey("race")) peopleData.setRace((String) map.get("race"));
+        if (map.containsKey("attributes")) peopleData.setAttributes((String) map.get("attributes"));
+        if (map.containsKey("gender")) peopleData.setGender((String) map.get("gender"));
+        if (map.containsKey("profession")) peopleData.setProfession((String) map.get("profession"));
+        if (map.containsKey("age")) peopleData.setAge(((Number) map.get("age")).intValue());
+
         // 更多字段根據需要添加...
-        return builder.build();
+        return peopleData;
     }
 }
 

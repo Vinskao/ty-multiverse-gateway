@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-import tw.com.tymgateway.grpc.people.PeopleData;
 import tw.com.tymgateway.grpc.client.PeopleGrpcClient;
+import tw.com.tymgateway.dto.PeopleData;
 
 import java.util.List;
 import java.util.Optional;
@@ -85,15 +85,14 @@ class PeopleGrpcClientTest {
     @Test
     void testInsertPeople() {
         // 創建測試數據
-        PeopleData testPeople = PeopleData.newBuilder()
-            .setName("Maya")
-            .setNameOriginal("Maya")
-            .setRace("人類")
-            .setGender("女")
-            .setAge(25)
-            .setHeightCm(165)
-            .setWeightKg(55)
-            .build();
+        PeopleData testPeople = new PeopleData();
+        testPeople.setName("Maya");
+        testPeople.setNameOriginal("Maya");
+        testPeople.setRace("人類");
+        testPeople.setGender("女");
+        testPeople.setAge(25);
+        testPeople.setHeightCm(165);
+        testPeople.setWeightKg(55);
 
         try {
             PeopleData result = peopleGrpcClient.insertPeople(testPeople);

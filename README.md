@@ -1,290 +1,136 @@
 # TY Multiverse Gateway
 
-API Gateway for TY Multiverse system using Spring Cloud Gateway.
+**API Gateway for TY Multiverse system using Spring Cloud Gateway.**
+
+TY Multiverse Gateway 是整個 TY Multiverse 系統的統一 API 入口點，負責將前端的所有請求路由到後端服務，並提供統一的安全、監控和流量控制功能。
+
+## 🎯 Gateway 角色定位
+
+Gateway 作為系統的**統一入口閘道**，專注於以下職責：
+
+- **🔐 統一認證授權**：處理 JWT 驗證和權限檢查
+- **🚦 流量控制**：實現限流、熔斷和負載均衡
+- **📊 統一監控**：記錄所有請求響應和性能指標
+- **🔄 協議轉換**：將 HTTP 請求轉換為 gRPC 調用
+- **🛡️ 安全防護**：CORS、請求驗證和異常處理
+
+## 🚀 快速開始
+
+### 環境準備
+1. **啟動 Backend 服務**（必須）
+   ```bash
+   cd ../ty-multiverse-backend
+   mvn spring-boot:run
+   ```
+
+2. **啟動 Gateway**
+   ```bash
+   mvn spring-boot:run
+   ```
+
+### 服務端點
+- **Gateway API**: `http://localhost:8082`
+- **健康檢查**: `http://localhost:8082/actuator/health`
+- **API 文檔**: `http://localhost:8082/tymgateway/tymb/people/docs`
+
+### 測試指令
+```bash
+# 檢查健康狀態
+curl http://localhost:8082/actuator/health
+
+# 測試人物 API
+curl http://localhost:8082/tymgateway/tymb/people/get-all
+
+# 查看路由配置
+curl http://localhost:8082/actuator/gateway/routes
+```
 
 ## 🔧 開發環境設定
 
-### 依賴管理架構
+### 依賴關係說明
 
-本專案使用 **統一的依賴管理架構**，透過 Maven 從本地或遠端倉庫引用共用程式庫 `ty-multiverse-common`。
+**重要：必須按順序啟動服務**
 
-#### 架構說明
-- **統一 common 模組**：所有共用程式碼集中在單一專案中管理
-- **自動依賴解析**：Maven 自動處理模組間的依賴關係
-- **版本同步**：所有專案使用相同版本的 common 模組
+1. **Backend 服務** - 提供實際業務功能
+   ```bash
+   cd ../ty-multiverse-backend
+   mvn spring-boot:run
+   ```
 
-#### 開發環境設定
-```bash
-# 確保 common 模組已建置並安裝到本地倉庫
-cd ../ty-multiverse-common
-mvn clean install
+2. **Gateway** - API 網關入口
+   ```bash
+   mvn spring-boot:run
+   ```
 
-# 檢查依賴關係
-mvn dependency:tree | grep ty-multiverse-common
-```
+**服務連接：**
+- Backend HTTP: `localhost:8080`
+- Backend gRPC: `localhost:50051`
+- Gateway API: `localhost:8082`
 
-#### Common 模組更新流程
-```bash
-# 1. 在 common 目錄中進行開發
-cd ../ty-multiverse-common
-git checkout -b feature/new-enhancement
-# ... 修改程式碼 ...
-
-# 2. 建置並安裝到本地倉庫
-mvn clean install
-
-# 3. 提交並推送變更
-git add .
-git commit -m "Add new enhancement"
-git push origin feature/new-enhancement
-
-# 4. 其他專案會自動使用更新後的版本
-mvn clean compile  # 自動使用新版本的 common
-```
-
-## 🚀 本地開發啟動
+## 🚀 Gateway 服務啟動
 
 ### 啟動指令
-
 ```bash
-# 啟動 Gateway（包含 gRPC 客戶端）
 mvn spring-boot:run
 ```
 
-**服務器啟動資訊：**
-- **Gateway API**: `http://localhost:8082`
-- **gRPC Client**: 自動連接到後端 `localhost:50051`
+### 服務端點
+- **API 入口**: `http://localhost:8082`
 - **健康檢查**: `http://localhost:8082/actuator/health`
 - **路由資訊**: `http://localhost:8082/actuator/gateway/routes`
+- **API 文檔**: `http://localhost:8082/tymgateway/tymb/people/docs`
 
-**測試 gRPC 調用：**
-
-## 🛡️ Gateway Middleware/Filter 架構
-
-### Spring Cloud Gateway 中間件設計
-
-Gateway 作為系統的入口點，負責請求路由、負載均衡和各種橫切關注點的處理。
-
-#### 1. Global Filter 層級
-
-**LoggingGlobalFilter** - 全局請求日誌記錄：
-```java
-@Component
-public class LoggingGlobalFilter implements GlobalFilter, Ordered {
-    @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        // 記錄所有進入 Gateway 的請求
-        // 包括請求路徑、方法、響應時間等
-        return chain.filter(exchange);
-    }
-}
-```
-- **位置**：Spring Cloud Gateway 的 Global Filter 鏈
-- **職責**：統一記錄所有請求響應日誌
-
-#### 2. CORS 處理
-
-**Spring Cloud Gateway CORS Filter**：
-```yaml
-spring:
-  cloud:
-    gateway:
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins: "http://localhost:3000"
-            allowedMethods: GET,POST,PUT,DELETE,OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: true
-```
-- **位置**：Gateway 內建 CORS 處理
-- **職責**：跨域資源共享控制
-
-#### 3. Rate Limiting Filter
-
-**Redis 分散式限流**（可選配置）：
-```yaml
-spring:
-  cloud:
-    gateway:
-      routes:
-      - id: people_route
-        uri: http://backend-service:8080
-        filters:
-        - name: RequestRateLimiter
-          args:
-            redis-rate-limiter.replenishRate: 10
-            redis-rate-limiter.burstCapacity: 20
-            key-resolver: "#{@userKeyResolver}"
-```
-- **位置**：路由級別 Filter
-- **職責**：基於 Redis 的分散式請求限流
-
-### Gateway vs Backend 中間件對比
-
-| 層級 | Gateway (入口) | Backend (業務) |
-|------|---------------|---------------|
-| **Filter** | GlobalFilter (響應式) | Servlet Filter (阻塞式) |
-| **認證** | JWT 驗證轉發 | JWT Token 解析 |
-| **限流** | 分散式限流 | 方法級限流 |
-| **日誌** | 全域請求日誌 | 業務邏輯日誌 |
-| **錯誤處理** | Gateway 異常處理 | @ControllerAdvice |
-
-### 架構優勢
-
-1. **統一入口**：所有請求都經過 Gateway，便於集中管理
-2. **負載均衡**：自動分發請求到多個 Backend 實例
-3. **安全性**：在請求到達業務服務前進行安全檢查
-4. **可觀察性**：集中記錄和監控所有服務調用
-5. **靈活性**：動態路由和過濾器配置
-
-### 監控端點
-
-- **路由資訊**: `GET /actuator/gateway/routes`
-- **全局過濾器**: `GET /actuator/gateway/globalfilters`
-- **路由過濾器**: `GET /actuator/gateway/routefilters`
-
-**相關文件：**
-- `src/main/java/tw/com/tymgateway/config/GatewayConfig.java`
-- `src/main/java/tw/com/tymgateway/filter/LoggingGlobalFilter.java`
-
-### 查看 API 文檔
+### 測試指令
 ```bash
-curl http://localhost:8082/tymgateway/tymb/people/docs
-```
+# 健康檢查
+curl http://localhost:8082/actuator/health
 
-### 獲取所有人物
-```bash
-# 基本測試
+# 測試人物 API
 curl http://localhost:8082/tymgateway/tymb/people/get-all
 
-# PowerShell 詳細查看
-$response = Invoke-RestMethod -Uri "http://localhost:8082/tymgateway/tymb/people/get-all"
-Write-Host "成功: $($response.success), 數據量: $($response.count)" -ForegroundColor Green
-$response.people | Select-Object -First 5 | Format-Table -Property name, profession, race, gender, age -AutoSize
+# 查看路由配置
+curl http://localhost:8082/actuator/gateway/routes
 ```
 
-### 查看完整響應數據
-```powershell
-# 獲取完整響應並顯示詳細信息
-$response = Invoke-RestMethod -Uri "http://localhost:8082/tymgateway/tymb/people/get-all"
-
-Write-Host "=== API 響應總結 ===" -ForegroundColor Cyan
-Write-Host "狀態: $($response.success)" -ForegroundColor $(if($response.success){'Green'}else{'Red'})
-Write-Host "消息: $($response.message)"
-Write-Host "總數: $($response.count)"
-Write-Host "數據數量: $($response.people.Count)"
-
-Write-Host "`n=== 前3個人物詳情 ===" -ForegroundColor Cyan
-$response.people | Select-Object -First 3 | ForEach-Object {
-    Write-Host "人物: $($_.name)" -ForegroundColor Yellow
-    Write-Host "  職業: $($_.profession)"
-    Write-Host "  種族: $($_.race)"
-    Write-Host "  性別: $($_.gender)"
-    Write-Host "  年齡: $($_.age)"
-    Write-Host ""
-}
-```
-
-**啟動前置要求：**
-1. 確保後端服務已啟動並運行在 `localhost:50051` (gRPC)
-2. 確保後端 HTTP API 運行在 `localhost:8080`
-3. 查看啟動日誌確認 gRPC 客戶端連接狀態
-
-## 📊 查看數據和連接狀態
-
-### 檢查後端與 Consumer 連接狀態
-
-後端支援**兩種處理模式**：
-
-**模式1：同步處理（預設，RABBITMQ_ENABLED=false）**
-```
-Frontend → Gateway gRPC → Backend → 數據庫 → 直接返回
-```
-
-**模式2：異步處理（RABBITMQ_ENABLED=true）**
-```
-Frontend → Gateway gRPC → Backend → RabbitMQ → Consumer → 數據庫 → Redis → 返回
-```
-
-### 啟用分散式限流（可選）
-
-如果你有多個 Gateway 實例需要分散式限流，可以啟用 Redis：
-
-**步驟1：取消註釋 pom.xml 中的 Redis 依賴**
-```xml
-<!-- Redis for distributed rate limiting -->
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
-</dependency>
-```
-
-**步驟2：啟用 local.properties 中的 Redis 配置**
-```properties
-# Redis Configuration (for distributed rate limiting)
-REDIS_HOST=localhost  # 使用與 Backend 相同的 Redis server
-REDIS_CUSTOM_PORT=6379
-REDIS_PASSWORD=
-```
-
-**注意：** Gateway 會自動使用 Redis database 1，而 Backend 使用 database 0，這樣可以共享同一個 Redis 實例但數據隔離。
-
-### 啟用 Consumer 異步模式
-
-**步驟2：啟用後端 RabbitMQ**
-```properties
-# 在 ty-multiverse-backend/src/main/resources/env/local.properties
-RABBITMQ_ENABLED=true
-```
-
-**步驟3：啟動 Consumer**
-```bash
-cd ../ty-multiverse-consumer
-mvn spring-boot:run
-```
-
-**步驟4：重啟後端**
+### 前置條件
+**必須先啟動 Backend 服務：**
 ```bash
 cd ../ty-multiverse-backend
 mvn spring-boot:run
 ```
 
-**步驟5：測試異步調用**
+## 📊 監控與狀態檢查
+
+### 監控端點
 ```bash
-# 調用 gRPC API（現在會透過 Consumer 處理）
-curl http://localhost:8082/tymgateway/tymb/people/get-all
+# Gateway 健康檢查
+curl http://localhost:8082/actuator/health
 
-# 檢查日誌確認異步處理流程
-# Backend 日誌應該顯示：📤 已發送異步請求到 RabbitMQ
-# Consumer 日誌應該顯示：🎯 收到 Producer 的 People Get-All 請求
+# 路由配置檢查
+curl http://localhost:8082/actuator/gateway/routes
+
+# 性能指標
+curl http://localhost:8082/actuator/metrics
 ```
 
-### 快速查看人物數據
-
-```powershell
-# 獲取並格式化顯示前 10 個人物
-$response = Invoke-RestMethod -Uri "http://localhost:8082/tymgateway/tymb/people/get-all"
-$response.people | Select-Object -First 10 | Format-Table -Property name, profession, race, gender, age -AutoSize
-
-# 統計數據
-$response.people | Group-Object -Property race | Select-Object Name, Count
-$response.people | Group-Object -Property gender | Select-Object Name, Count
+### 啟動日誌確認
+啟動時會看到：
+```
+🚀 初始化 gRPC Keycloak Client，連接後端: localhost:50051
+✅ gRPC Keycloak Client 初始化完成（使用模擬實現）
+🚀 初始化 gRPC People Client，連接後端: localhost:50051
+✅ gRPC People Client 初始化完成（使用模擬實現）
 ```
 
-## 概述
+## 🎯 Gateway 核心功能
 
-TY Multiverse Gateway 是整個 TY Multiverse 系統的統一入口，負責將前端的所有請求路由到後端服務。使用 Spring Cloud Gateway 提供高性能、可擴展的 API 閘道器功能。
+TY Multiverse Gateway 作為微服務架構中的 API 網關，提供：
 
-## 主要功能
-
-- **統一路由管理**：將所有前端請求統一路由到後端服務
-- **負載均衡**：支援多個後端實例的負載均衡
-- **限流保護**：基於 Redis 的分散式限流機制
-- **熔斷降級**：使用 Resilience4j 提供熔斷保護
-- **跨域處理**：統一處理 CORS 跨域請求
-- **日誌追蹤**：記錄所有經過的請求和響應
-- **監控指標**：提供 Prometheus 格式的監控指標
+- **🔐 統一認證授權**：JWT 驗證和權限檢查
+- **🚦 流量控制**：限流、熔斷和負載均衡
+- **📊 統一監控**：請求響應記錄和性能指標
+- **🔄 協議轉換**：HTTP 請求轉換為 gRPC 調用
+- **🛡️ 安全防護**：CORS、請求驗證和異常處理
 
 ## 系統架構圖
 

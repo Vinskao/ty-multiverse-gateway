@@ -8,7 +8,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tw.com.tymgateway.grpc.client.KeycloakGrpcClient;
-import tw.com.tymgateway.grpc.people.*;
+import tw.com.tymgateway.dto.AuthRedirectResponse;
+import tw.com.tymgateway.dto.LogoutResponse;
+import tw.com.tymgateway.dto.IntrospectTokenResponse;
+import tw.com.tymgateway.dto.UserInfo;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +28,7 @@ import java.util.Map;
  * @version 1.0
  */
 @RestController
-@RequestMapping("/tymgateway/keycloak")
+@RequestMapping({"/tymgateway/keycloak", "/keycloak"}) // 支持舊的路由和新的路由
 @ConditionalOnProperty(name = "grpc.client.enabled", havingValue = "true")
 public class KeycloakController {
 
@@ -29,6 +36,9 @@ public class KeycloakController {
 
     @Autowired
     private KeycloakGrpcClient keycloakGrpcClient;
+
+    @org.springframework.beans.factory.annotation.Value("${url.frontend}")
+    private String frontendUrl;
 
     /**
      * 透過 gRPC 處理 OAuth2 重定向
@@ -224,6 +234,72 @@ public class KeycloakController {
         docs.put("baseUrl", "http://localhost:8082");
 
         return ResponseEntity.ok(docs);
+    }
+
+    /**
+     * 處理從 Keycloak 認證後重導向回來的請求（舊的路由，為了兼容前端）
+     *
+     * 此方法是為了兼容前端現有的路由結構，將請求轉發到 gRPC 服務處理。
+     * 最終會將使用者資訊與 tokens 附加至前端 URL 並進行重導向。
+     *
+     * @param code Keycloak 返回的授權碼
+     * @param redirectUri 重定向 URI（從請求參數獲取）
+     * @return ResponseEntity 包含重導向響應
+     */
+    @GetMapping("/redirect-legacy")
+    public ResponseEntity<Void> keycloakRedirect(@RequestParam("code") String code, @RequestParam(value = "redirect_uri", required = false) String redirectUri) {
+        logger.info("Gateway: 收到舊路由授權碼重定向請求，code={}", code.substring(0, 20) + "...");
+
+        try {
+            logger.info("Gateway: 處理授權碼: {}", code);
+
+            // 使用請求中的 redirect_uri，如果沒有則構造一個
+            String actualRedirectUri = redirectUri != null ? redirectUri : "http://localhost:8082/tymgateway/keycloak/redirect";
+            logger.info("Gateway: 使用 redirectUri: {}", actualRedirectUri);
+
+            // 通過 gRPC 調用 backend 的認證服務
+            AuthRedirectResponse grpcResponse = keycloakGrpcClient.processAuthRedirect(code, actualRedirectUri);
+
+            if (!grpcResponse.getSuccess()) {
+                logger.error("Gateway: gRPC 認證失敗: {}", grpcResponse.getMessage());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+
+            // 從 gRPC 響應中獲取用戶資訊和令牌
+            UserInfo userInfo = grpcResponse.getUserInfo();
+            String accessToken = grpcResponse.getAccessToken();
+            String refreshToken = grpcResponse.getRefreshToken();
+
+            logger.info("Gateway: 成功獲取用戶資訊和令牌，用戶名: {}", userInfo.getUsername());
+
+            // 組合重導向 URL，將使用者資訊與 tokens 附加至 query string 中
+            String redirectTarget = frontendUrl
+                + "?username=" + URLEncoder.encode(userInfo.getUsername(), "UTF-8")
+                + "&email=" + URLEncoder.encode(userInfo.getEmail(), "UTF-8")
+                + "&name=" + URLEncoder.encode(userInfo.getName(), "UTF-8")
+                + "&firstName=" + URLEncoder.encode(userInfo.getFirstName(), "UTF-8")
+                + "&lastName=" + URLEncoder.encode(userInfo.getLastName(), "UTF-8")
+                + "&token=" + URLEncoder.encode(accessToken, "UTF-8")
+                + "&refreshToken=" + URLEncoder.encode(refreshToken, "UTF-8");
+
+            // 添加詳細日誌
+            logger.info("=== Gateway 重定向診斷 ===");
+            logger.info("前端URL: {}", frontendUrl);
+            logger.info("用戶名: {}", userInfo.getUsername());
+            logger.info("Token長度: {}", accessToken.length());
+            logger.info("Token前20字符: {}", accessToken.substring(0, Math.min(20, accessToken.length())));
+            logger.info("完整重定向URL: {}", redirectTarget);
+
+            // 返回重導向響應
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Location", redirectTarget);
+            return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build();
+
+        } catch (Exception e) {
+            // 若有任何錯誤，記錄錯誤並回傳 500 錯誤碼
+            logger.error("Gateway: 處理 OAuth 重定向時發生錯誤", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     /**

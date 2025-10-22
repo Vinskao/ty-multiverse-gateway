@@ -25,17 +25,17 @@ spring:
             maxAge: 3600
 
       # Route configurations - 將所有請求轉發到 backend
-      # 前端請求格式：http://localhost:8082/tymgateway/tymb/**
+      # 前端請求格式：http://localhost:8082/tymg/**
       # Gateway 轉發到：http://localhost:8080/tymb/**
       routes:
         # People module routes (only for non-GET requests)
         - id: people-route
           uri: "@BACKEND_SERVICE_URL@"
           predicates:
-            - Path=/tymgateway/tymb/people/**
+            - Path=/tymg/people/**
             - Method=POST,PUT,DELETE
           filters:
-            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - StripPrefix=1 # 移除 /tymg 前綴
             - name: CircuitBreaker
               args:
                 name: backendCircuitBreaker
@@ -45,9 +45,9 @@ spring:
         - id: people-images-route
           uri: "@BACKEND_SERVICE_URL@"
           predicates:
-            - Path=/tymgateway/tymb/people-images/**
+            - Path=/tymg/people-images/**
           filters:
-            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - StripPrefix=1 # 移除 /tymg 前綴
             - name: CircuitBreaker
               args:
                 name: backendCircuitBreaker
@@ -57,9 +57,9 @@ spring:
         - id: weapons-route
           uri: "@BACKEND_SERVICE_URL@"
           predicates:
-            - Path=/tymgateway/tymb/weapons/**
+            - Path=/tymg/weapons/**
           filters:
-            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - StripPrefix=1 # 移除 /tymg 前綴
             - name: CircuitBreaker
               args:
                 name: backendCircuitBreaker
@@ -69,9 +69,9 @@ spring:
         - id: gallery-route
           uri: "@BACKEND_SERVICE_URL@"
           predicates:
-            - Path=/tymgateway/tymb/gallery/**
+            - Path=/tymg/gallery/**
           filters:
-            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - StripPrefix=1 # 移除 /tymg 前綴
             - name: CircuitBreaker
               args:
                 name: backendCircuitBreaker
@@ -81,9 +81,9 @@ spring:
         - id: ckeditor-route
           uri: "@BACKEND_SERVICE_URL@"
           predicates:
-            - Path=/tymgateway/tymb/ckeditor/**
+            - Path=/tymg/ckeditor/**
           filters:
-            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - StripPrefix=1 # 移除 /tymg 前綴
             - name: CircuitBreaker
               args:
                 name: backendCircuitBreaker
@@ -93,9 +93,9 @@ spring:
         - id: blackjack-route
           uri: "@BACKEND_SERVICE_URL@"
           predicates:
-            - Path=/tymgateway/tymb/deckofcards/blackjack/**
+            - Path=/tymg/deckofcards/blackjack/**
           filters:
-            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - StripPrefix=1 # 移除 /tymg 前綴
             - name: CircuitBreaker
               args:
                 name: backendCircuitBreaker
@@ -105,9 +105,9 @@ spring:
         - id: guardian-route
           uri: "@BACKEND_SERVICE_URL@"
           predicates:
-            - Path=/tymgateway/tymb/guardian/**
+            - Path=/tymg/guardian/**
           filters:
-            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - StripPrefix=1 # 移除 /tymg 前綴
             - name: CircuitBreaker
               args:
                 name: backendCircuitBreaker
@@ -117,9 +117,9 @@ spring:
         - id: keycloak-route
           uri: "@BACKEND_SERVICE_URL@"
           predicates:
-            - Path=/tymgateway/tymb/keycloak/**
+            - Path=/tymg/keycloak/**
           filters:
-            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - StripPrefix=1 # 移除 /tymg 前綴
             - name: CircuitBreaker
               args:
                 name: backendCircuitBreaker
@@ -129,9 +129,9 @@ spring:
         - id: async-request-status-route
           uri: "@BACKEND_SERVICE_URL@"
           predicates:
-            - Path=/tymgateway/tymb/api/request-status/**
+            - Path=/tymg/api/request-status/**
           filters:
-            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - StripPrefix=1 # 移除 /tymg 前綴
             - name: CircuitBreaker
               args:
                 name: backendCircuitBreaker
@@ -140,9 +140,9 @@ spring:
         - id: async-test-route
           uri: "@BACKEND_SERVICE_URL@"
           predicates:
-            - Path=/tymgateway/tymb/api/test/async/**
+            - Path=/tymg/api/test/async/**
           filters:
-            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - StripPrefix=1 # 移除 /tymg 前綴
             - name: CircuitBreaker
               args:
                 name: backendCircuitBreaker
@@ -152,9 +152,9 @@ spring:
         - id: docs-route
           uri: "@BACKEND_SERVICE_URL@"
           predicates:
-            - Path=/tymgateway/tymb/docs/**
+            - Path=/tymg/docs/**
           filters:
-            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - StripPrefix=1 # 移除 /tymg 前綴
             - name: CircuitBreaker
               args:
                 name: backendCircuitBreaker
@@ -164,9 +164,9 @@ spring:
         - id: actuator-route
           uri: "@BACKEND_SERVICE_URL@"
           predicates:
-            - Path=/tymgateway/tymb/actuator/**
+            - Path=/tymg/actuator/**
           filters:
-            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - StripPrefix=1 # 移除 /tymg 前綴
             - name: CircuitBreaker
               args:
                 name: backendCircuitBreaker
@@ -176,9 +176,9 @@ spring:
         - id: swagger-route
           uri: "@BACKEND_SERVICE_URL@"
           predicates:
-            - Path=/tymgateway/tymb/swagger-ui/**,/tymgateway/tymb/v3/api-docs/**
+            - Path=/tymg/swagger-ui/**,/tymg/v3/api-docs/**
           filters:
-            - StripPrefix=1 # 移除 /tymgateway 前綴
+            - StripPrefix=1 # 移除 /tymg 前綴
             - name: CircuitBreaker
               args:
                 name: backendCircuitBreaker
@@ -261,6 +261,10 @@ logging:
     reactor.netty: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Application specific properties
+url:
+  frontend: "@PUBLIC_FRONTEND_URL@/tymultiverse"
 
 # gRPC Client Configuration
 grpc:

@@ -25,6 +25,7 @@
         <grpc.version>1.58.0</grpc.version>
         <protobuf.version>4.32.1</protobuf.version>
         <protoc.version>4.32.1</protoc.version>
+        <env>local</env>
     </properties>
     
     <dependencies>
@@ -145,6 +146,14 @@
         </dependency>
     </dependencies>
 
+    <repositories>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/Vinskao/ty-multiverse-common</url>
+        </repository>
+    </repositories>
+
     <!-- GitHub Packages 發布配置 -->
     <distributionManagement>
         <repository>
@@ -154,13 +163,6 @@
         </repository>
     </distributionManagement>
 
-    <repositories>
-        <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/Vinskao/ty-multiverse-common</url>
-        </repository>
-    </repositories>
 
     <dependencyManagement>
         <dependencies>
@@ -194,6 +196,8 @@
             </plugin>
 
             <!-- Protobuf Maven Plugin -->
+            <!-- Protobuf plugin disabled - we use our own protocol definitions -->
+            <!--
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
@@ -215,8 +219,10 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
 
-            <!-- Build Helper Maven Plugin - Add generated sources to classpath -->
+            <!-- Build Helper Maven Plugin - Disabled since we don't use generated protobuf sources -->
+            <!--
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -237,6 +243,7 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
         </plugins>
         <extensions>
             <extension>
