@@ -2,7 +2,7 @@ spring:
   application:
     name: ty-multiverse-gateway
   profiles:
-    active: "@env@"
+    active: '@env@'
   cloud:
     gateway:
       # Global CORS configuration
@@ -10,7 +10,7 @@ spring:
         cors-configurations:
           "[/**]":
             allowedOrigins:
-              - "@PUBLIC_FRONTEND_URL@"
+              - '@PUBLIC_FRONTEND_URL@'
               - "http://localhost:4321"
             allowedMethods:
               - GET
@@ -28,12 +28,12 @@ spring:
       # 前端請求格式：http://localhost:8082/tymg/**
       # Gateway 轉發到：http://localhost:8080/tymb/**
       routes:
-        # People module routes (only for non-GET requests)
+        # People module routes (gRPC mode) - 路由到 Gateway 內部控制器
         - id: people-route
-          uri: "@BACKEND_SERVICE_URL@"
+          uri: no://op # 使用內部路由
           predicates:
             - Path=/tymg/people/**
-            - Method=POST,PUT,DELETE
+            - Method=GET,POST,PUT,DELETE
           filters:
             - StripPrefix=1 # 移除 /tymg 前綴
             - name: CircuitBreaker
@@ -41,9 +41,9 @@ spring:
                 name: backendCircuitBreaker
                 fallbackUri: forward:/fallback
 
-        # People Images routes
+        # People Images routes (gRPC mode) - 路由到 Gateway 內部控制器
         - id: people-images-route
-          uri: "@BACKEND_SERVICE_URL@"
+          uri: no://op # 使用內部路由
           predicates:
             - Path=/tymg/people-images/**
           filters:
@@ -53,9 +53,9 @@ spring:
                 name: backendCircuitBreaker
                 fallbackUri: forward:/fallback
 
-        # Weapons routes
+        # Weapons routes (gRPC mode) - 路由到 Gateway 內部控制器
         - id: weapons-route
-          uri: "@BACKEND_SERVICE_URL@"
+          uri: no://op # 使用內部路由
           predicates:
             - Path=/tymg/weapons/**
           filters:
@@ -65,9 +65,9 @@ spring:
                 name: backendCircuitBreaker
                 fallbackUri: forward:/fallback
 
-        # Gallery routes
+        # Gallery routes (gRPC mode) - 路由到 Gateway 內部控制器
         - id: gallery-route
-          uri: "@BACKEND_SERVICE_URL@"
+          uri: no://op # 使用內部路由
           predicates:
             - Path=/tymg/gallery/**
           filters:
@@ -77,9 +77,9 @@ spring:
                 name: backendCircuitBreaker
                 fallbackUri: forward:/fallback
 
-        # CKEditor routes
+        # CKEditor routes (gRPC mode) - 路由到 Gateway 內部控制器
         - id: ckeditor-route
-          uri: "@BACKEND_SERVICE_URL@"
+          uri: no://op # 使用內部路由
           predicates:
             - Path=/tymg/ckeditor/**
           filters:
@@ -89,45 +89,20 @@ spring:
                 name: backendCircuitBreaker
                 fallbackUri: forward:/fallback
 
-        # Blackjack routes
-        - id: blackjack-route
-          uri: "@BACKEND_SERVICE_URL@"
+
+        # Auth routes removed - authentication goes directly to backend
+
+        # Deckofcards routes (gRPC mode) - 路由到 Gateway 內部控制器
+        - id: deckofcards-route
+          uri: no://op # 使用內部路由
           predicates:
             - Path=/tymg/deckofcards/blackjack/**
           filters:
             - StripPrefix=1 # 移除 /tymg 前綴
-            - name: CircuitBreaker
-              args:
-                name: backendCircuitBreaker
-                fallbackUri: forward:/fallback
-
-        # Guardian routes (Authentication)
-        - id: guardian-route
-          uri: "@BACKEND_SERVICE_URL@"
-          predicates:
-            - Path=/tymg/guardian/**
-          filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
-            - name: CircuitBreaker
-              args:
-                name: backendCircuitBreaker
-                fallbackUri: forward:/fallback
-
-        # Keycloak routes
-        - id: keycloak-route
-          uri: "@BACKEND_SERVICE_URL@"
-          predicates:
-            - Path=/tymg/keycloak/**
-          filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
-            - name: CircuitBreaker
-              args:
-                name: backendCircuitBreaker
-                fallbackUri: forward:/fallback
 
         # Async API routes
         - id: async-request-status-route
-          uri: "@BACKEND_SERVICE_URL@"
+          uri: '@BACKEND_SERVICE_URL@'
           predicates:
             - Path=/tymg/api/request-status/**
           filters:
@@ -138,7 +113,7 @@ spring:
                 fallbackUri: forward:/fallback
 
         - id: async-test-route
-          uri: "@BACKEND_SERVICE_URL@"
+          uri: '@BACKEND_SERVICE_URL@'
           predicates:
             - Path=/tymg/api/test/async/**
           filters:
@@ -150,7 +125,7 @@ spring:
 
         # JavaDoc routes
         - id: docs-route
-          uri: "@BACKEND_SERVICE_URL@"
+          uri: '@BACKEND_SERVICE_URL@'
           predicates:
             - Path=/tymg/docs/**
           filters:
@@ -162,7 +137,7 @@ spring:
 
         # Actuator routes
         - id: actuator-route
-          uri: "@BACKEND_SERVICE_URL@"
+          uri: '@BACKEND_SERVICE_URL@'
           predicates:
             - Path=/tymg/actuator/**
           filters:
@@ -174,7 +149,7 @@ spring:
 
         # Swagger/OpenAPI routes
         - id: swagger-route
-          uri: "@BACKEND_SERVICE_URL@"
+          uri: '@BACKEND_SERVICE_URL@'
           predicates:
             - Path=/tymg/swagger-ui/**,/tymg/v3/api-docs/**
           filters:
@@ -264,7 +239,7 @@ logging:
 
 # Application specific properties
 url:
-  frontend: "@PUBLIC_FRONTEND_URL@/tymultiverse"
+  frontend: '@PUBLIC_FRONTEND_URL@/tymultiverse'
 
 # gRPC Client Configuration
 grpc:

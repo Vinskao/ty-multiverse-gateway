@@ -23,7 +23,7 @@ import java.util.Map;
  * @version 1.0
  */
 @RestController
-@RequestMapping("/tymgateway/tymb/people")
+@RequestMapping("/people")
 @ConditionalOnProperty(name = "grpc.client.enabled", havingValue = "true")
 public class PeopleController {
 

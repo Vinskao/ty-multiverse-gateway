@@ -524,7 +524,7 @@ Gateway 轉發以下端點到 Backend：
 | `/tymb/gallery/**` | Backend | 圖庫管理 API |
 | `/tymb/ckeditor/**` | Backend | CKEditor 文件上傳 |
 | `/tymb/deckofcards/blackjack/**` | Backend | 21點遊戲 API |
-| `/tymb/guardian/**` | Backend | 認證守護 API |
+| `/tymb/auth/**` | Backend | 認證 API |
 | `/tymb/keycloak/**` | Backend | Keycloak 整合 |
 | `/tymb/api/request-status/**` | Backend | 異步請求狀態 |
 | `/tymb/api/test/async/**` | Backend | 異步測試 API |

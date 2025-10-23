@@ -36,6 +36,7 @@
             <version>1.1</version>
         </dependency>
 
+
         <!-- AOP support for common module logging aspect -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -195,9 +196,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Protobuf Maven Plugin -->
-            <!-- Protobuf plugin disabled - we use our own protocol definitions -->
-            <!--
+            <!-- Protobuf Maven Plugin - Generate gRPC client classes -->
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
@@ -219,10 +218,8 @@
                     </execution>
                 </executions>
             </plugin>
-            -->
 
-            <!-- Build Helper Maven Plugin - Disabled since we don't use generated protobuf sources -->
-            <!--
+            <!-- Build Helper Maven Plugin - Add generated sources to classpath -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -243,7 +240,6 @@
                     </execution>
                 </executions>
             </plugin>
-            -->
         </plugins>
         <extensions>
             <extension>
