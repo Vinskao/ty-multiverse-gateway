@@ -28,73 +28,60 @@ spring:
       # 前端請求格式：http://localhost:8082/tymg/**
       # Gateway 轉發到：http://localhost:8080/tymb/**
       routes:
+        # Health check route - 測試基本路由功能
+        - id: health-route
+          uri: '@BACKEND_SERVICE_URL@'
+          predicates:
+            - Path=/tymg/health/**
+          filters:
+            - StripPrefix=1
         # People module routes (gRPC mode) - 路由到 Gateway 內部控制器
         - id: people-route
-          uri: no://op # 使用內部路由
+          uri: '@BACKEND_SERVICE_URL@' # 指向 backend 服務
           predicates:
             - Path=/tymg/people/**
             - Method=GET,POST,PUT,DELETE
           filters:
             - StripPrefix=1 # 移除 /tymg 前綴
-            - name: CircuitBreaker
-              args:
-                name: backendCircuitBreaker
-                fallbackUri: forward:/fallback
 
         # People Images routes (gRPC mode) - 路由到 Gateway 內部控制器
         - id: people-images-route
-          uri: no://op # 使用內部路由
+          uri: '@BACKEND_SERVICE_URL@' # 指向 backend 服務
           predicates:
             - Path=/tymg/people-images/**
           filters:
             - StripPrefix=1 # 移除 /tymg 前綴
-            - name: CircuitBreaker
-              args:
-                name: backendCircuitBreaker
-                fallbackUri: forward:/fallback
 
         # Weapons routes (gRPC mode) - 路由到 Gateway 內部控制器
         - id: weapons-route
-          uri: no://op # 使用內部路由
+          uri: '@BACKEND_SERVICE_URL@' # 指向 backend 服務
           predicates:
             - Path=/tymg/weapons/**
           filters:
             - StripPrefix=1 # 移除 /tymg 前綴
-            - name: CircuitBreaker
-              args:
-                name: backendCircuitBreaker
-                fallbackUri: forward:/fallback
 
         # Gallery routes (gRPC mode) - 路由到 Gateway 內部控制器
         - id: gallery-route
-          uri: no://op # 使用內部路由
+          uri: '@BACKEND_SERVICE_URL@' # 指向 backend 服務
           predicates:
             - Path=/tymg/gallery/**
           filters:
             - StripPrefix=1 # 移除 /tymg 前綴
-            - name: CircuitBreaker
-              args:
-                name: backendCircuitBreaker
-                fallbackUri: forward:/fallback
 
         # CKEditor routes (gRPC mode) - 路由到 Gateway 內部控制器
         - id: ckeditor-route
-          uri: no://op # 使用內部路由
+          uri: '@BACKEND_SERVICE_URL@' # 指向 backend 服務
           predicates:
             - Path=/tymg/ckeditor/**
           filters:
             - StripPrefix=1 # 移除 /tymg 前綴
-            - name: CircuitBreaker
-              args:
-                name: backendCircuitBreaker
-                fallbackUri: forward:/fallback
 
 
         # Auth routes removed - authentication goes directly to backend
 
         # Deckofcards routes (gRPC mode) - 路由到 Gateway 內部控制器
         - id: deckofcards-route
-          uri: no://op # 使用內部路由
+          uri: '@BACKEND_SERVICE_URL@' # 指向 backend 服務
           predicates:
             - Path=/tymg/deckofcards/blackjack/**
           filters:
@@ -107,10 +94,6 @@ spring:
             - Path=/tymg/api/request-status/**
           filters:
             - StripPrefix=1 # 移除 /tymg 前綴
-            - name: CircuitBreaker
-              args:
-                name: backendCircuitBreaker
-                fallbackUri: forward:/fallback
 
         - id: async-test-route
           uri: '@BACKEND_SERVICE_URL@'
@@ -118,10 +101,6 @@ spring:
             - Path=/tymg/api/test/async/**
           filters:
             - StripPrefix=1 # 移除 /tymg 前綴
-            - name: CircuitBreaker
-              args:
-                name: backendCircuitBreaker
-                fallbackUri: forward:/fallback
 
         # JavaDoc routes
         - id: docs-route
@@ -130,10 +109,6 @@ spring:
             - Path=/tymg/docs/**
           filters:
             - StripPrefix=1 # 移除 /tymg 前綴
-            - name: CircuitBreaker
-              args:
-                name: backendCircuitBreaker
-                fallbackUri: forward:/fallback
 
         # Actuator routes
         - id: actuator-route
@@ -142,10 +117,6 @@ spring:
             - Path=/tymg/actuator/**
           filters:
             - StripPrefix=1 # 移除 /tymg 前綴
-            - name: CircuitBreaker
-              args:
-                name: backendCircuitBreaker
-                fallbackUri: forward:/fallback
 
         # Swagger/OpenAPI routes
         - id: swagger-route
@@ -154,10 +125,6 @@ spring:
             - Path=/tymg/swagger-ui/**,/tymg/v3/api-docs/**
           filters:
             - StripPrefix=1 # 移除 /tymg 前綴
-            - name: CircuitBreaker
-              args:
-                name: backendCircuitBreaker
-                fallbackUri: forward:/fallback
 
       # Default filters applied to all routes
       default-filters:
@@ -184,26 +151,26 @@ server:
   port: 8082
   # Note: Gateway uses WebFlux, not Servlet. Context path is handled via route predicates.
 
-# Circuit Breaker Configuration
-resilience4j:
-  circuitbreaker:
-    configs:
-      default:
-        slidingWindowSize: 100
-        minimumNumberOfCalls: 10
-        permittedNumberOfCallsInHalfOpenState: 3
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-        waitDurationInOpenState: 10s
-        failureRateThreshold: 50
-        eventConsumerBufferSize: 10
-    instances:
-      backendCircuitBreaker:
-        baseConfig: default
+# Circuit Breaker Configuration (disabled for now)
+# resilience4j:
+#   circuitbreaker:
+#     configs:
+#       default:
+#         slidingWindowSize: 100
+#         minimumNumberOfCalls: 10
+#         permittedNumberOfCallsInHalfOpenState: 3
+#         automaticTransitionFromOpenToHalfOpenEnabled: true
+#         waitDurationInOpenState: 10s
+#         failureRateThreshold: 50
+#         eventConsumerBufferSize: 10
+#     instances:
+#       backendCircuitBreaker:
+#         baseConfig: default
 
-  timelimiter:
-    configs:
-      default:
-        timeoutDuration: 30s
+#   timelimiter:
+#     configs:
+#       default:
+#         timeoutDuration: 30s
 
 # Actuator configuration
 management:
