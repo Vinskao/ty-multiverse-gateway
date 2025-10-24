@@ -119,6 +119,131 @@ public class GalleryController {
     }
 
     /**
+     * 透過 gRPC 保存圖片
+     *
+     * API 端點: POST /gallery/save
+     *
+     * 請求格式:
+     * {
+     *   "imageBase64": "base64_string"
+     * }
+     *
+     * 回應格式:
+     * {
+     *   "success": true,
+     *   "message": "Image saved successfully via gRPC",
+     *   "image": {...}  // 保存的圖片數據
+     * }
+     */
+    @PostMapping("/save")
+    public ResponseEntity<Map<String, Object>> saveImage(@RequestBody Map<String, String> request) {
+        try {
+            String imageBase64 = request.get("imageBase64");
+            logger.info("Gateway: Received HTTP request to save image, calling Backend via gRPC...");
+
+            tw.com.tymgateway.grpc.gallery.GalleryData galleryData = tw.com.tymgateway.grpc.gallery.GalleryData.newBuilder()
+                    .setImageBase64(imageBase64)
+                    .setUploadTime(java.time.Instant.now().toString())
+                    .build();
+
+            GalleryData savedImage = galleryGrpcClient.saveImage(galleryData);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Image saved successfully via gRPC");
+            response.put("image", convertToMap(savedImage));
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Gateway: Error calling gRPC service", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Failed to save image: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 透過 gRPC 更新圖片
+     *
+     * API 端點: POST /gallery/update
+     *
+     * 請求格式:
+     * {
+     *   "id": 123,
+     *   "imageBase64": "new_base64_string"
+     * }
+     *
+     * 回應格式:
+     * {
+     *   "success": true,
+     *   "message": "Image updated successfully via gRPC",
+     *   "image": {...}  // 更新後的圖片數據
+     * }
+     */
+    @PostMapping("/update")
+    public ResponseEntity<Map<String, Object>> updateImage(@RequestBody Map<String, Object> request) {
+        try {
+            Integer id = ((Number) request.get("id")).intValue();
+            String imageBase64 = (String) request.get("imageBase64");
+            logger.info("Gateway: Received HTTP request to update image id={}, calling Backend via gRPC...", id);
+
+            GalleryData updatedImage = galleryGrpcClient.updateImage(id, imageBase64);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Image updated successfully via gRPC");
+            response.put("image", convertToMap(updatedImage));
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Gateway: Error calling gRPC service", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Failed to update image: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
+     * 透過 gRPC 刪除圖片
+     *
+     * API 端點: POST /gallery/delete
+     *
+     * 請求格式:
+     * {
+     *   "id": 123
+     * }
+     *
+     * 回應格式:
+     * {
+     *   "success": true,
+     *   "message": "Image deleted successfully via gRPC"
+     * }
+     */
+    @PostMapping("/delete")
+    public ResponseEntity<Map<String, Object>> deleteImage(@RequestBody Map<String, Integer> request) {
+        try {
+            Integer id = request.get("id");
+            logger.info("Gateway: Received HTTP request to delete image id={}, calling Backend via gRPC...", id);
+
+            galleryGrpcClient.deleteImage(id);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Image deleted successfully via gRPC");
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Gateway: Error calling gRPC service", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "Failed to delete image: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    /**
      * API 文檔
      */
     @GetMapping("/docs")

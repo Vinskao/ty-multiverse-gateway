@@ -22,15 +22,21 @@ public class GatewayRouterController {
     @Autowired(required = false)
     private WebClient webClient;
 
-    // Note: People module uses gRPC routing via PeopleController
+    // Note: People, Weapons, Gallery, Deckofcards modules use gRPC routing via respective Controllers
     // Other modules use HTTP routing below
 
-    // Generic route for other modules
+    // Generic route for other modules (excluding gRPC modules)
     @PostMapping("/**")
     public Mono<ResponseEntity<String>> routePost(@RequestBody(required = false) String body,
                                                  @RequestHeader(value = "Content-Type", required = false) String contentType,
                                                  ServerHttpRequest request) {
         String targetPath = extractTargetPath(request.getPath().value(), "/tymgateway/tymb");
+
+        // Skip routing for modules that have dedicated gRPC controllers
+        if (isGrpcModule(targetPath)) {
+            return Mono.error(new IllegalStateException("Request should be handled by dedicated gRPC controller"));
+        }
+
         return webClient.post()
                 .uri(targetPath)
                 .header("Content-Type", contentType != null ? contentType : "application/json")
@@ -42,10 +48,27 @@ public class GatewayRouterController {
     @GetMapping("/**")
     public Mono<ResponseEntity<String>> routeGet(ServerHttpRequest request) {
         String targetPath = extractTargetPath(request.getPath().value(), "/tymgateway/tymb");
+
+        // Skip routing for modules that have dedicated gRPC controllers
+        if (isGrpcModule(targetPath)) {
+            return Mono.error(new IllegalStateException("Request should be handled by dedicated gRPC controller"));
+        }
+
         return webClient.get()
                 .uri(targetPath)
                 .retrieve()
                 .toEntity(String.class);
+    }
+
+    /**
+     * 檢查是否為 gRPC 模組的路徑
+     * 這些模組有專用的 gRPC Controller，不需要通過通用路由器處理
+     */
+    private boolean isGrpcModule(String targetPath) {
+        return targetPath.startsWith("/people") ||
+               targetPath.startsWith("/weapons") ||
+               targetPath.startsWith("/gallery") ||
+               targetPath.startsWith("/deckofcards");
     }
 
     /**

@@ -52,21 +52,8 @@ spring:
           filters:
             - StripPrefix=1 # 移除 /tymg 前綴
 
-        # Weapons routes (gRPC mode) - 路由到 Gateway 內部控制器
-        - id: weapons-route
-          uri: '@BACKEND_SERVICE_URL@' # 指向 backend 服務
-          predicates:
-            - Path=/tymg/weapons/**
-          filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
-
-        # Gallery routes (gRPC mode) - 路由到 Gateway 內部控制器
-        - id: gallery-route
-          uri: '@BACKEND_SERVICE_URL@' # 指向 backend 服務
-          predicates:
-            - Path=/tymg/gallery/**
-          filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
+        # Weapons routes handled by WeaponController (gRPC mode)
+        # Gallery routes handled by GalleryController (gRPC mode)
 
         # CKEditor routes (gRPC mode) - 路由到 Gateway 內部控制器
         - id: ckeditor-route

@@ -120,6 +120,89 @@ public class GalleryGrpcClient {
     }
 
     /**
+     * 保存圖片
+     */
+    public GalleryData saveImage(tw.com.tymgateway.grpc.gallery.GalleryData galleryData) {
+        logger.info("📤 gRPC Client: 保存圖片");
+
+        try {
+            GalleryServiceGrpc.GalleryServiceBlockingStub stub = GalleryServiceGrpc.newBlockingStub(channel)
+                    .withDeadlineAfter(30, TimeUnit.SECONDS);
+
+            GalleryResponse response = stub.saveImage(galleryData);
+
+            if (response.getSuccess()) {
+                logger.info("✅ gRPC Client: 圖片保存成功");
+                return convertProtobufToGateway(response.getGallery());
+            } else {
+                throw new RuntimeException("Failed to save image: " + response.getMessage());
+            }
+
+        } catch (Exception e) {
+            logger.error("❌ gRPC Client: 保存圖片失敗", e);
+            throw new RuntimeException("Failed to save image via gRPC", e);
+        }
+    }
+
+    /**
+     * 更新圖片
+     */
+    public GalleryData updateImage(Integer id, String imageBase64) {
+        logger.info("📤 gRPC Client: 更新圖片，ID: {}", id);
+
+        try {
+            GalleryServiceGrpc.GalleryServiceBlockingStub stub = GalleryServiceGrpc.newBlockingStub(channel)
+                    .withDeadlineAfter(30, TimeUnit.SECONDS);
+
+            UpdateImageRequest request = UpdateImageRequest.newBuilder()
+                    .setId(id)
+                    .setImageBase64(imageBase64)
+                    .build();
+
+            GalleryResponse response = stub.updateImage(request);
+
+            if (response.getSuccess()) {
+                logger.info("✅ gRPC Client: 圖片更新成功，ID: {}", id);
+                return convertProtobufToGateway(response.getGallery());
+            } else {
+                throw new RuntimeException("Failed to update image: " + response.getMessage());
+            }
+
+        } catch (Exception e) {
+            logger.error("❌ gRPC Client: 更新圖片失敗，ID: {}", id, e);
+            throw new RuntimeException("Failed to update image via gRPC", e);
+        }
+    }
+
+    /**
+     * 刪除圖片
+     */
+    public void deleteImage(Integer id) {
+        logger.info("📤 gRPC Client: 刪除圖片，ID: {}", id);
+
+        try {
+            GalleryServiceGrpc.GalleryServiceBlockingStub stub = GalleryServiceGrpc.newBlockingStub(channel)
+                    .withDeadlineAfter(30, TimeUnit.SECONDS);
+
+            DeleteImageRequest request = DeleteImageRequest.newBuilder()
+                    .setId(id)
+                    .build();
+
+            DeleteImageResponse response = stub.deleteImage(request);
+
+            if (response.getSuccess()) {
+                logger.info("✅ gRPC Client: 圖片刪除成功，ID: {}", id);
+            } else {
+                throw new RuntimeException("Failed to delete image: " + response.getMessage());
+            }
+
+        } catch (Exception e) {
+            logger.error("❌ gRPC Client: 刪除圖片失敗，ID: {}", id, e);
+            throw new RuntimeException("Failed to delete image via gRPC", e);
+        }
+    }
+
+    /**
      * 檢查gRPC連接健康狀態
      */
     public boolean isHealthy() {
