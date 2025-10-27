@@ -36,6 +36,8 @@
             <version>1.1</version>
         </dependency>
 
+        <!-- Removed dependency on backend module - Gateway should be independent -->
+
 
         <!-- AOP support for common module logging aspect -->
         <dependency>
@@ -196,7 +198,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Protobuf Maven Plugin - Generate gRPC client classes -->
+            <!-- Protobuf Maven Plugin - Generate gRPC classes for Gateway -->
             <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>

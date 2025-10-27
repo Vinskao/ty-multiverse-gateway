@@ -1,0 +1,363 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: windows
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 10.0
+[INFO] os.detected.version.major: 10
+[INFO] os.detected.version.minor: 0
+[INFO] os.detected.classifier: windows-x86_64
+[INFO] 
+[INFO] ------------------< tw.com.ty:ty-multiverse-gateway >-------------------
+[INFO] Building ty-multiverse-gateway 1.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.2.7:run (default-cli) > test-compile @ ty-multiverse-gateway >>>
+[INFO] 
+[INFO] --- protobuf:0.6.1:compile (default) @ ty-multiverse-gateway ---
+[INFO] Compiling 5 proto file(s) to F:\002-workspace\ty-multiverse\ty-multiverse-gateway\target\generated-sources\protobuf\java
+[INFO] 
+[INFO] --- protobuf:0.6.1:compile-custom (default) @ ty-multiverse-gateway ---
+[INFO] Compiling 5 proto file(s) to F:\002-workspace\ty-multiverse\ty-multiverse-gateway\target\generated-sources\protobuf\grpc-java
+[INFO] 
+[INFO] --- build-helper:3.3.0:add-source (add-source) @ ty-multiverse-gateway ---
+[INFO] Source directory: F:\002-workspace\ty-multiverse\ty-multiverse-gateway\target\generated-sources\protobuf\java added.
+[INFO] Source directory: F:\002-workspace\ty-multiverse\ty-multiverse-gateway\target\generated-sources\protobuf\grpc-java added.
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ ty-multiverse-gateway ---
+[INFO] Copying 4 resources from src\main\resources to target\classes
+[INFO] Copying 5 resources from src\main\proto to target\classes
+[INFO] Copying 5 resources from src\main\proto to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ ty-multiverse-gateway ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 158 source files with javac [debug release 21] to target\classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ ty-multiverse-gateway ---
+[INFO] skip non existing resourceDirectory F:\002-workspace\ty-multiverse\ty-multiverse-gateway\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ ty-multiverse-gateway ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 2 source files with javac [debug release 21] to target\test-classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] 
+[INFO] <<< spring-boot:3.2.7:run (default-cli) < test-compile @ ty-multiverse-gateway <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.2.7:run (default-cli) @ ty-multiverse-gateway ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.7)
+
+2025-10-25 14:49:41 - Starting TYMGatewayApplication using Java 21.0.6 with PID 17968 (F:\002-workspace\ty-multiverse\ty-multiverse-gateway\target\classes started by VinsKao in F:\002-workspace\ty-multiverse\ty-multiverse-gateway)
+2025-10-25 14:49:41 - Running with Spring Boot v3.2.7, Spring v6.1.10
+2025-10-25 14:49:41 - The following 1 profile is active: "local"
+2025-10-25 14:49:41 - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-10-25 14:49:41 - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-10-25 14:49:44 - BeanFactory id=9404f6fa-e341-3c49-ad27-2fef8ae2ec7c
+2025-10-25 14:49:44 - 🚀 初始化 gRPC CKEditor Client，連接後端: localhost:50051
+2025-10-25 14:49:45 - ✅ gRPC CKEditor Client 初始化完成
+2025-10-25 14:49:45 - 🚀 初始化 gRPC Deckofcards Client，連接後端: localhost:50051
+2025-10-25 14:49:45 - ✅ gRPC Deckofcards Client 初始化完成
+2025-10-25 14:49:45 - 🚀 初始化 gRPC Gallery Client，連接後端: localhost:50051
+2025-10-25 14:49:45 - ✅ gRPC Gallery Client 初始化完成
+2025-10-25 14:49:45 - 🚀 初始化 gRPC Keycloak Client，連接後端: localhost:50051
+2025-10-25 14:49:45 - ✅ gRPC Keycloak Client 初始化完成（使用模擬實現）
+2025-10-25 14:49:45 - 🚀 初始化 gRPC People Client，連接後端: localhost:50051
+2025-10-25 14:49:45 - ✅ gRPC People Client 初始化完成（使用模擬實現）
+2025-10-25 14:49:45 - 🚀 初始化 gRPC Weapon Client，連接後端: localhost:50051
+2025-10-25 14:49:45 - ✅ gRPC Weapon Client 初始化完成
+2025-10-25 14:49:46 - Cannot determine local hostname
+2025-10-25 14:49:46 - Routes supplied from Gateway Properties: [RouteDefinition{id='health-route', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/tymg/health/**}}], filters=[FilterDefinition{name='StripPrefix', args={_genkey_0=1}}], uri=http://localhost:8080/tymb, order=0, metadata={}}, RouteDefinition{id='people-route', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/tymg/people/**}}, PredicateDefinition{name='Method', args={_genkey_0=GET, _genkey_1=POST, _genkey_2=PUT, _genkey_3=DELETE}}], filters=[FilterDefinition{name='StripPrefix', args={_genkey_0=1}}], uri=http://localhost:8080/tymb, order=0, metadata={}}, RouteDefinition{id='people-images-route', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/tymg/people-images/**}}], filters=[FilterDefinition{name='StripPrefix', args={_genkey_0=1}}], uri=http://localhost:8080/tymb, order=0, metadata={}}, RouteDefinition{id='weapons-route', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/tymg/weapons/**}}, PredicateDefinition{name='Method', args={_genkey_0=GET, _genkey_1=POST, _genkey_2=PUT, _genkey_3=DELETE}}], filters=[FilterDefinition{name='StripPrefix', args={_genkey_0=1}}], uri=http://localhost:8080/tymb, order=0, metadata={}}, RouteDefinition{id='gallery-route', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/tymg/gallery/**}}, PredicateDefinition{name='Method', args={_genkey_0=GET, _genkey_1=POST, _genkey_2=PUT, _genkey_3=DELETE}}], filters=[FilterDefinition{name='StripPrefix', args={_genkey_0=1}}], uri=http://localhost:8080/tymb, order=0, metadata={}}, RouteDefinition{id='ckeditor-route', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/tymg/ckeditor/**}}], filters=[FilterDefinition{name='StripPrefix', args={_genkey_0=1}}], uri=http://localhost:8080/tymb, order=0, metadata={}}, RouteDefinition{id='deckofcards-route', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/tymg/deckofcards/blackjack/**}}], filters=[FilterDefinition{name='StripPrefix', args={_genkey_0=1}}], uri=http://localhost:8080/tymb, order=0, metadata={}}, RouteDefinition{id='async-request-status-route', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/tymg/api/request-status/**}}], filters=[FilterDefinition{name='StripPrefix', args={_genkey_0=1}}], uri=http://localhost:8080/tymb, order=0, metadata={}}, RouteDefinition{id='async-test-route', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/tymg/api/test/async/**}}], filters=[FilterDefinition{name='StripPrefix', args={_genkey_0=1}}], uri=http://localhost:8080/tymb, order=0, metadata={}}, RouteDefinition{id='auth-route', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/tymg/auth/**}}], filters=[FilterDefinition{name='StripPrefix', args={_genkey_0=1}}], uri=http://localhost:8080/tymb, order=0, metadata={}}, RouteDefinition{id='docs-route', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/tymg/docs/**}}], filters=[FilterDefinition{name='StripPrefix', args={_genkey_0=1}}], uri=http://localhost:8080/tymb, order=0, metadata={}}, RouteDefinition{id='actuator-route', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/tymg/actuator/**}}], filters=[FilterDefinition{name='StripPrefix', args={_genkey_0=1}}], uri=http://localhost:8080/tymb, order=0, metadata={}}, RouteDefinition{id='swagger-route', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/tymg/swagger-ui/**, _genkey_1=/tymg/v3/api-docs/**}}], filters=[FilterDefinition{name='StripPrefix', args={_genkey_0=1}}], uri=http://localhost:8080/tymb, order=0, metadata={}}]
+2025-10-25 14:49:46 - Loaded RoutePredicateFactory [After]
+2025-10-25 14:49:46 - Loaded RoutePredicateFactory [Before]
+2025-10-25 14:49:46 - Loaded RoutePredicateFactory [Between]
+2025-10-25 14:49:46 - Loaded RoutePredicateFactory [Cookie]
+2025-10-25 14:49:46 - Loaded RoutePredicateFactory [Header]
+2025-10-25 14:49:46 - Loaded RoutePredicateFactory [Host]
+2025-10-25 14:49:46 - Loaded RoutePredicateFactory [Method]
+2025-10-25 14:49:46 - Loaded RoutePredicateFactory [Path]
+2025-10-25 14:49:46 - Loaded RoutePredicateFactory [Query]
+2025-10-25 14:49:46 - Loaded RoutePredicateFactory [ReadBody]
+2025-10-25 14:49:46 - Loaded RoutePredicateFactory [RemoteAddr]
+2025-10-25 14:49:46 - Loaded RoutePredicateFactory [XForwardedRemoteAddr]
+2025-10-25 14:49:46 - Loaded RoutePredicateFactory [Weight]
+2025-10-25 14:49:46 - Loaded RoutePredicateFactory [CloudFoundryRouteService]
+2025-10-25 14:49:47 - Cannot determine local hostname
+2025-10-25 14:49:47 - Exposing 5 endpoint(s) beneath base path '/actuator'
+2025-10-25 14:49:47 - LiveReload server is running on port 35729
+2025-10-25 14:49:47 - [http] resources will use the default LoopResources: DefaultLoopResources {prefix=reactor-http, daemon=true, selectCount=16, workerCount=16}
+2025-10-25 14:49:47 - [http] resources will use the default ConnectionProvider: reactor.netty.resources.DefaultPooledConnectionProvider@60a9458c
+2025-10-25 14:49:48 - Default io_uring support : false
+2025-10-25 14:49:48 - Default Epoll support : false
+2025-10-25 14:49:48 - Default KQueue support : false
+2025-10-25 14:49:48 - [a0befaeb, L:/[0:0:0:0:0:0:0:0]:8082] Bound new server
+2025-10-25 14:49:48 - Netty started on port 8082
+2025-10-25 14:49:49 - Cannot determine local hostname
+2025-10-25 14:49:50 - Cannot determine local hostname
+2025-10-25 14:49:50 - RouteDefinition health-route applying {_genkey_0=/tymg/health/**} to Path
+2025-10-25 14:49:50 - RouteDefinition health-route applying filter {_genkey_0=Access-Control-Allow-Credentials Access-Control-Allow-Origin} to DedupeResponseHeader
+2025-10-25 14:49:50 - RouteDefinition health-route applying filter {_genkey_0=X-Gateway-Response, _genkey_1=TYM-Gateway} to AddResponseHeader
+2025-10-25 14:49:50 - RouteDefinition health-route applying filter {_genkey_0=1} to StripPrefix
+2025-10-25 14:49:50 - RouteDefinition matched: health-route
+2025-10-25 14:49:50 - RouteDefinition people-route applying {_genkey_0=/tymg/people/**} to Path
+2025-10-25 14:49:50 - RouteDefinition people-route applying {_genkey_0=GET, _genkey_1=POST, _genkey_2=PUT, _genkey_3=DELETE} to Method
+2025-10-25 14:49:50 - RouteDefinition people-route applying filter {_genkey_0=Access-Control-Allow-Credentials Access-Control-Allow-Origin} to DedupeResponseHeader
+2025-10-25 14:49:50 - RouteDefinition people-route applying filter {_genkey_0=X-Gateway-Response, _genkey_1=TYM-Gateway} to AddResponseHeader
+2025-10-25 14:49:50 - RouteDefinition people-route applying filter {_genkey_0=1} to StripPrefix
+2025-10-25 14:49:50 - RouteDefinition matched: people-route
+2025-10-25 14:49:50 - RouteDefinition people-images-route applying {_genkey_0=/tymg/people-images/**} to Path
+2025-10-25 14:49:50 - RouteDefinition people-images-route applying filter {_genkey_0=Access-Control-Allow-Credentials Access-Control-Allow-Origin} to DedupeResponseHeader
+2025-10-25 14:49:50 - RouteDefinition people-images-route applying filter {_genkey_0=X-Gateway-Response, _genkey_1=TYM-Gateway} to AddResponseHeader
+2025-10-25 14:49:50 - RouteDefinition people-images-route applying filter {_genkey_0=1} to StripPrefix
+2025-10-25 14:49:50 - RouteDefinition matched: people-images-route
+2025-10-25 14:49:50 - RouteDefinition weapons-route applying {_genkey_0=/tymg/weapons/**} to Path
+2025-10-25 14:49:50 - RouteDefinition weapons-route applying {_genkey_0=GET, _genkey_1=POST, _genkey_2=PUT, _genkey_3=DELETE} to Method
+2025-10-25 14:49:50 - RouteDefinition weapons-route applying filter {_genkey_0=Access-Control-Allow-Credentials Access-Control-Allow-Origin} to DedupeResponseHeader
+2025-10-25 14:49:50 - RouteDefinition weapons-route applying filter {_genkey_0=X-Gateway-Response, _genkey_1=TYM-Gateway} to AddResponseHeader
+2025-10-25 14:49:50 - RouteDefinition weapons-route applying filter {_genkey_0=1} to StripPrefix
+2025-10-25 14:49:50 - RouteDefinition matched: weapons-route
+2025-10-25 14:49:50 - RouteDefinition gallery-route applying {_genkey_0=/tymg/gallery/**} to Path
+2025-10-25 14:49:50 - RouteDefinition gallery-route applying {_genkey_0=GET, _genkey_1=POST, _genkey_2=PUT, _genkey_3=DELETE} to Method
+2025-10-25 14:49:50 - RouteDefinition gallery-route applying filter {_genkey_0=Access-Control-Allow-Credentials Access-Control-Allow-Origin} to DedupeResponseHeader
+2025-10-25 14:49:50 - RouteDefinition gallery-route applying filter {_genkey_0=X-Gateway-Response, _genkey_1=TYM-Gateway} to AddResponseHeader
+2025-10-25 14:49:50 - RouteDefinition gallery-route applying filter {_genkey_0=1} to StripPrefix
+2025-10-25 14:49:50 - RouteDefinition matched: gallery-route
+2025-10-25 14:49:50 - RouteDefinition ckeditor-route applying {_genkey_0=/tymg/ckeditor/**} to Path
+2025-10-25 14:49:50 - RouteDefinition ckeditor-route applying filter {_genkey_0=Access-Control-Allow-Credentials Access-Control-Allow-Origin} to DedupeResponseHeader
+2025-10-25 14:49:50 - RouteDefinition ckeditor-route applying filter {_genkey_0=X-Gateway-Response, _genkey_1=TYM-Gateway} to AddResponseHeader
+2025-10-25 14:49:50 - RouteDefinition ckeditor-route applying filter {_genkey_0=1} to StripPrefix
+2025-10-25 14:49:50 - RouteDefinition matched: ckeditor-route
+2025-10-25 14:49:50 - RouteDefinition deckofcards-route applying {_genkey_0=/tymg/deckofcards/blackjack/**} to Path
+2025-10-25 14:49:50 - RouteDefinition deckofcards-route applying filter {_genkey_0=Access-Control-Allow-Credentials Access-Control-Allow-Origin} to DedupeResponseHeader
+2025-10-25 14:49:50 - RouteDefinition deckofcards-route applying filter {_genkey_0=X-Gateway-Response, _genkey_1=TYM-Gateway} to AddResponseHeader
+2025-10-25 14:49:50 - RouteDefinition deckofcards-route applying filter {_genkey_0=1} to StripPrefix
+2025-10-25 14:49:50 - RouteDefinition matched: deckofcards-route
+2025-10-25 14:49:50 - RouteDefinition async-request-status-route applying {_genkey_0=/tymg/api/request-status/**} to Path
+2025-10-25 14:49:50 - RouteDefinition async-request-status-route applying filter {_genkey_0=Access-Control-Allow-Credentials Access-Control-Allow-Origin} to DedupeResponseHeader
+2025-10-25 14:49:50 - RouteDefinition async-request-status-route applying filter {_genkey_0=X-Gateway-Response, _genkey_1=TYM-Gateway} to AddResponseHeader
+2025-10-25 14:49:50 - RouteDefinition async-request-status-route applying filter {_genkey_0=1} to StripPrefix
+2025-10-25 14:49:50 - RouteDefinition matched: async-request-status-route
+2025-10-25 14:49:50 - RouteDefinition async-test-route applying {_genkey_0=/tymg/api/test/async/**} to Path
+2025-10-25 14:49:50 - RouteDefinition async-test-route applying filter {_genkey_0=Access-Control-Allow-Credentials Access-Control-Allow-Origin} to DedupeResponseHeader
+2025-10-25 14:49:50 - RouteDefinition async-test-route applying filter {_genkey_0=X-Gateway-Response, _genkey_1=TYM-Gateway} to AddResponseHeader
+2025-10-25 14:49:50 - RouteDefinition async-test-route applying filter {_genkey_0=1} to StripPrefix
+2025-10-25 14:49:50 - RouteDefinition matched: async-test-route
+2025-10-25 14:49:50 - RouteDefinition auth-route applying {_genkey_0=/tymg/auth/**} to Path
+2025-10-25 14:49:50 - RouteDefinition auth-route applying filter {_genkey_0=Access-Control-Allow-Credentials Access-Control-Allow-Origin} to DedupeResponseHeader
+2025-10-25 14:49:50 - RouteDefinition auth-route applying filter {_genkey_0=X-Gateway-Response, _genkey_1=TYM-Gateway} to AddResponseHeader
+2025-10-25 14:49:50 - RouteDefinition auth-route applying filter {_genkey_0=1} to StripPrefix
+2025-10-25 14:49:50 - RouteDefinition matched: auth-route
+2025-10-25 14:49:50 - RouteDefinition docs-route applying {_genkey_0=/tymg/docs/**} to Path
+2025-10-25 14:49:50 - RouteDefinition docs-route applying filter {_genkey_0=Access-Control-Allow-Credentials Access-Control-Allow-Origin} to DedupeResponseHeader
+2025-10-25 14:49:50 - RouteDefinition docs-route applying filter {_genkey_0=X-Gateway-Response, _genkey_1=TYM-Gateway} to AddResponseHeader
+2025-10-25 14:49:50 - RouteDefinition docs-route applying filter {_genkey_0=1} to StripPrefix
+2025-10-25 14:49:50 - RouteDefinition matched: docs-route
+2025-10-25 14:49:50 - RouteDefinition actuator-route applying {_genkey_0=/tymg/actuator/**} to Path
+2025-10-25 14:49:50 - RouteDefinition actuator-route applying filter {_genkey_0=Access-Control-Allow-Credentials Access-Control-Allow-Origin} to DedupeResponseHeader
+2025-10-25 14:49:50 - RouteDefinition actuator-route applying filter {_genkey_0=X-Gateway-Response, _genkey_1=TYM-Gateway} to AddResponseHeader
+2025-10-25 14:49:50 - RouteDefinition actuator-route applying filter {_genkey_0=1} to StripPrefix
+2025-10-25 14:49:50 - RouteDefinition matched: actuator-route
+2025-10-25 14:49:50 - RouteDefinition swagger-route applying {_genkey_0=/tymg/swagger-ui/**, _genkey_1=/tymg/v3/api-docs/**} to Path
+2025-10-25 14:49:50 - RouteDefinition swagger-route applying filter {_genkey_0=Access-Control-Allow-Credentials Access-Control-Allow-Origin} to DedupeResponseHeader
+2025-10-25 14:49:50 - RouteDefinition swagger-route applying filter {_genkey_0=X-Gateway-Response, _genkey_1=TYM-Gateway} to AddResponseHeader
+2025-10-25 14:49:50 - RouteDefinition swagger-route applying filter {_genkey_0=1} to StripPrefix
+2025-10-25 14:49:50 - RouteDefinition matched: swagger-route
+2025-10-25 14:49:50 - New routes count: 13
+2025-10-25 14:49:50 - Started TYMGatewayApplication in 10.145 seconds (process running for 10.458)
+2025-10-25 14:50:18 - [995d7182, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51022] New http connection, requesting read
+2025-10-25 14:50:18 - [995d7182, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51022] Initialized pipeline DefaultChannelPipeline{(reactor.left.httpCodec = io.netty.handler.codec.http.HttpServerCodec), (reactor.left.httpTrafficHandler = reactor.netty.http.server.HttpTrafficHandler), (reactor.right.reactiveBridge = reactor.netty.channel.ChannelOperationsHandler)}
+2025-10-25 14:50:18 - [995d7182, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51022] Increasing pending responses count: 1
+2025-10-25 14:50:18 - [995d7182-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51022] Handler is being applied: org.springframework.http.server.reactive.ReactorHttpHandlerAdapter@64b60465
+2025-10-25 14:50:18 - [995d7182-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51022] Last HTTP response frame
+2025-10-25 14:50:18 - [995d7182-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51022] Headers are not sent before onComplete().
+2025-10-25 14:50:18 - [995d7182-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51022] Decreasing pending responses count: 0
+2025-10-25 14:50:18 - [995d7182-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51022] Last HTTP packet was sent, terminating the channel
+2025-10-25 14:50:18 - [995d7182-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51022] [HttpServer] Channel inbound receiver cancelled (subscription disposed).
+2025-10-25 14:50:18 - [995d7182, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51022] onUncaughtException(SimpleConnection{channel=[id: 0x995d7182, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51022]})
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at io.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:255)
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132)
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:356)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-10-25 14:50:25 - [0c425bfe, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51033] New http connection, requesting read
+2025-10-25 14:50:25 - [0c425bfe, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51033] Initialized pipeline DefaultChannelPipeline{(reactor.left.httpCodec = io.netty.handler.codec.http.HttpServerCodec), (reactor.left.httpTrafficHandler = reactor.netty.http.server.HttpTrafficHandler), (reactor.right.reactiveBridge = reactor.netty.channel.ChannelOperationsHandler)}
+2025-10-25 14:50:25 - [0c425bfe, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51033] Increasing pending responses count: 1
+2025-10-25 14:50:25 - [0c425bfe-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51033] Handler is being applied: org.springframework.http.server.reactive.ReactorHttpHandlerAdapter@64b60465
+2025-10-25 14:50:25 - Route matched: people-route
+2025-10-25 14:50:25 - Mapping [Exchange: POST http://localhost:8082/tymg/people/get-all] to Route{id='people-route', uri=http://localhost:8080/tymb, order=0, predicate=(Paths: [/tymg/people/**], match trailing slash: true && Methods: [GET, POST, PUT, DELETE]), gatewayFilters=[[[DedupeResponseHeader Access-Control-Allow-Credentials Access-Control-Allow-Origin = RETAIN_FIRST], order = 1], [[StripPrefix parts = 1], order = 1], [[AddResponseHeader X-Gateway-Response = 'TYM-Gateway'], order = 2]], metadata={}}
+2025-10-25 14:50:25 - [0c425bfe-2] Mapped to org.springframework.cloud.gateway.handler.FilteringWebHandler@3407f4e8
+2025-10-25 14:50:25 - Sorted gatewayFilterFactories: [[GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RemoveCachedBodyFilter@363dda7c}, order = -2147483648], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.AdaptCachedBodyGlobalFilter@730f9c1d}, order = -2147482648], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyWriteResponseFilter@2face000}, order = -1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardPathFilter@2137a76d}, order = 0], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.GatewayMetricsFilter@7b071e3d}, order = 0], [[DedupeResponseHeader Access-Control-Allow-Credentials Access-Control-Allow-Origin = RETAIN_FIRST], order = 1], [[StripPrefix parts = 1], order = 1], [[AddResponseHeader X-Gateway-Response = 'TYM-Gateway'], order = 2], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RouteToRequestUrlFilter@39977262}, order = 10000], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.config.GatewayNoLoadBalancerClientAutoConfiguration$NoLoadBalancerClientFilter@d1739a4}, order = 10150], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.WebsocketRoutingFilter@7981670d}, order = 2147483646], [GatewayFilterAdapter{delegate=tw.com.tymgateway.filter.LoggingGlobalFilter@737f8b42}, order = 2147483647], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyRoutingFilter@c2b97f0}, order = 2147483647], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardRoutingFilter@69d3f6b7}, order = 2147483647]]
+2025-10-25 14:50:25 - Gateway Request: POST /people/get-all from /[0:0:0:0:0:0:0:1]:51033
+2025-10-25 14:50:25 - Will instrument the HTTP request headers [User-Agent:"Mozilla/5.0 (Windows NT; Windows NT 10.0; zh-TW) WindowsPowerShell/5.1.19041.6456", Content-Type:"application/x-www-form-urlencoded", Host:"localhost:8082", Content-Length:"0", Forwarded:"proto=http;host="localhost:8082";for="[0:0:0:0:0:0:0:1]:51033"", X-Forwarded-For:"0:0:0:0:0:0:0:1", X-Forwarded-Proto:"http", X-Forwarded-Prefix:"/tymg", X-Forwarded-Port:"8082", X-Forwarded-Host:"localhost:8082"]
+2025-10-25 14:50:25 - Client observation  {name=http.client.requests(null), error=null, context=name='http.client.requests', contextualName='null', error='null', lowCardinalityKeyValues=[http.method='POST', http.status_code='UNKNOWN', spring.cloud.gateway.route.id='people-route', spring.cloud.gateway.route.uri='http://localhost:8080/tymb'], highCardinalityKeyValues=[http.uri='http://localhost:8082/people/get-all'], map=[class io.micrometer.core.instrument.LongTaskTimer$Sample='SampleImpl{duration(seconds)=6.347E-4, duration(nanos)=634700.0, startTimeNanos=761026660008100}', class io.micrometer.core.instrument.Timer$Sample='io.micrometer.core.instrument.Timer$Sample@2801ba84'], parentObservation={name=http.server.requests(null), error=null, context=name='http.server.requests', contextualName='null', error='null', lowCardinalityKeyValues=[exception='none', method='POST', outcome='SUCCESS', status='200', uri='UNKNOWN'], highCardinalityKeyValues=[http.url='/tymg/people/get-all'], map=[class io.micrometer.core.instrument.LongTaskTimer$Sample='SampleImpl{duration(seconds)=0.0347147, duration(nanos)=3.47147E7, startTimeNanos=761026626020800}', class io.micrometer.core.instrument.Timer$Sample='io.micrometer.core.instrument.Timer$Sample@7bb66796'], parentObservation=null}} created for the request. New headers are [User-Agent:"Mozilla/5.0 (Windows NT; Windows NT 10.0; zh-TW) WindowsPowerShell/5.1.19041.6456", Content-Type:"application/x-www-form-urlencoded", Host:"localhost:8082", Content-Length:"0", Forwarded:"proto=http;host="localhost:8082";for="[0:0:0:0:0:0:0:1]:51033"", X-Forwarded-For:"0:0:0:0:0:0:0:1", X-Forwarded-Proto:"http", X-Forwarded-Prefix:"/tymg", X-Forwarded-Port:"8082", X-Forwarded-Host:"localhost:8082"]
+2025-10-25 14:50:25 - Creating a new [proxy] client pool [PoolFactory{evictionInterval=PT0S, leasingStrategy=fifo, maxConnections=2147483647, maxIdleTime=-1, maxLifeTime=-1, metricsEnabled=false, pendingAcquireMaxCount=-1, pendingAcquireTimeout=0}] for [localhost/<unresolved>:8080]
+2025-10-25 14:50:25 - [039eeac7] Created a new pooled channel, now: 0 active connections, 0 inactive connections and 0 pending acquire requests.
+2025-10-25 14:50:25 - [039eeac7] Initialized pipeline DefaultChannelPipeline{(reactor.left.httpCodec = io.netty.handler.codec.http.HttpClientCodec), (reactor.right.reactiveBridge = reactor.netty.channel.ChannelOperationsHandler)}
+2025-10-25 14:50:25 - [039eeac7] Connecting to [localhost/127.0.0.1:8080].
+2025-10-25 14:50:25 - [039eeac7] Connect attempt to [localhost/127.0.0.1:8080] failed.
+io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: getsockopt: localhost/127.0.0.1:8080
+Caused by: java.net.ConnectException: Connection refused: getsockopt
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682)
+	at java.base/sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:973)
+	at io.netty.channel.socket.nio.NioSocketChannel.doFinishConnect(NioSocketChannel.java:336)
+	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:339)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:776)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-10-25 14:50:25 - An exception occurred and observation was not previously stopped, will stop it. The exception was [io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: getsockopt: localhost/127.0.0.1:8080]
+2025-10-25 14:50:25 - [0c425bfe-2]  500 Server Error for HTTP POST "/tymg/people/get-all"
+io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: getsockopt: localhost/127.0.0.1:8080
+	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+Error has been observed at the following site(s):
+	*__checkpoint ⇢ org.springframework.web.cors.reactive.CorsWebFilter [DefaultWebFilterChain]
+	*__checkpoint ⇢ org.springframework.cloud.gateway.filter.WeightCalculatorWebFilter [DefaultWebFilterChain]
+	*__checkpoint ⇢ HTTP POST "/tymg/people/get-all" [ExceptionHandlingWebHandler]
+Original Stack Trace:
+Caused by: java.net.ConnectException: Connection refused: getsockopt
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682)
+	at java.base/sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:973)
+	at io.netty.channel.socket.nio.NioSocketChannel.doFinishConnect(NioSocketChannel.java:336)
+	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:339)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:776)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-10-25 14:50:25 - [0c425bfe-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51033] Last HTTP response frame
+2025-10-25 14:50:25 - [0c425bfe-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51033] Headers are not sent before onComplete().
+2025-10-25 14:50:25 - [0c425bfe-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51033] Decreasing pending responses count: 0
+2025-10-25 14:50:25 - [0c425bfe-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51033] Last HTTP packet was sent, terminating the channel
+2025-10-25 14:50:25 - [0c425bfe-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51033] [HttpServer] Channel inbound receiver cancelled (subscription disposed).
+2025-10-25 14:50:25 - [0c425bfe, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51033] onUncaughtException(SimpleConnection{channel=[id: 0x0c425bfe, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51033]})
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at io.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:255)
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132)
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:356)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-10-25 14:50:34 - [09311ed4, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51054] New http connection, requesting read
+2025-10-25 14:50:34 - [09311ed4, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51054] Initialized pipeline DefaultChannelPipeline{(reactor.left.httpCodec = io.netty.handler.codec.http.HttpServerCodec), (reactor.left.httpTrafficHandler = reactor.netty.http.server.HttpTrafficHandler), (reactor.right.reactiveBridge = reactor.netty.channel.ChannelOperationsHandler)}
+2025-10-25 14:50:34 - [09311ed4, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51054] Increasing pending responses count: 1
+2025-10-25 14:50:34 - [09311ed4-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51054] Handler is being applied: org.springframework.http.server.reactive.ReactorHttpHandlerAdapter@64b60465
+2025-10-25 14:50:34 - Route matched: actuator-route
+2025-10-25 14:50:34 - Mapping [Exchange: GET http://localhost:8082/tymg/actuator/health] to Route{id='actuator-route', uri=http://localhost:8080/tymb, order=0, predicate=Paths: [/tymg/actuator/**], match trailing slash: true, gatewayFilters=[[[DedupeResponseHeader Access-Control-Allow-Credentials Access-Control-Allow-Origin = RETAIN_FIRST], order = 1], [[StripPrefix parts = 1], order = 1], [[AddResponseHeader X-Gateway-Response = 'TYM-Gateway'], order = 2]], metadata={}}
+2025-10-25 14:50:34 - [09311ed4-3] Mapped to org.springframework.cloud.gateway.handler.FilteringWebHandler@3407f4e8
+2025-10-25 14:50:34 - Sorted gatewayFilterFactories: [[GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RemoveCachedBodyFilter@363dda7c}, order = -2147483648], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.AdaptCachedBodyGlobalFilter@730f9c1d}, order = -2147482648], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyWriteResponseFilter@2face000}, order = -1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardPathFilter@2137a76d}, order = 0], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.GatewayMetricsFilter@7b071e3d}, order = 0], [[DedupeResponseHeader Access-Control-Allow-Credentials Access-Control-Allow-Origin = RETAIN_FIRST], order = 1], [[StripPrefix parts = 1], order = 1], [[AddResponseHeader X-Gateway-Response = 'TYM-Gateway'], order = 2], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RouteToRequestUrlFilter@39977262}, order = 10000], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.config.GatewayNoLoadBalancerClientAutoConfiguration$NoLoadBalancerClientFilter@d1739a4}, order = 10150], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.WebsocketRoutingFilter@7981670d}, order = 2147483646], [GatewayFilterAdapter{delegate=tw.com.tymgateway.filter.LoggingGlobalFilter@737f8b42}, order = 2147483647], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyRoutingFilter@c2b97f0}, order = 2147483647], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardRoutingFilter@69d3f6b7}, order = 2147483647]]
+2025-10-25 14:50:34 - Gateway Request: GET /actuator/health from /[0:0:0:0:0:0:0:1]:51054
+2025-10-25 14:50:34 - Will instrument the HTTP request headers [User-Agent:"Mozilla/5.0 (Windows NT; Windows NT 10.0; zh-TW) WindowsPowerShell/5.1.19041.6456", Host:"localhost:8082", Forwarded:"proto=http;host="localhost:8082";for="[0:0:0:0:0:0:0:1]:51054"", X-Forwarded-For:"0:0:0:0:0:0:0:1", X-Forwarded-Proto:"http", X-Forwarded-Prefix:"/tymg", X-Forwarded-Port:"8082", X-Forwarded-Host:"localhost:8082"]
+2025-10-25 14:50:34 - Client observation  {name=http.client.requests(null), error=null, context=name='http.client.requests', contextualName='null', error='null', lowCardinalityKeyValues=[http.method='GET', http.status_code='UNKNOWN', spring.cloud.gateway.route.id='actuator-route', spring.cloud.gateway.route.uri='http://localhost:8080/tymb'], highCardinalityKeyValues=[http.uri='http://localhost:8082/actuator/health'], map=[class io.micrometer.core.instrument.LongTaskTimer$Sample='SampleImpl{duration(seconds)=4.66E-5, duration(nanos)=46600.0, startTimeNanos=761035851460800}', class io.micrometer.core.instrument.Timer$Sample='io.micrometer.core.instrument.Timer$Sample@19da7733'], parentObservation={name=http.server.requests(null), error=null, context=name='http.server.requests', contextualName='null', error='null', lowCardinalityKeyValues=[exception='none', method='GET', outcome='SUCCESS', status='200', uri='UNKNOWN'], highCardinalityKeyValues=[http.url='/tymg/actuator/health'], map=[class io.micrometer.core.instrument.LongTaskTimer$Sample='SampleImpl{duration(seconds)=0.0036524, duration(nanos)=3652400.0, startTimeNanos=761035847913000}', class io.micrometer.core.instrument.Timer$Sample='io.micrometer.core.instrument.Timer$Sample@5cd8ea6c'], parentObservation=null}} created for the request. New headers are [User-Agent:"Mozilla/5.0 (Windows NT; Windows NT 10.0; zh-TW) WindowsPowerShell/5.1.19041.6456", Host:"localhost:8082", Forwarded:"proto=http;host="localhost:8082";for="[0:0:0:0:0:0:0:1]:51054"", X-Forwarded-For:"0:0:0:0:0:0:0:1", X-Forwarded-Proto:"http", X-Forwarded-Prefix:"/tymg", X-Forwarded-Port:"8082", X-Forwarded-Host:"localhost:8082"]
+2025-10-25 14:50:34 - [10489d48] Created a new pooled channel, now: 0 active connections, 0 inactive connections and 0 pending acquire requests.
+2025-10-25 14:50:34 - [10489d48] Initialized pipeline DefaultChannelPipeline{(reactor.left.httpCodec = io.netty.handler.codec.http.HttpClientCodec), (reactor.right.reactiveBridge = reactor.netty.channel.ChannelOperationsHandler)}
+2025-10-25 14:50:34 - [10489d48] Connecting to [localhost/127.0.0.1:8080].
+2025-10-25 14:50:34 - [10489d48] Connect attempt to [localhost/127.0.0.1:8080] failed.
+io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: getsockopt: localhost/127.0.0.1:8080
+Caused by: java.net.ConnectException: Connection refused: getsockopt
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682)
+	at java.base/sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:973)
+	at io.netty.channel.socket.nio.NioSocketChannel.doFinishConnect(NioSocketChannel.java:336)
+	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:339)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:776)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-10-25 14:50:34 - An exception occurred and observation was not previously stopped, will stop it. The exception was [io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: getsockopt: localhost/127.0.0.1:8080]
+2025-10-25 14:50:34 - [09311ed4-3]  500 Server Error for HTTP GET "/tymg/actuator/health"
+io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: getsockopt: localhost/127.0.0.1:8080
+	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+Error has been observed at the following site(s):
+	*__checkpoint ⇢ org.springframework.web.cors.reactive.CorsWebFilter [DefaultWebFilterChain]
+	*__checkpoint ⇢ org.springframework.cloud.gateway.filter.WeightCalculatorWebFilter [DefaultWebFilterChain]
+	*__checkpoint ⇢ HTTP GET "/tymg/actuator/health" [ExceptionHandlingWebHandler]
+Original Stack Trace:
+Caused by: java.net.ConnectException: Connection refused: getsockopt
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682)
+	at java.base/sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:973)
+	at io.netty.channel.socket.nio.NioSocketChannel.doFinishConnect(NioSocketChannel.java:336)
+	at io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:339)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:776)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-10-25 14:50:34 - [09311ed4-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51054] Last HTTP response frame
+2025-10-25 14:50:34 - [09311ed4-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51054] Headers are not sent before onComplete().
+2025-10-25 14:50:34 - [09311ed4-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51054] Decreasing pending responses count: 0
+2025-10-25 14:50:34 - [09311ed4-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51054] Last HTTP packet was sent, terminating the channel
+2025-10-25 14:50:34 - [09311ed4-1, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51054] [HttpServer] Channel inbound receiver cancelled (subscription disposed).
+2025-10-25 14:50:34 - [09311ed4, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51054] onUncaughtException(SimpleConnection{channel=[id: 0x09311ed4, L:/[0:0:0:0:0:0:0:1]:8082 - R:/[0:0:0:0:0:0:0:1]:51054]})
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at io.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:255)
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132)
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:356)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1583)

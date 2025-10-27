@@ -1,6 +1,7 @@
 # Local Environment Configuration for Gateway
 
-# Backend Service URL
+# Backend Service URL - includes context path /tymb
+# Gateway routes will strip /tymg prefix and forward to this URL
 BACKEND_SERVICE_URL: http://localhost:8080/tymb
 
 # Frontend URL for CORS
