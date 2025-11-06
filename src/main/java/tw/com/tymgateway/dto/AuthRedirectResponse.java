@@ -28,6 +28,7 @@ public class AuthRedirectResponse {
 
     // Getters and Setters
     public boolean getSuccess() { return success; }
+    public boolean isSuccess() { return success; }  // Add isSuccess() for consistency
     public void setSuccess(boolean success) { this.success = success; }
 
     public String getMessage() { return message; }

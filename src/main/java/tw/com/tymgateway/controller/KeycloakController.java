@@ -28,7 +28,7 @@ import java.util.Map;
  * @version 1.0
  */
 @RestController
-@RequestMapping({"/tymgateway/keycloak", "/keycloak"}) // 支持舊的路由和新的路由
+@RequestMapping("/keycloak")
 @ConditionalOnProperty(name = "grpc.client.enabled", havingValue = "true")
 public class KeycloakController {
 

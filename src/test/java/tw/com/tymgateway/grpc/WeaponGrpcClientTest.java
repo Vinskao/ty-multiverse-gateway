@@ -68,7 +68,7 @@ class WeaponGrpcClientTest {
             String weaponName = weaponList.get(0).getName();
             System.out.println("   測試武器名稱: " + weaponName);
             
-            Optional<WeaponData> result = weaponGrpcClient.getWeaponByName(weaponName);
+            Optional<WeaponData> result = weaponGrpcClient.getWeaponById(weaponName);
             assertNotNull(result, "應該返回Optional結果");
             assertTrue(result.isPresent(), "應該找到武器");
             assertEquals(weaponName, result.get().getName(), "武器名稱應該匹配");

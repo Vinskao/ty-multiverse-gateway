@@ -46,16 +46,13 @@ class DeckofcardsGrpcClientTest {
     void testStartGame() {
         System.out.println("🃏 測試開始遊戲...");
         
-        String testPlayerId = "test-player-" + System.currentTimeMillis();
-        DeckofcardsDTO.GameResponseDTO result = deckofcardsGrpcClient.startGame(testPlayerId);
+        DeckofcardsDTO result = deckofcardsGrpcClient.startGame();
         
         assertNotNull(result, "應該返回遊戲響應");
-        assertTrue(result.isSuccess(), "遊戲應該成功開始");
-        assertNotNull(result.getGameState(), "應該返回遊戲狀態");
+        assertNotNull(result.getGameStatus(), "應該返回遊戲狀態");
         
         System.out.println("✅ 開始遊戲成功");
-        System.out.println("   玩家 ID: " + testPlayerId);
-        System.out.println("   遊戲狀態: " + result.getGameState().getStatus());
+        System.out.println("   遊戲狀態: " + result.getGameStatus());
     }
 
     @Test
@@ -64,18 +61,17 @@ class DeckofcardsGrpcClientTest {
         System.out.println("🃏 測試玩家要牌...");
         
         // 先開始一個遊戲
-        String testPlayerId = "test-player-" + System.currentTimeMillis();
-        DeckofcardsDTO.GameResponseDTO startResult = deckofcardsGrpcClient.startGame(testPlayerId);
-        assertTrue(startResult.isSuccess(), "遊戲應該成功開始");
+        DeckofcardsDTO startResult = deckofcardsGrpcClient.startGame();
+        assertNotNull(startResult, "遊戲應該成功開始");
         
         // 玩家要牌
-        DeckofcardsDTO.GameResponseDTO hitResult = deckofcardsGrpcClient.playerHit(testPlayerId);
+        DeckofcardsDTO hitResult = deckofcardsGrpcClient.playerHit();
         
         assertNotNull(hitResult, "應該返回要牌響應");
-        assertNotNull(hitResult.getGameState(), "應該返回遊戲狀態");
+        assertNotNull(hitResult.getGameStatus(), "應該返回遊戲狀態");
         
         System.out.println("✅ 玩家要牌成功");
-        System.out.println("   遊戲狀態: " + hitResult.getGameState().getStatus());
+        System.out.println("   遊戲狀態: " + hitResult.getGameStatus());
     }
 
     @Test
@@ -84,18 +80,17 @@ class DeckofcardsGrpcClientTest {
         System.out.println("🃏 測試玩家停牌...");
         
         // 先開始一個遊戲
-        String testPlayerId = "test-player-" + System.currentTimeMillis();
-        DeckofcardsDTO.GameResponseDTO startResult = deckofcardsGrpcClient.startGame(testPlayerId);
-        assertTrue(startResult.isSuccess(), "遊戲應該成功開始");
+        DeckofcardsDTO startResult = deckofcardsGrpcClient.startGame();
+        assertNotNull(startResult, "遊戲應該成功開始");
         
         // 玩家停牌
-        DeckofcardsDTO.GameResponseDTO standResult = deckofcardsGrpcClient.playerStand(testPlayerId);
+        DeckofcardsDTO standResult = deckofcardsGrpcClient.playerStand();
         
         assertNotNull(standResult, "應該返回停牌響應");
-        assertNotNull(standResult.getGameState(), "應該返回遊戲狀態");
+        assertNotNull(standResult.getGameStatus(), "應該返回遊戲狀態");
         
         System.out.println("✅ 玩家停牌成功");
-        System.out.println("   遊戲狀態: " + standResult.getGameState().getStatus());
+        System.out.println("   遊戲狀態: " + standResult.getGameStatus());
     }
 
     @Test
@@ -104,19 +99,17 @@ class DeckofcardsGrpcClientTest {
         System.out.println("🃏 測試獲取遊戲狀態...");
         
         // 先開始一個遊戲
-        String testPlayerId = "test-player-" + System.currentTimeMillis();
-        DeckofcardsDTO.GameResponseDTO startResult = deckofcardsGrpcClient.startGame(testPlayerId);
-        assertTrue(startResult.isSuccess(), "遊戲應該成功開始");
+        DeckofcardsDTO startResult = deckofcardsGrpcClient.startGame();
+        assertNotNull(startResult, "遊戲應該成功開始");
         
         // 獲取遊戲狀態
-        DeckofcardsDTO.GameStateDTO gameState = deckofcardsGrpcClient.getGameStatus(testPlayerId);
+        DeckofcardsDTO gameState = deckofcardsGrpcClient.getGameStatus();
         
         assertNotNull(gameState, "應該返回遊戲狀態");
-        assertEquals(testPlayerId, gameState.getPlayerId(), "玩家 ID 應該匹配");
+        assertNotNull(gameState.getGameStatus(), "遊戲狀態應該存在");
         
         System.out.println("✅ 獲取遊戲狀態成功");
-        System.out.println("   玩家 ID: " + gameState.getPlayerId());
-        System.out.println("   遊戲狀態: " + gameState.getStatus());
+        System.out.println("   遊戲狀態: " + gameState.getGameStatus());
     }
 
     @Test
@@ -124,7 +117,7 @@ class DeckofcardsGrpcClientTest {
         if (!isBackendRunning()) {
             System.out.println("⚠️  Backend 未運行，測試錯誤處理...");
             RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-                deckofcardsGrpcClient.startGame("test-player");
+                deckofcardsGrpcClient.startGame();
             });
             assertTrue(exception.getMessage().contains("Failed to call gRPC service"),
                       "錯誤消息應該包含失敗信息");

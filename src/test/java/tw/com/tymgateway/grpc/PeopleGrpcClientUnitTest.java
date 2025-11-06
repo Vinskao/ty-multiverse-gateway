@@ -66,9 +66,9 @@ class PeopleGrpcClientUnitTest {
     }
 
     @Test
-    void testShutdown() {
+    void testDestroy() {
         // 測試關閉功能
-        peopleGrpcClient.shutdown();
+        peopleGrpcClient.destroy();
 
         // 驗證 channel 被關閉
         verify(mockChannel, times(1)).shutdown();

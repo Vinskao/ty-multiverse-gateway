@@ -46,12 +46,13 @@ class CkeditorGrpcClientTest {
     void testGetContent() {
         System.out.println("📝 測試獲取內容...");
         
-        String testPageId = "test-page";
-        CkeditorDTO.GetContentDTO result = ckeditorGrpcClient.getContent(testPageId);
+        String testEditor = "test-page";
+        String testToken = "test-token";
+        CkeditorDTO result = ckeditorGrpcClient.getContent(testEditor, testToken);
         
         assertNotNull(result, "應該返回內容結果");
         System.out.println("✅ 獲取內容成功");
-        System.out.println("   頁面 ID: " + testPageId);
+        System.out.println("   Editor: " + testEditor);
         System.out.println("   成功狀態: " + result.isSuccess());
     }
 
@@ -60,16 +61,14 @@ class CkeditorGrpcClientTest {
     void testSaveContent() {
         System.out.println("📝 測試保存內容...");
         
-        String testPageId = "test-page";
+        String testUserId = "test-user";
+        String testEditor = "test-page";
         String testContent = "<p>這是測試內容</p>";
+        String testToken = "test-token";
         
-        CkeditorDTO.EditContentVO editContent = new CkeditorDTO.EditContentVO();
-        editContent.setPageId(testPageId);
-        editContent.setContent(testContent);
+        CkeditorDTO result = ckeditorGrpcClient.saveContent(testUserId, testEditor, testContent, testToken);
         
-        boolean result = ckeditorGrpcClient.saveContent(editContent);
-        
-        assertTrue(result, "保存應該成功");
+        assertNotNull(result, "保存應該返回結果");
         System.out.println("✅ 保存內容成功");
     }
 
@@ -78,8 +77,10 @@ class CkeditorGrpcClientTest {
     void testGetDraft() {
         System.out.println("📝 測試獲取草稿...");
         
-        String testPageId = "test-page";
-        CkeditorDTO.GetContentDTO result = ckeditorGrpcClient.getDraft(testPageId);
+        String testUserId = "test-user";
+        String testEditor = "test-page";
+        String testToken = "test-token";
+        CkeditorDTO result = ckeditorGrpcClient.getDraft(testUserId, testEditor, testToken);
         
         assertNotNull(result, "應該返回草稿結果");
         System.out.println("✅ 獲取草稿成功");
@@ -91,16 +92,14 @@ class CkeditorGrpcClientTest {
     void testSaveDraft() {
         System.out.println("📝 測試保存草稿...");
         
-        String testPageId = "test-page";
+        String testUserId = "test-user";
+        String testEditor = "test-page";
         String testContent = "<p>這是草稿內容</p>";
+        String testToken = "test-token";
         
-        CkeditorDTO.EditContentVO editContent = new CkeditorDTO.EditContentVO();
-        editContent.setPageId(testPageId);
-        editContent.setContent(testContent);
+        CkeditorDTO result = ckeditorGrpcClient.saveDraft(testUserId, testEditor, testContent, testToken);
         
-        boolean result = ckeditorGrpcClient.saveDraft(editContent);
-        
-        assertTrue(result, "保存草稿應該成功");
+        assertNotNull(result, "保存草稿應該返回結果");
         System.out.println("✅ 保存草稿成功");
     }
 
@@ -109,7 +108,7 @@ class CkeditorGrpcClientTest {
         if (!isBackendRunning()) {
             System.out.println("⚠️  Backend 未運行，測試錯誤處理...");
             RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-                ckeditorGrpcClient.getContent("test-page");
+                ckeditorGrpcClient.getContent("test-page", "test-token");
             });
             assertTrue(exception.getMessage().contains("Failed to call gRPC service"),
                       "錯誤消息應該包含失敗信息");

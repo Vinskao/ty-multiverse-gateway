@@ -26,6 +26,7 @@ public class IntrospectTokenResponse {
 
     // Getters and Setters
     public boolean getActive() { return active; }
+    public boolean isActive() { return active; }  // Add isActive() for consistency
     public void setActive(boolean active) { this.active = active; }
 
     public String getMessage() { return message; }

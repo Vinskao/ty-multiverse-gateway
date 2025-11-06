@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
  * @version 1.0
  */
 @RestController
-@RequestMapping("/tymgateway/tymb")
+@RequestMapping("/tymg")
 public class GatewayRouterController {
 
     @Autowired(required = false)
@@ -30,7 +30,7 @@ public class GatewayRouterController {
     public Mono<ResponseEntity<String>> routePost(@RequestBody(required = false) String body,
                                                  @RequestHeader(value = "Content-Type", required = false) String contentType,
                                                  ServerHttpRequest request) {
-        String targetPath = extractTargetPath(request.getPath().value(), "/tymgateway/tymb");
+        String targetPath = extractTargetPath(request.getPath().value(), "/tymg");
 
         // Skip routing for modules that have dedicated gRPC controllers
         if (isGrpcModule(targetPath)) {
@@ -47,7 +47,7 @@ public class GatewayRouterController {
 
     @GetMapping("/**")
     public Mono<ResponseEntity<String>> routeGet(ServerHttpRequest request) {
-        String targetPath = extractTargetPath(request.getPath().value(), "/tymgateway/tymb");
+        String targetPath = extractTargetPath(request.getPath().value(), "/tymg");
 
         // Skip routing for modules that have dedicated gRPC controllers
         if (isGrpcModule(targetPath)) {
@@ -65,15 +65,14 @@ public class GatewayRouterController {
      * 這些模組有專用的 gRPC Controller，不需要通過通用路由器處理
      */
     private boolean isGrpcModule(String targetPath) {
-        return targetPath.startsWith("/people") ||
-               targetPath.startsWith("/weapons") ||
-               targetPath.startsWith("/gallery") ||
-               targetPath.startsWith("/deckofcards");
+        // People, Weapons, Gallery, Deckofcards 現在都有專用的控制器
+        // 所以這些路徑不會通過通用路由器處理
+        return false; // 暫時禁用，讓各個專用控制器處理
     }
 
     /**
      * 從完整路徑中提取目標路徑
-     * 例如：/tymgateway/tymb/people/get-by-name -> /people/get-by-name
+     * 例如：/tymg/people/get-by-name -> /people/get-by-name
      */
     private String extractTargetPath(String fullPath, String prefix) {
         if (fullPath.startsWith(prefix)) {

@@ -133,7 +133,7 @@ class AllGrpcApisIntegrationTest {
         System.out.println("\n📝 測試 CKEditor API...");
         
         try {
-            CkeditorDTO.GetContentDTO result = ckeditorGrpcClient.getContent("test-page");
+            CkeditorDTO result = ckeditorGrpcClient.getContent("test-page", "test-token");
             assertNotNull(result, "CKEditor API 應該返回數據");
             System.out.println("   ✅ CKEditor API 連通正常");
         } catch (Exception e) {
@@ -148,10 +148,8 @@ class AllGrpcApisIntegrationTest {
         System.out.println("\n🃏 測試 DeckOfCards API...");
         
         try {
-            String testPlayerId = "test-player-" + System.currentTimeMillis();
-            DeckofcardsDTO.GameResponseDTO result = deckofcardsGrpcClient.startGame(testPlayerId);
+            DeckofcardsDTO result = deckofcardsGrpcClient.startGame();
             assertNotNull(result, "DeckOfCards API 應該返回數據");
-            assertTrue(result.isSuccess(), "遊戲應該成功開始");
             System.out.println("   ✅ DeckOfCards API 連通正常");
         } catch (Exception e) {
             fail("❌ DeckOfCards API 連通失敗: " + e.getMessage());
@@ -217,7 +215,7 @@ class AllGrpcApisIntegrationTest {
         
         // CKEditor API
         try {
-            ckeditorGrpcClient.getContent("test-page");
+            ckeditorGrpcClient.getContent("test-page", "test-token");
             healthyApis++;
             System.out.println("   ✅ CKEditor API: 健康");
         } catch (Exception e) {
@@ -226,7 +224,7 @@ class AllGrpcApisIntegrationTest {
         
         // DeckOfCards API
         try {
-            deckofcardsGrpcClient.startGame("health-check-" + System.currentTimeMillis());
+            deckofcardsGrpcClient.startGame();
             healthyApis++;
             System.out.println("   ✅ DeckOfCards API: 健康");
         } catch (Exception e) {

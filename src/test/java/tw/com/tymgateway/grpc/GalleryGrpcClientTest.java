@@ -65,7 +65,7 @@ class GalleryGrpcClientTest {
         // 先獲取所有圖片，找一個存在的圖片 ID
         List<GalleryData> imageList = galleryGrpcClient.getAllImages();
         if (!imageList.isEmpty()) {
-            Long imageId = imageList.get(0).getId();
+            Integer imageId = imageList.get(0).getId();
             System.out.println("   測試圖片 ID: " + imageId);
             
             Optional<GalleryData> result = galleryGrpcClient.getImageById(imageId);

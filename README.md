@@ -33,19 +33,260 @@ Gateway 作為系統的**統一入口閘道**，專注於以下職責：
 - **健康檢查**: `http://localhost:8082/actuator/health`
 - **API 文檔**: `http://localhost:8082/tymgateway/tymb/people/docs`
 
-### 測試指令
+## 🧪 API 測試端點
+
+### 📋 架構說明
+
+**Gateway API 處理模式：**
+- **🟢 gRPC 控制器**：`/people/*`, `/weapons/*`, `/gallery/*`, `/deckofcards/*` - Gateway 內部處理，通過 gRPC 調用 Backend
+- **🔄 路由轉發**：`/tymg/*` 路徑 - 通過 Spring Cloud Gateway 路由到 Backend
+- **🔄 訊息佇列**：特定操作通過 RabbitMQ 到 Consumer 處理
+
+**Consumer 整合說明：**
+- 🔄 `/tymg/api/test/async/damage-calculation` - 觸發傷害計算模擬
+- 🔄 `/tymg/api/test/async/people-get-all` - 觸發角色列表獲取模擬
+- 🔄 `/tymg/api/request-status/*` - 查詢非同步處理結果
+
+**這些端點會通過 RabbitMQ 發送訊息給 Consumer 服務進行非同步處理。**
+
+### 前置條件
+**⚠️ 重要：測試前請確保 Backend 服務正在運行**
 ```bash
-# 檢查健康狀態
+# 啟動 Backend 服務
+cd ../ty-multiverse-backend
+./mvnw spring-boot:run
+```
+
+### 健康檢查
+```bash
+# Gateway 健康狀態
 curl http://localhost:8082/actuator/health
 
-# 測試人物 API
-curl http://localhost:8082/tymgateway/tymb/people/get-all
+# Backend 健康狀態（通過 Gateway 代理）
+curl http://localhost:8082/tymg/actuator/health
 
-# 查看路由配置
+# 查看所有路由配置
 curl http://localhost:8082/actuator/gateway/routes
 ```
 
+### 👥 People 人物管理 API
+```bash
+# 獲取所有人物
+curl -X GET "http://localhost:8082/tymg/people/get-all"
+
+# 根據名稱查詢人物
+curl -X POST "http://localhost:8082/tymg/people/get-by-name" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Maya"}'
+
+# 新增人物
+curl -X POST "http://localhost:8082/tymg/people/insert" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "新人物",
+    "description": "人物描述",
+    "age": 25,
+    "occupation": "冒險者"
+  }'
+
+# 更新人物
+curl -X PUT "http://localhost:8082/tymg/people/update" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "現有人物",
+    "description": "更新後的描述",
+    "age": 26
+  }'
+
+# 刪除人物
+curl -X DELETE "http://localhost:8082/tymg/people/delete" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "要刪除的人物"}'
+```
+
+### ⚔️ Weapons 武器管理 API
+```bash
+# 獲取所有武器
+curl -X GET "http://localhost:8082/tymg/weapons/get-all"
+
+# 根據名稱查詢武器
+curl -X POST "http://localhost:8082/tymg/weapons/get-by-name" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "測試武器"}'
+
+# 計算傷害（武器 vs 防具）
+curl -X POST "http://localhost:8082/tymg/weapons/calculate-damage" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "weaponName": "鐵劍",
+    "armorName": "皮甲",
+    "attackerLevel": 10,
+    "defenderLevel": 8
+  }'
+```
+
+### 🖼️ Gallery 圖庫管理 API
+```bash
+# 獲取所有圖片
+curl -X GET "http://localhost:8082/tymg/gallery/get-all"
+
+# 根據ID查詢圖片
+curl -X POST "http://localhost:8082/tymg/gallery/get-by-id" \
+  -H "Content-Type: application/json" \
+  -d '{"id": 1}'
+
+# 上傳新圖片
+curl -X POST "http://localhost:8082/tymg/gallery/save" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "新圖片",
+    "description": "圖片描述",
+    "imageUrl": "https://example.com/image.jpg",
+    "category": "人物"
+  }'
+
+# 更新圖片資訊
+curl -X POST "http://localhost:8082/tymg/gallery/update" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": 1,
+    "title": "更新後的標題",
+    "description": "更新後的描述"
+  }'
+
+# 刪除圖片
+curl -X POST "http://localhost:8082/tymg/gallery/delete" \
+  -H "Content-Type: application/json" \
+  -d '{"id": 1}'
+```
+
+### 🃏 Deckofcards 撲克牌遊戲 API
+```bash
+# 開始新遊戲
+curl -X POST "http://localhost:8082/tymg/deckofcards/start-game"
+
+# 玩家要牌
+curl -X POST "http://localhost:8082/tymg/deckofcards/player-hit"
+
+# 玩家停牌
+curl -X POST "http://localhost:8082/tymg/deckofcards/player-stand"
+
+# 玩家加倍
+curl -X POST "http://localhost:8082/tymg/deckofcards/player-double"
+
+# 玩家分牌
+curl -X POST "http://localhost:8082/tymg/deckofcards/player-split"
+
+# 獲取遊戲狀態
+curl -X POST "http://localhost:8082/tymg/deckofcards/get-game-status"
+```
+
+### 🔐 認證與授權 API
+```bash
+# 獲取認證狀態
+curl -X GET "http://localhost:8082/tymg/auth/status"
+
+# 登入（如果啟用）
+curl -X POST "http://localhost:8082/tymg/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "password"
+  }'
+
+# 檢查權限
+curl -X GET "http://localhost:8082/tymg/auth/permissions"
+```
+
+### 📊 監控與指標 API
+```bash
+# 應用健康狀態
+curl http://localhost:8082/actuator/health
+
+# 應用指標
+curl http://localhost:8082/actuator/metrics
+
+# 記憶體使用情況
+curl http://localhost:8082/actuator/metrics/jvm.memory.used
+
+# HTTP 請求統計
+curl http://localhost:8082/actuator/metrics/http.server.requests
+
+# Prometheus 格式指標
+curl http://localhost:8082/actuator/prometheus
+```
+
+### 🧪 非同步測試 API (會走到 Consumer)
+```bash
+# 🔄 檢查非同步請求狀態
+curl "http://localhost:8082/tymg/api/request-status?requestId=your-request-id"
+
+# 🔄 觸發傷害計算模擬 (發送到 Consumer)
+curl -X POST "http://localhost:8082/tymg/api/test/async/damage-calculation" \
+  -H "Content-Type: application/json" \
+  -d '{"requestId": "uuid-123", "characterName": "Maya"}'
+
+# 🔄 觸發角色列表獲取模擬 (發送到 Consumer)
+curl -X POST "http://localhost:8082/tymg/api/test/async/people-get-all" \
+  -H "Content-Type: application/json" \
+  -d '{"requestId": "uuid-456"}'
+
+# 🔄 生成測試 UUID
+curl "http://localhost:8082/tymg/api/test/async/generate-uuid"
+```
+
+### 📚 文檔與資訊 API
+```bash
+# JavaDoc 文檔
+curl http://localhost:8082/tymg/docs/
+
+# Swagger UI
+curl http://localhost:8082/tymg/swagger-ui/
+
+# API 規範
+curl http://localhost:8082/tymg/v3/api-docs
+```
+
+### 💡 測試提示
+- **所有 POST/PUT/DELETE 請求都需要正確的 JSON 格式**
+- **確保 Backend 服務運行在 `http://localhost:8080`**
+- **測試 Consumer 端點時，需啟動 Consumer 服務：**
+  ```bash
+  cd ../ty-multiverse-consumer
+  ./mvnw spring-boot:run
+  ```
+- **🏗️ 架構原則：Gateway 絕對不能直接連接數據庫！**
+  - Gateway 只負責路由和協調，不處理業務邏輯
+  - 所有數據操作都通過 gRPC 調用 Backend 或 Consumer 處理
+- **檢查網路連接和防火牆設定**
+- **查看 Gateway 日誌以獲取詳細錯誤資訊**
+- **使用 `-v` 參數獲取詳細的 HTTP 請求響應資訊**
+- **Consumer 處理是非同步的，可能需要等待幾秒鐘才能看到結果**
+
 ## 🔧 開發環境設定
+
+### 編譯指令
+
+**重要：Gateway 項目包含 protobuf 代碼生成，編譯時必須使用正確的指令：**
+
+```bash
+# 完整編譯指令（推薦）
+./mvnw clean generate-sources compile test-compile
+
+# 或使用簡化指令
+./mvnw clean compile test-compile
+
+# 僅編譯主代碼
+./mvnw clean generate-sources compile
+
+# 僅編譯測試代碼
+./mvnw clean compile test-compile
+```
+
+**編譯注意事項：**
+- 必須使用 `generate-sources` 階段確保 protobuf 代碼正確生成
+- 如果遇到 protobuf 類文件訪問錯誤，請使用完整的 `clean generate-sources compile test-compile` 指令
+- 編譯包含 158 個源文件和 5 個 proto 文件
 
 ### 依賴關係說明
 
@@ -580,7 +821,7 @@ ty-multiverse-gateway/
 
 2. **啟動 Gateway**
    ```bash
-   mvn spring-boot:run
+   mvn clean compile -Dmaven.test.skip=true spring-boot:run
    ```
 
    Gateway 將在 `http://localhost:8081` 啟動

@@ -111,6 +111,54 @@ public class DeckofcardsDTO {
     }
 
     /**
+     * 遊戲響應 DTO
+     */
+    public static class GameResponseDTO {
+        private boolean success;
+        private String message;
+        private GameStateDTO gameState;
+
+        public boolean isSuccess() { return success; }
+        public void setSuccess(boolean success) { this.success = success; }
+
+        public String getMessage() { return message; }
+        public void setMessage(String message) { this.message = message; }
+
+        public GameStateDTO getGameState() { return gameState; }
+        public void setGameState(GameStateDTO gameState) { this.gameState = gameState; }
+    }
+
+    /**
+     * 遊戲狀態 DTO
+     */
+    public static class GameStateDTO {
+        private String playerId;
+        private String status;
+        private Card[] playerCards;
+        private Card[] dealerCards;
+        private int playerScore;
+        private int dealerScore;
+
+        public String getPlayerId() { return playerId; }
+        public void setPlayerId(String playerId) { this.playerId = playerId; }
+
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
+
+        public Card[] getPlayerCards() { return playerCards; }
+        public void setPlayerCards(Card[] playerCards) { this.playerCards = playerCards; }
+
+        public Card[] getDealerCards() { return dealerCards; }
+        public void setDealerCards(Card[] dealerCards) { this.dealerCards = dealerCards; }
+
+        public int getPlayerScore() { return playerScore; }
+        public void setPlayerScore(int playerScore) { this.playerScore = playerScore; }
+
+        public int getDealerScore() { return dealerScore; }
+        public void setDealerScore(int dealerScore) { this.dealerScore = dealerScore; }
+    }
+
+    /**
      * 撲克牌數據結構
      */
     public static class Card {

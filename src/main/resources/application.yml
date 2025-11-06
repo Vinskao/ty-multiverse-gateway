@@ -25,6 +25,7 @@ spring:
             maxAge: 3600
 
       # Route configurations - 將所有請求轉發到 backend
+      # Gateway context-path: /tymg (自動添加)
       # 前端請求格式：http://localhost:8082/tymg/**
       # Gateway 轉發到：http://localhost:8080/tymb/**
       routes:
@@ -32,109 +33,66 @@ spring:
         - id: health-route
           uri: '@BACKEND_SERVICE_URL@'
           predicates:
-            - Path=/tymg/health/**
+            - Path=/health/**
           filters:
             - StripPrefix=1
-        # People module routes (gRPC mode) - 路由到 Gateway 內部控制器
-        - id: people-route
-          uri: '@BACKEND_SERVICE_URL@' # 指向 backend 服務
-          predicates:
-            - Path=/tymg/people/**
-            - Method=GET,POST,PUT,DELETE
-          filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
 
         # People Images routes (gRPC mode) - 路由到 Gateway 內部控制器
         - id: people-images-route
           uri: '@BACKEND_SERVICE_URL@' # 指向 backend 服務
           predicates:
-            - Path=/tymg/people-images/**
+            - Path=/people-images/**
           filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
-
-        # Weapons routes handled by WeaponController (gRPC mode)
-        - id: weapons-route
-          uri: '@BACKEND_SERVICE_URL@' # 指向 backend 服務
-          predicates:
-            - Path=/tymg/weapons/**
-            - Method=GET,POST,PUT,DELETE
-          filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
-
-        # Gallery routes handled by GalleryController (gRPC mode)
-        - id: gallery-route
-          uri: '@BACKEND_SERVICE_URL@' # 指向 backend 服務
-          predicates:
-            - Path=/tymg/gallery/**
-            - Method=GET,POST,PUT,DELETE
-          filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
-
-        # CKEditor routes (gRPC mode) - 路由到 Gateway 內部控制器
-        - id: ckeditor-route
-          uri: '@BACKEND_SERVICE_URL@' # 指向 backend 服務
-          predicates:
-            - Path=/tymg/ckeditor/**
-          filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
-
+            - StripPrefix=1
 
         # Auth routes removed - authentication goes directly to backend
-
-        # Deckofcards routes (gRPC mode) - 路由到 Gateway 內部控制器
-        - id: deckofcards-route
-          uri: '@BACKEND_SERVICE_URL@' # 指向 backend 服務
-          predicates:
-            - Path=/tymg/deckofcards/blackjack/**
-          filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
 
         # Async API routes
         - id: async-request-status-route
           uri: '@BACKEND_SERVICE_URL@'
           predicates:
-            - Path=/tymg/api/request-status/**
+            - Path=/api/request-status/**
           filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
+            - StripPrefix=1
 
         - id: async-test-route
           uri: '@BACKEND_SERVICE_URL@'
           predicates:
-            - Path=/tymg/api/test/async/**
+            - Path=/api/test/async/**
           filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
+            - StripPrefix=1
 
         # Auth routes
         - id: auth-route
           uri: '@BACKEND_SERVICE_URL@'
           predicates:
-            - Path=/tymg/auth/**
+            - Path=/auth/**
           filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
+            - StripPrefix=1
 
         # JavaDoc routes
         - id: docs-route
           uri: '@BACKEND_SERVICE_URL@'
           predicates:
-            - Path=/tymg/docs/**
+            - Path=/docs/**
           filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
+            - StripPrefix=1
 
         # Actuator routes
         - id: actuator-route
           uri: '@BACKEND_SERVICE_URL@'
           predicates:
-            - Path=/tymg/actuator/**
+            - Path=/actuator/**
           filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
+            - StripPrefix=1
 
         # Swagger/OpenAPI routes
         - id: swagger-route
           uri: '@BACKEND_SERVICE_URL@'
           predicates:
-            - Path=/tymg/swagger-ui/**,/tymg/v3/api-docs/**
+            - Path=/swagger-ui/**,/v3/api-docs/**
           filters:
-            - StripPrefix=1 # 移除 /tymg 前綴
+            - StripPrefix=1
 
       # Default filters applied to all routes
       default-filters:
@@ -159,7 +117,8 @@ spring:
 # Server configuration
 server:
   port: 8082
-  # Note: Gateway uses WebFlux, not Servlet. Context path is handled via route predicates.
+  servlet:
+    context-path: /tymg
 
 # Circuit Breaker Configuration (disabled for now)
 # resilience4j:
