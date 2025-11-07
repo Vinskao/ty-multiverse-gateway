@@ -24,10 +24,14 @@ spring:
             allowCredentials: true
             maxAge: 3600
 
-      # Route configurations - 將所有請求轉發到 backend
+      # Route configurations - Spring Cloud Gateway 处理简单 HTTP 转发
       # Gateway context-path: /tymg (自動添加)
       # 前端請求格式：http://localhost:8082/tymg/**
       # Gateway 轉發到：http://localhost:8080/tymb/**
+      #
+      # 路由分工：
+      # - Spring Cloud Gateway: 处理 /api/*, /auth/*, /health/*, /actuator/* 等简单 HTTP 转发
+      # - Manual Controllers: 处理 /people/*, /weapons/*, /gallery/* 等需要 gRPC 的复杂路由
       routes:
         # Health check route - 測試基本路由功能
         - id: health-route
@@ -52,8 +56,17 @@ spring:
           uri: '@BACKEND_SERVICE_URL@'
           predicates:
             - Path=/api/request-status/**
+            - Method=GET,DELETE
           filters:
-            - StripPrefix=1
+            - StripPrefix=0  # 保留完整路径，Backend 有 context-path /tymb
+
+        - id: people-result-route
+          uri: '@BACKEND_SERVICE_URL@'
+          predicates:
+            - Path=/api/people/result/**
+            - Method=GET,DELETE
+          filters:
+            - StripPrefix=0  # 保留完整路径，Backend 有 context-path /tymb
 
         - id: async-test-route
           uri: '@BACKEND_SERVICE_URL@'

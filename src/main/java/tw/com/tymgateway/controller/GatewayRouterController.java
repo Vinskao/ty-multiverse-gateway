@@ -8,12 +8,24 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
- * Gateway 路由控制器
+ * Gateway 通用路由控制器
  *
- * <p>手動實現路由功能來替換Spring Cloud Gateway，這樣可以避免與gRPC依賴衝突</p>
+ * <p>处理非 gRPC 模块的通用路由，与 Spring Cloud Gateway 共存：</p>
+ * <ul>
+ *   <li>Spring Cloud Gateway: 处理 /api/*, /auth/*, /health/* 等简单 HTTP 转发</li>
+ *   <li>Manual Controllers: 处理 /people/*, /weapons/*, /gallery/* 等 gRPC 路由</li>
+ *   <li>此控制器: 作为 fallback，处理未被上述两者匹配的请求</li>
+ * </ul>
+ *
+ * <p>路由优先级：</p>
+ * <ol>
+ *   <li>专用 gRPC Controllers (@RequestMapping 精确匹配)</li>
+ *   <li>Spring Cloud Gateway routes (application.yml 配置)</li>
+ *   <li>此通用控制器 (/** 通配符，最低优先级)</li>
+ * </ol>
  *
  * @author TY Team
- * @version 1.0
+ * @version 2.0
  */
 @RestController
 @RequestMapping("/tymg")
@@ -22,10 +34,14 @@ public class GatewayRouterController {
     @Autowired(required = false)
     private WebClient webClient;
 
-    // Note: People, Weapons, Gallery, Deckofcards modules use gRPC routing via respective Controllers
-    // Other modules use HTTP routing below
+    // Note: 此控制器作为 fallback，优先级最低
+    // gRPC 模块由专用 Controllers 处理
+    // 简单 HTTP 转发由 Spring Cloud Gateway 处理
 
-    // Generic route for other modules (excluding gRPC modules)
+    // 临时禁用通用路由，让 Spring Cloud Gateway 完全接管
+    // Generic fallback route for unmatched requests - DISABLED for Spring Cloud Gateway testing
+
+    /*
     @PostMapping("/**")
     public Mono<ResponseEntity<String>> routePost(@RequestBody(required = false) String body,
                                                  @RequestHeader(value = "Content-Type", required = false) String contentType,
@@ -59,6 +75,41 @@ public class GatewayRouterController {
                 .retrieve()
                 .toEntity(String.class);
     }
+
+    @DeleteMapping("/**")
+    public Mono<ResponseEntity<String>> routeDelete(ServerHttpRequest request) {
+        String targetPath = extractTargetPath(request.getPath().value(), "/tymg");
+
+        // Skip routing for modules that have dedicated gRPC controllers
+        if (isGrpcModule(targetPath)) {
+            return Mono.error(new IllegalStateException("Request should be handled by dedicated gRPC controller"));
+        }
+
+        return webClient.delete()
+                .uri(targetPath)
+                .retrieve()
+                .toEntity(String.class);
+    }
+
+    @PutMapping("/**")
+    public Mono<ResponseEntity<String>> routePut(@RequestBody(required = false) String body,
+                                                @RequestHeader(value = "Content-Type", required = false) String contentType,
+                                                ServerHttpRequest request) {
+        String targetPath = extractTargetPath(request.getPath().value(), "/tymg");
+
+        // Skip routing for modules that have dedicated gRPC controllers
+        if (isGrpcModule(targetPath)) {
+            return Mono.error(new IllegalStateException("Request should be handled by dedicated gRPC controller"));
+        }
+
+        return webClient.put()
+                .uri(targetPath)
+                .header("Content-Type", contentType != null ? contentType : "application/json")
+                .bodyValue(body != null ? body : "")
+                .retrieve()
+                .toEntity(String.class);
+    }
+    */
 
     /**
      * 檢查是否為 gRPC 模組的路徑
