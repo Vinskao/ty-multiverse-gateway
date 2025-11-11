@@ -3,6 +3,12 @@ spring:
     name: ty-multiverse-gateway
   profiles:
     active: '@env@'
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/${KEYCLOAK_REALM:ty-multiverse}
+          jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/${KEYCLOAK_REALM:ty-multiverse}/protocol/openid-connect/certs
   cloud:
     gateway:
       # Global CORS configuration
@@ -24,88 +30,172 @@ spring:
             allowCredentials: true
             maxAge: 3600
 
-      # Route configurations - Spring Cloud Gateway 处理简单 HTTP 转发
+      # Route configurations - Spring Cloud Gateway 纯路由转发
       # Gateway context-path: /tymg (自動添加)
       # 前端請求格式：http://localhost:8082/tymg/**
       # Gateway 轉發到：http://localhost:8080/tymb/**
       #
-      # 路由分工：
-      # - Spring Cloud Gateway: 处理 /api/*, /auth/*, /health/*, /actuator/* 等简单 HTTP 转发
-      # - Manual Controllers: 处理 /people/*, /weapons/*, /gallery/* 等需要 gRPC 的复杂路由
+      # 架构说明：
+      # Spring Cloud Gateway (WebFlux) → Backend REST Controllers
+      # 所有请求通过路由配置转发到 Backend REST API
       routes:
-        # Health check route - 測試基本路由功能
-        - id: health-route
-          uri: '@BACKEND_SERVICE_URL@'
+        # ========================================
+        # People Module Routes
+        # ========================================
+        - id: people-routes
+          uri: 'http://localhost:8080'
           predicates:
-            - Path=/health/**
+            - Path=/tymg/people/**
           filters:
-            - StripPrefix=1
+            - RewritePath=/tymg/people/(?<segment>.*), /tymb/people/$\{segment}
 
-        # People Images routes (gRPC mode) - 路由到 Gateway 內部控制器
+        # ========================================
+        # Weapons Module Routes
+        # ========================================
+        - id: weapons-routes
+          uri: 'http://localhost:8080'
+          predicates:
+            - Path=/tymg/weapons
+            - Method=GET
+          filters:
+            - RewritePath=/tymg/weapons, /tymb/weapons
+
+        - id: weapons-detail-route
+          uri: 'http://localhost:8080'
+          predicates:
+            - Path=/tymg/weapons/**
+            - Method=GET
+          filters:
+            - RewritePath=/tymg/weapons/(?<segment>.*), /tymb/weapons/$\{segment}
+
+        # ========================================
+        # Gallery Module Routes
+        # ========================================
+        - id: gallery-routes
+          uri: 'http://localhost:8080'
+          predicates:
+            - Path=/tymg/gallery/**
+            - Method=POST
+          filters:
+            - RewritePath=/tymg/gallery/(?<segment>.*), /tymb/gallery/$\{segment}
+
+        # ========================================
+        # Deckofcards (Blackjack) Routes
+        # ========================================
+        - id: deckofcards-routes
+          uri: 'http://localhost:8080'
+          predicates:
+            - Path=/tymg/deckofcards/**
+            - Method=GET,POST
+          filters:
+            - RewritePath=/tymg/deckofcards/(?<segment>.*), /tymb/deckofcards/$\{segment}
+
+        # ========================================
+        # CKEditor Module Routes
+        # ========================================
+        - id: ckeditor-routes
+          uri: 'http://localhost:8080'
+          predicates:
+            - Path=/tymg/ckeditor/**
+          filters:
+            - RewritePath=/tymg/ckeditor/(?<segment>.*), /tymb/ckeditor/$\{segment}
+
+        # ========================================
+        # Infrastructure Routes
+        # ========================================
         - id: people-images-route
-          uri: '@BACKEND_SERVICE_URL@' # 指向 backend 服務
+          uri: 'http://localhost:8080'
           predicates:
-            - Path=/people-images/**
+            - Path=/tymg/people-images/**
           filters:
-            - StripPrefix=1
+            - RewritePath=/tymg/people-images/(?<segment>.*), /tymb/people-images/$\{segment}
 
-        # Auth routes removed - authentication goes directly to backend
-
-        # Async API routes
         - id: async-request-status-route
-          uri: '@BACKEND_SERVICE_URL@'
+          uri: 'http://localhost:8080'
           predicates:
-            - Path=/api/request-status/**
+            - Path=/tymg/api/request-status/**
             - Method=GET,DELETE
           filters:
-            - StripPrefix=0  # 保留完整路径，Backend 有 context-path /tymb
+            - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}
 
-        - id: people-result-route
-          uri: '@BACKEND_SERVICE_URL@'
+        - id: async-result-route
+          uri: 'http://localhost:8080'
           predicates:
-            - Path=/api/people/result/**
+            - Path=/tymg/api/async/result/**
             - Method=GET,DELETE
           filters:
-            - StripPrefix=0  # 保留完整路径，Backend 有 context-path /tymb
+            - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}
 
-        - id: async-test-route
-          uri: '@BACKEND_SERVICE_URL@'
+        - id: sync-characters-route
+          uri: 'http://localhost:8080'
           predicates:
-            - Path=/api/test/async/**
+            - Path=/tymg/api/sync-characters
+            - Method=POST
           filters:
-            - StripPrefix=1
+            - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}
 
-        # Auth routes
-        - id: auth-route
-          uri: '@BACKEND_SERVICE_URL@'
+        - id: health-consumer-route
+          uri: 'http://localhost:8080'
           predicates:
-            - Path=/auth/**
+            - Path=/tymg/health/consumer
+            - Method=GET
           filters:
-            - StripPrefix=1
+            - RewritePath=/tymg/health/consumer, /tymb/health/consumer
 
-        # JavaDoc routes
-        - id: docs-route
-          uri: '@BACKEND_SERVICE_URL@'
-          predicates:
-            - Path=/docs/**
-          filters:
-            - StripPrefix=1
-
-        # Actuator routes
         - id: actuator-route
-          uri: '@BACKEND_SERVICE_URL@'
+          uri: 'http://localhost:8080'
           predicates:
-            - Path=/actuator/**
+            - Path=/tymg/actuator/**
           filters:
-            - StripPrefix=1
+            - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}
 
-        # Swagger/OpenAPI routes
-        - id: swagger-route
-          uri: '@BACKEND_SERVICE_URL@'
+        # ========================================
+        # Swagger UI Routes - Direct access to Gateway's own endpoints
+        # ========================================
+        - id: swagger-ui-route
+          uri: 'forward:/swagger-ui'  # Forward to Gateway's own endpoint
           predicates:
-            - Path=/swagger-ui/**,/v3/api-docs/**
+            - Path=/tymg/swagger-ui/**
           filters:
-            - StripPrefix=1
+            - RewritePath=/tymg/swagger-ui/(?<segment>.*), /swagger-ui/$\{segment}
+
+        - id: swagger-api-docs-route
+          uri: 'forward:/v3/api-docs'  # Forward to Gateway's own endpoint
+          predicates:
+            - Path=/tymg/v3/api-docs/**
+          filters:
+            - RewritePath=/tymg/v3/api-docs/(?<segment>.*), /v3/api-docs/$\{segment}
+
+        - id: swagger-webjars-route
+          uri: 'forward:/webjars'  # Forward to Gateway's own webjars
+          predicates:
+            - Path=/tymg/webjars/**
+          filters:
+            - RewritePath=/tymg/webjars/(?<segment>.*), /webjars/$\{segment}
+
+        # ========================================
+        # Custom API Docs Routes
+        # ========================================
+        - id: api-docs-ui-route
+          uri: 'forward:/api-docs/ui'  # Forward to Gateway's API docs page
+          predicates:
+            - Path=/tymg/api-docs/ui
+          filters:
+            - RewritePath=/tymg/api-docs/ui, /api-docs/ui
+
+        - id: api-docs-routes-route
+          uri: 'forward:/api-docs/routes'  # Forward to Gateway's routes info
+          predicates:
+            - Path=/tymg/api-docs/routes
+          filters:
+            - RewritePath=/tymg/api-docs/routes, /api-docs/routes
+
+        - id: health-route
+          uri: 'http://localhost:8080'
+          predicates:
+            - Path=/tymg/health
+          filters:
+            - RewritePath=/tymg/health, /tymb/actuator/health
 
       # Default filters applied to all routes
       default-filters:
@@ -127,11 +217,11 @@ spring:
   #         min-idle: 2
   #         max-wait: 5000ms
 
-# Server configuration
+# Server configuration  
 server:
   port: 8082
-  servlet:
-    context-path: /tymg
+  # Note: Spring Cloud Gateway (WebFlux) does NOT support servlet.context-path
+  # Context path is handled by route predicates instead
 
 # Circuit Breaker Configuration (disabled for now)
 # resilience4j:
@@ -190,10 +280,27 @@ logging:
 url:
   frontend: '@PUBLIC_FRONTEND_URL@/tymultiverse'
 
-# gRPC Client Configuration
-grpc:
-  client:
-    enabled: ${GRPC_CLIENT_ENABLED:false}
-    backend:
-      host: ${GRPC_BACKEND_HOST:localhost}
-      port: ${GRPC_BACKEND_PORT:50051}
+# Backend Service Configuration
+backend:
+  service:
+    url: ${BACKEND_SERVICE_URL:http://localhost:8080}
+    timeout: 30000  # 30 seconds
+
+# Keycloak Configuration
+keycloak:
+  auth-server-url: ${KEYCLOAK_URL:http://localhost:8180}
+  realm: ${KEYCLOAK_REALM:ty-multiverse}
+  resource: ${KEYCLOAK_CLIENT_ID:ty-multiverse-gateway}
+
+# SpringDoc OpenAPI 配置 for WebFlux
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui
+    try-it-out-enabled: true
+    filter: true
+    operations-sorter: method
+    tags-sorter: alpha
+  webjars:
+    prefix: /webjars

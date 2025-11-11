@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import tw.com.ty.common.response.GatewayResponse;
+
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,39 +28,33 @@ public class FallbackController {
 
     /**
      * GET 請求降級處理
-     * 
+     *
      * @return 降級響應
      */
     @GetMapping
-    public Mono<ResponseEntity<Map<String, Object>>> getFallback() {
+    public Mono<ResponseEntity<GatewayResponse<Void>>> getFallback() {
         return Mono.just(createFallbackResponse());
     }
 
     /**
      * POST 請求降級處理
-     * 
+     *
      * @return 降級響應
      */
     @PostMapping
-    public Mono<ResponseEntity<Map<String, Object>>> postFallback() {
+    public Mono<ResponseEntity<GatewayResponse<Void>>> postFallback() {
         return Mono.just(createFallbackResponse());
     }
 
     /**
      * 創建降級響應
-     * 
+     *
      * @return 降級響應實體
      */
-    private ResponseEntity<Map<String, Object>> createFallbackResponse() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "SERVICE_UNAVAILABLE");
-        response.put("message", "後端服務暫時不可用，請稍後再試");
-        response.put("timestamp", LocalDateTime.now().toString());
-        response.put("code", HttpStatus.SERVICE_UNAVAILABLE.value());
-        
+    private ResponseEntity<GatewayResponse<Void>> createFallbackResponse() {
         return ResponseEntity
                 .status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(response);
+                .body(GatewayResponse.serviceUnavailable("后端服务暂时不可用，请稍后再试"));
     }
 }
 
