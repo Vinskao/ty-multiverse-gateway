@@ -69,40 +69,66 @@ curl http://localhost:8082/tymg/actuator/health
 curl http://localhost:8082/actuator/gateway/routes
 ```
 
-### 👥 People 人物管理 API
-```bash
-# 獲取所有人物
-curl -X GET "http://localhost:8082/tymg/people/get-all"
+### 👥 People 人物管理 API (CRUD 測試指令)
 
-# 根據名稱查詢人物
+```bash
+# 🟢 SELECT * - 獲取所有角色名稱 (無需認證)
+curl -X GET "http://localhost:8082/tymg/people/names" \
+  -H "Content-Type: application/json" \
+  -w "\nHTTP Status: %{http_code}\n" \
+  -s
+
+# 🔵 SELECT by name - 根據名稱查詢角色 (無需認證)
 curl -X POST "http://localhost:8082/tymg/people/get-by-name" \
   -H "Content-Type: application/json" \
-  -d '{"name": "Maya"}'
+  -d '{"name": "Test User"}' \
+  -w "\nHTTP Status: %{http_code}\n" \
+  -s
 
-# 新增人物
+# 🟡 INSERT - 新增角色 (無需認證)
 curl -X POST "http://localhost:8082/tymg/people/insert" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "新人物",
-    "description": "人物描述",
+    "name": "測試角色",
     "age": 25,
-    "occupation": "冒險者"
-  }'
+    "physicPower": 10,
+    "magicPower": 15,
+    "utilityPower": 8
+  }' \
+  -w "\nHTTP Status: %{http_code}\n" \
+  -s
 
-# 更新人物
-curl -X PUT "http://localhost:8082/tymg/people/update" \
+# 🟠 UPDATE - 更新角色 (無需認證)
+curl -X POST "http://localhost:8082/tymg/people/update" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "現有人物",
-    "description": "更新後的描述",
-    "age": 26
-  }'
+    "name": "測試角色",
+    "age": 26,
+    "physicPower": 12,
+    "magicPower": 17,
+    "utilityPower": 10
+  }' \
+  -w "\nHTTP Status: %{http_code}\n" \
+  -s
 
-# 刪除人物
-curl -X DELETE "http://localhost:8082/tymg/people/delete" \
+# 🔴 DELETE - 刪除所有角色 (無需認證)
+curl -X POST "http://localhost:8082/tymg/people/delete-all" \
   -H "Content-Type: application/json" \
-  -d '{"name": "要刪除的人物"}'
+  -w "\nHTTP Status: %{http_code}\n" \
+  -s
 ```
+
+### 📋 People API 端點總結
+
+| 操作 | 方法 | 端點 | 認證 | 狀態碼 | 說明 |
+|------|------|------|------|--------|------|
+| **SELECT \*** | GET | `/tymg/people/names` | ❌ 無需 | 200 | 獲取所有角色名稱列表 |
+| **SELECT by name** | POST | `/tymg/people/get-by-name` | ❌ 無需 | 202 | 異步查詢單個角色 |
+| **INSERT** | POST | `/tymg/people/insert` | ❌ 無需 | 201 | 同步新增角色 |
+| **UPDATE** | POST | `/tymg/people/update` | ❌ 無需 | 200/202 | 同步/異步更新角色 |
+| **DELETE ALL** | POST | `/tymg/people/delete-all` | ❌ 無需 | 202 | 異步刪除所有角色 |
+
+**⚠️ 注意**: 所有 People API 端點目前都配置為**無需認證**，方便測試和外部系統整合。
 
 ### ⚔️ Weapons 武器管理 API
 ```bash

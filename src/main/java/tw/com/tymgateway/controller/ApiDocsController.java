@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +30,9 @@ import java.util.Map;
 @Tag(name = "Gateway API", description = "TY Multiverse Gateway 路由文档")
 public class ApiDocsController {
 
+    @Value("${BACKEND_SERVICE_URL:http://localhost:8080}")
+    private String backendServiceUrl;
+
     @GetMapping("/routes")
     @Operation(summary = "获取所有路由信息",
                description = "返回 Gateway 配置的所有路由信息和转发规则")
@@ -44,27 +48,27 @@ public class ApiDocsController {
             "routes", Map.of(
                 "people", Map.of(
                     "path", "/tymg/people/**",
-                    "target", "http://localhost:8080/tymb/people/**",
+                    "target", backendServiceUrl + "/tymb/people/**",
                     "description", "People 管理模块"
                 ),
                 "weapons", Map.of(
                     "path", "/tymg/weapons/**",
-                    "target", "http://localhost:8080/tymb/weapons/**",
+                    "target", backendServiceUrl + "/tymb/weapons/**",
                     "description", "武器管理模块"
                 ),
                 "gallery", Map.of(
                     "path", "/tymg/gallery/**",
-                    "target", "http://localhost:8080/tymb/gallery/**",
+                    "target", backendServiceUrl + "/tymb/gallery/**",
                     "description", "图片管理模块"
                 ),
                 "async", Map.of(
                     "path", "/tymg/api/**",
-                    "target", "http://localhost:8080/tymb/api/**",
+                    "target", backendServiceUrl + "/tymb/api/**",
                     "description", "异步请求状态管理"
                 ),
                 "health", Map.of(
                     "path", "/tymg/health/**",
-                    "target", "http://localhost:8080/tymb/health/**",
+                    "target", backendServiceUrl + "/tymb/health/**",
                     "description", "健康检查和监控"
                 )
             )

@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Arrays;
@@ -27,25 +29,31 @@ import java.util.List;
 @Configuration
 public class GatewayConfig {
 
-    /**
-     * CORS 過濾器配置
-     * 
-     * @return CorsWebFilter 配置好的 CORS 過濾器
-     */
-    @Bean
-    public CorsWebFilter corsWebFilter() {
-        CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowCredentials(true);
-        corsConfig.setAllowedOriginPatterns(List.of("*"));
-        corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        corsConfig.setAllowedHeaders(List.of("*"));
-        corsConfig.setMaxAge(3600L);
+/**
+ * CORS 過濾器配置，使用最高優先級確保在認證過濾器之前執行
+ */
+@Bean
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public CorsWebFilter corsWebFilter() {
+    CorsConfiguration corsConfig = new CorsConfiguration();
+    corsConfig.setAllowCredentials(true);
+    // 當 allowCredentials 為 true 時，不能使用 "*" 作為 allowedOriginPatterns
+    // 必須設置具體的來源域名
+    corsConfig.setAllowedOriginPatterns(List.of(
+        "http://localhost:4321",    // 前端開發環境
+        "http://localhost:3000",    // 其他可能的開發端口
+        "https://localhost:4321",   // HTTPS 版本
+        "https://localhost:3000"
+    ));
+    corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+    corsConfig.setAllowedHeaders(List.of("*"));
+    corsConfig.setMaxAge(3600L);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfig);
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", corsConfig);
 
-        return new CorsWebFilter(source);
-    }
+    return new CorsWebFilter(source);
+}
 
     @Value("${BACKEND_SERVICE_URL:http://localhost:8080}")
     private String backendServiceUrl;

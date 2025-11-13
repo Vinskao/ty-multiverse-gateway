@@ -11,24 +11,8 @@ spring:
           jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/${KEYCLOAK_REALM:ty-multiverse}/protocol/openid-connect/certs
   cloud:
     gateway:
-      # Global CORS configuration
-      globalcors:
-        cors-configurations:
-          "[/**]":
-            allowedOrigins:
-              - '@PUBLIC_FRONTEND_URL@'
-              - "http://localhost:4321"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-              - PATCH
-            allowedHeaders:
-              - "*"
-            allowCredentials: true
-            maxAge: 3600
+      # CORS configuration is handled by CorsWebFilter in GatewayConfig.java
+      # Global CORS configuration removed to avoid conflicts
 
       # Route configurations - Spring Cloud Gateway 纯路由转发
       # Gateway context-path: /tymg (自動添加)
@@ -220,6 +204,7 @@ spring:
 # Server configuration  
 server:
   port: 8082
+  address: 0.0.0.0  # 綁定到所有接口，讓外部可以訪問
   # Note: Spring Cloud Gateway (WebFlux) does NOT support servlet.context-path
   # Context path is handled by route predicates instead
 

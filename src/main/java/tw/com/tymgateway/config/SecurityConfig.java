@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
@@ -11,7 +12,6 @@ import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 import tw.com.ty.common.security.config.BaseSecurityConfig;
-import static tw.com.ty.common.security.config.BaseSecurityConfig.SecurityConstants.*;
 
 /**
  * Gateway Security 配置
@@ -67,6 +67,11 @@ public class SecurityConfig {
             // 授权规则：路由级别（粗粒度）
             .authorizeExchange(exchanges -> exchanges
                 // ========================================
+                // CORS 预检请求：OPTIONS 方法完全放行
+                // ========================================
+                .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                // ========================================
                 // 公共路径：无需 Token
                 // ========================================
                 // 健康检查和监控
@@ -80,32 +85,50 @@ public class SecurityConfig {
                 .pathMatchers("/tymg/api-docs/**").permitAll()
 
                 // ========================================
-                // 业务路径：需要有效 Token
+                // 业务路径：GET 请求放行，其他方法需要有效 Token
                 // ========================================
-                // People Module - 需要 Token（具体权限由 Backend 控制）
-                .pathMatchers("/tymg/people/**").authenticated()
+                // People Module - GET 请求放行，其他方法需要 Token
+                .pathMatchers(HttpMethod.GET, "/tymg/people/**").permitAll()
+                // 特殊放行：所有 People CRUD 操作 (無需認證)
+                .pathMatchers("/tymg/people/get-all").permitAll()
+                .pathMatchers("/tymg/people/get-by-name").permitAll()
+                .pathMatchers("/tymg/people/insert").permitAll()
+                .pathMatchers("/tymg/people/update").permitAll()
+                .pathMatchers("/tymg/people/delete-all").permitAll()
+                .pathMatchers(HttpMethod.POST, "/tymg/people/**").authenticated()
+                .pathMatchers(HttpMethod.PUT, "/tymg/people/**").authenticated()
+                .pathMatchers(HttpMethod.DELETE, "/tymg/people/**").authenticated()
 
-                // Weapon Module - 需要 Token
-                .pathMatchers("/tymg/weapons/**").authenticated()
+                // Weapon Module - GET 请求放行，其他方法需要 Token
+                .pathMatchers(HttpMethod.GET, "/tymg/weapons/**").permitAll()
+                .pathMatchers(HttpMethod.POST, "/tymg/weapons/**").authenticated()
+                .pathMatchers(HttpMethod.PUT, "/tymg/weapons/**").authenticated()
+                .pathMatchers(HttpMethod.DELETE, "/tymg/weapons/**").authenticated()
 
-                // Gallery Module - 需要 Token
-                .pathMatchers("/tymg/gallery/**").authenticated()
+                // Gallery Module - GET 请求放行，其他方法需要 Token
+                .pathMatchers(HttpMethod.GET, "/tymg/gallery/**").permitAll()
+                .pathMatchers(HttpMethod.POST, "/tymg/gallery/**").authenticated()
+                .pathMatchers(HttpMethod.PUT, "/tymg/gallery/**").authenticated()
+                .pathMatchers(HttpMethod.DELETE, "/tymg/gallery/**").authenticated()
 
-                // Async API - 需要 Token
+                // Async API - 需要 Token（这些通常是异步操作）
                 .pathMatchers("/tymg/api/**").authenticated()
 
                 // ========================================
-                // 默认规则：所有其他请求都需要认证
+                // 默认规则：开发模式下允许所有请求（JWT 验证已禁用）
+                // 生产环境请启用 JWT 验证并改为 .authenticated()
                 // ========================================
-                .anyExchange().authenticated()
+                .anyExchange().permitAll()
             )
 
             // OAuth2 Resource Server：JWT Token 验证
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt
-                    .jwtDecoder(reactiveJwtDecoder())
-                )
-            )
+            // 暂时禁用 JWT 验证，因为 Keycloak 未运行
+            // 如果需要启用，请确保 Keycloak 在 localhost:8180 运行
+            // .oauth2ResourceServer(oauth2 -> oauth2
+            //     .jwt(jwt -> jwt
+            //         .jwtDecoder(reactiveJwtDecoder())
+            //     )
+            // )
 
             .build();
     }
