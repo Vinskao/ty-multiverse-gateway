@@ -7,10 +7,23 @@ BACKEND_SERVICE_URL: http://localhost:8080/tymb
 # Frontend URL for CORS
 PUBLIC_FRONTEND_URL: http://localhost:4321
 
+gateway:
+  async:
+    timeout: 30
+
 # Redis Configuration (currently disabled)
 # REDIS_HOST: localhost
 # REDIS_CUSTOM_PORT: 6379
 # REDIS_PASSWORD: ""
+
+# RabbitMQ Configuration for async result listening
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: admin123
+    virtual-host: /
 
 # Logging
 logging:

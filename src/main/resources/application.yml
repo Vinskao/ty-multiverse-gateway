@@ -3,6 +3,15 @@ spring:
     name: ty-multiverse-gateway
   profiles:
     active: '@env@'
+gateway:
+  async:
+    timeout: 30
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:admin}
+    password: ${RABBITMQ_PASSWORD:admin123}
+    virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
   security:
     oauth2:
       resourceserver:
@@ -24,12 +33,15 @@ spring:
       # 所有请求通过路由配置转发到 Backend REST API
       routes:
         # ========================================
-        # People Module Routes
+        # People Module Routes (Original routes)
         # ========================================
+        # NOTE: /tymg/api/people/** routes are handled by AsyncPeopleProxyController
+        # and should NOT be forwarded by Gateway routes
         - id: people-routes
           uri: 'http://localhost:8080'
           predicates:
             - Path=/tymg/people/**
+            - Path!=/tymg/api/people/**  # Exclude API proxy routes
           filters:
             - RewritePath=/tymg/people/(?<segment>.*), /tymb/people/$\{segment}
 
@@ -98,14 +110,6 @@ spring:
           uri: 'http://localhost:8080'
           predicates:
             - Path=/tymg/api/request-status/**
-            - Method=GET,DELETE
-          filters:
-            - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}
-
-        - id: async-result-route
-          uri: 'http://localhost:8080'
-          predicates:
-            - Path=/tymg/api/async/result/**
             - Method=GET,DELETE
           filters:
             - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}

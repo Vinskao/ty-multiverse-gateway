@@ -1,5 +1,6 @@
 package tw.com.tymgateway;
 
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -14,6 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *   <li>負載均衡</li>
  *   <li>跨域處理</li>
  *   <li>gRPC客戶端支援</li>
+ *   <li>RabbitMQ 消息監聽（異步結果推送）</li>
  * </ul>
  *
  * @author TY Team
@@ -21,6 +23,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @since 2024
  */
 @SpringBootApplication
+@EnableRabbit
 public class TYMGatewayApplication {
 
     public static void main(String[] args) {

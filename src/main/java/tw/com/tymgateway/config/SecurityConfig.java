@@ -111,7 +111,9 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.PUT, "/tymg/gallery/**").authenticated()
                 .pathMatchers(HttpMethod.DELETE, "/tymg/gallery/**").authenticated()
 
-                // Async API - 需要 Token（这些通常是异步操作）
+                // People 同步代理 API - 放行
+                .pathMatchers("/tymg/api/people/**").permitAll()
+                // 其他 Async API - 需要 Token（这些通常是异步操作）
                 .pathMatchers("/tymg/api/**").authenticated()
 
                 // ========================================
