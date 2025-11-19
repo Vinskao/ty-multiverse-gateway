@@ -187,6 +187,13 @@ EOF
                             sh '''
                                 cd "${WORKSPACE}"
                                 
+                                # Verify GitHub token (show first 10 chars for debugging)
+                                if [ -z "${GITHUB_TOKEN}" ]; then
+                                    echo "ERROR: GITHUB_TOKEN is empty!"
+                                    exit 1
+                                fi
+                                echo "GitHub token present (length: ${#GITHUB_TOKEN}, starts with: ${GITHUB_TOKEN:0:10}...)"
+                                
                                 # Docker login with retry mechanism
                                 echo "Attempting Docker login..."
                                 for i in {1..3}; do
@@ -213,10 +220,11 @@ EOF
                                 fi
                                 
                                 # 構建 Docker 鏡像（啟用 BuildKit 與多平台參數，傳遞 GitHub token）
-                                echo "Building Docker image..."
+                                echo "Building Docker image with GitHub token..."
                                 docker build \
                                     --build-arg BUILDKIT_INLINE_CACHE=1 \
                                     --build-arg GITHUB_TOKEN="${GITHUB_TOKEN}" \
+                                    --build-arg GITHUB_USERNAME="Vinskao" \
                                     --cache-from ${DOCKER_IMAGE}:latest \
                                     -t ${DOCKER_IMAGE}:${DOCKER_TAG} \
                                     -t ${DOCKER_IMAGE}:latest \
