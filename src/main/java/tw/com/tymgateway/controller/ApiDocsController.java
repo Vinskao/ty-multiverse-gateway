@@ -30,7 +30,7 @@ import java.util.Map;
 @Tag(name = "Gateway API", description = "TY Multiverse Gateway 路由文档")
 public class ApiDocsController {
 
-    @Value("${BACKEND_SERVICE_URL:http://localhost:8080}")
+    @Value("${PUBLIC_TYMB_URL:http://localhost:8080}")
     private String backendServiceUrl;
 
     @GetMapping("/routes")

@@ -1,5 +1,13 @@
 # TY Multiverse Gateway - Agent Guide
 
+## 📁 文档组织规定
+
+**重要**：所有非 `AGENTS.md` 和 `README.md` 的 Markdown 文档都必须放在项目的 `/docs` 目录下。
+
+- ✅ **允许在根目录**：`AGENTS.md`、`README.md`
+- ✅ **必须放在 `/docs`**：所有其他 `.md` 文件（如 `JENKINS_CREDENTIALS.md`、`ARCHITECTURE.md` 等）
+- 📂 **文档目录结构**：`/docs/` 目录下可以创建子目录来组织相关文档
+
 ## Project Overview
 
 TY Multiverse Gateway is a Spring Cloud Gateway application that serves as the unified API entry point for the TY Multiverse system. It provides centralized authentication, rate limiting, circuit breaking, and request routing to backend services.
@@ -241,7 +249,7 @@ curl http://localhost:8082/actuator/gateway/routes
 java -jar target/ty-multiverse-gateway.jar \
   --spring.profiles.active=prod \
   --server.port=8082 \
-  --BACKEND_SERVICE_URL=http://backend:8080
+  --PUBLIC_TYMB_URL=http://backend:8080
 ```
 
 ### Route Configuration
@@ -292,7 +300,7 @@ resilience4j:
 ### Environment Variables
 ```bash
 # Service URLs
-BACKEND_SERVICE_URL=http://localhost:8080
+PUBLIC_TYMB_URL=http://localhost:8080
 FRONTEND_URL=http://localhost:4321
 
 # Redis (for rate limiting)

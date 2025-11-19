@@ -55,7 +55,7 @@ public CorsWebFilter corsWebFilter() {
     return new CorsWebFilter(source);
 }
 
-    @Value("${BACKEND_SERVICE_URL:http://localhost:8080}")
+    @Value("${PUBLIC_TYMB_URL:http://localhost:8080}")
     private String backendServiceUrl;
 
     /**

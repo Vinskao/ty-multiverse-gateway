@@ -341,7 +341,6 @@ curl http://localhost:8082/tymg/v3/api-docs
 
 **服務連接：**
 - Backend HTTP: `localhost:8080`
-- Backend gRPC: `localhost:50051`
 - Gateway API: `localhost:8082`
 
 ## 🚀 Gateway 服務啟動
@@ -391,13 +390,7 @@ curl http://localhost:8082/actuator/metrics
 ```
 
 ### 啟動日誌確認
-啟動時會看到：
-```
-🚀 初始化 gRPC Keycloak Client，連接後端: localhost:50051
-✅ gRPC Keycloak Client 初始化完成（使用模擬實現）
-🚀 初始化 gRPC People Client，連接後端: localhost:50051
-✅ gRPC People Client 初始化完成（使用模擬實現）
-```
+啟動時會看到 Gateway 服務正常啟動的日誌訊息。
 
 ## 🎯 Gateway 核心功能
 
@@ -884,7 +877,7 @@ cp src/main/resources/env/local.properties.example src/main/resources/env/local.
 
 ```properties
 # Backend 服務地址
-BACKEND_SERVICE_URL=http://localhost:8080
+PUBLIC_TYMB_URL=http://localhost:8080
 
 # 前端地址（CORS）
 PUBLIC_FRONTEND_URL=http://localhost:4321
@@ -907,7 +900,7 @@ docker build -t ty-multiverse-gateway:latest .
 
 ```bash
 docker run -p 8081:8081 \
-  -e BACKEND_SERVICE_URL=http://backend:8080 \
+  -e PUBLIC_TYMB_URL=http://backend:8080 \
   -e PUBLIC_FRONTEND_URL=http://your-frontend-url \
   ty-multiverse-gateway:latest
 ```
@@ -989,7 +982,7 @@ resilience4j:
 ### 常見問題
 
 1. **無法連接到 Backend**
-   - 檢查 `BACKEND_SERVICE_URL` 配置
+   - 檢查 `PUBLIC_TYMB_URL` 配置
    - 確認 Backend 服務正常運行
    - 查看網絡連接和防火牆設置
 

@@ -41,8 +41,8 @@ spec:
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: "platform"
-        - name: BACKEND_SERVICE_URL
-          value: "http://ty-multiverse-backend-service:8080"
+        - name: PUBLIC_TYMB_URL
+          value: "https://peoplesystem.tatdvsonorth.com/tymb"
         - name: REDIS_HOST
           valueFrom:
             configMapKeyRef:

@@ -143,8 +143,8 @@
             <artifactId>spring-security-config</artifactId>
         </dependency>
 
-        <!-- gRPC dependencies - Required by Spring Cloud Gateway 3.x internal components -->
-        <!-- Spring Cloud Gateway framework uses GrpcSslConfigurer and jsonToGRPCFilterFactory -->
+        <!-- gRPC dependencies - Required by Spring Cloud Gateway framework internal components -->
+        <!-- Note: These are framework dependencies, not used directly in our code -->
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty</artifactId>

@@ -38,7 +38,7 @@ gateway:
         # NOTE: /tymg/api/people/** routes are handled by AsyncPeopleProxyController
         # and should NOT be forwarded by Gateway routes
         - id: people-routes
-          uri: 'http://localhost:8080'
+          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/people/**
             - Path!=/tymg/api/people/**  # Exclude API proxy routes
@@ -49,7 +49,7 @@ gateway:
         # Weapons Module Routes
         # ========================================
         - id: weapons-routes
-          uri: 'http://localhost:8080'
+          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/weapons
             - Method=GET
@@ -57,7 +57,7 @@ gateway:
             - RewritePath=/tymg/weapons, /tymb/weapons
 
         - id: weapons-detail-route
-          uri: 'http://localhost:8080'
+          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/weapons/**
             - Method=GET
@@ -68,7 +68,7 @@ gateway:
         # Gallery Module Routes
         # ========================================
         - id: gallery-routes
-          uri: 'http://localhost:8080'
+          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/gallery/**
             - Method=POST
@@ -79,7 +79,7 @@ gateway:
         # Deckofcards (Blackjack) Routes
         # ========================================
         - id: deckofcards-routes
-          uri: 'http://localhost:8080'
+          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/deckofcards/**
             - Method=GET,POST
@@ -90,7 +90,7 @@ gateway:
         # CKEditor Module Routes
         # ========================================
         - id: ckeditor-routes
-          uri: 'http://localhost:8080'
+          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/ckeditor/**
           filters:
@@ -100,14 +100,14 @@ gateway:
         # Infrastructure Routes
         # ========================================
         - id: people-images-route
-          uri: 'http://localhost:8080'
+          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/people-images/**
           filters:
             - RewritePath=/tymg/people-images/(?<segment>.*), /tymb/people-images/$\{segment}
 
         - id: async-request-status-route
-          uri: 'http://localhost:8080'
+          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/api/request-status/**
             - Method=GET,DELETE
@@ -115,7 +115,7 @@ gateway:
             - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}
 
         - id: sync-characters-route
-          uri: 'http://localhost:8080'
+          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/api/sync-characters
             - Method=POST
@@ -123,7 +123,7 @@ gateway:
             - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}
 
         - id: health-consumer-route
-          uri: 'http://localhost:8080'
+          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/health/consumer
             - Method=GET
@@ -131,7 +131,7 @@ gateway:
             - RewritePath=/tymg/health/consumer, /tymb/health/consumer
 
         - id: actuator-route
-          uri: 'http://localhost:8080'
+          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/actuator/**
           filters:
@@ -179,7 +179,7 @@ gateway:
             - RewritePath=/tymg/api-docs/routes, /api-docs/routes
 
         - id: health-route
-          uri: 'http://localhost:8080'
+          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/health
           filters:
@@ -267,12 +267,12 @@ logging:
 
 # Application specific properties
 url:
-  frontend: '@PUBLIC_FRONTEND_URL@/tymultiverse'
+  frontend: '@PUBLIC_FRONTEND_URL@'
 
 # Backend Service Configuration
 backend:
   service:
-    url: ${BACKEND_SERVICE_URL:http://localhost:8080}
+    url: ${PUBLIC_TYMB_URL:http://localhost:8080}
     timeout: 30000  # 30 seconds
 
 # Keycloak Configuration

@@ -155,7 +155,7 @@ grpc:
 ### 3. Backend 服务 URL
 
 ```yaml
-BACKEND_SERVICE_URL: http://localhost:8080
+PUBLIC_TYMB_URL: http://localhost:8080
 ```
 
 Spring Cloud Gateway 和 WebClient 使用此 URL 转发请求。
@@ -182,7 +182,7 @@ Spring Cloud Gateway 和 WebClient 使用此 URL 转发请求。
 ```yaml
 routes:
   - id: new-route
-    uri: '@BACKEND_SERVICE_URL@'
+    uri: '@PUBLIC_TYMB_URL@'
     predicates:
       - Path=/api/new-endpoint/**
       - Method=GET,POST
