@@ -180,7 +180,10 @@ EOF
             steps {
                 container('docker') {
                     script {
-                        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        withCredentials([
+                            usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD'),
+                            string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_TOKEN')
+                        ]) {
                             sh '''
                                 cd "${WORKSPACE}"
                                 
@@ -209,10 +212,11 @@ EOF
                                     exit 1
                                 fi
                                 
-                                # 構建 Docker 鏡像（啟用 BuildKit 與多平台參數）
+                                # 構建 Docker 鏡像（啟用 BuildKit 與多平台參數，傳遞 GitHub token）
                                 echo "Building Docker image..."
                                 docker build \
                                     --build-arg BUILDKIT_INLINE_CACHE=1 \
+                                    --build-arg GITHUB_TOKEN="${GITHUB_TOKEN}" \
                                     --cache-from ${DOCKER_IMAGE}:latest \
                                     -t ${DOCKER_IMAGE}:${DOCKER_TAG} \
                                     -t ${DOCKER_IMAGE}:latest \
