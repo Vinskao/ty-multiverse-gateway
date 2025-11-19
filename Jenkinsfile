@@ -360,12 +360,13 @@ EOF
                                         echo "=== Debug: pods for ty-multiverse-gateway ==="
                                         kubectl get pods -n default -l app=ty-multiverse-gateway -o wide || true
 
-                                        echo "=== Debug: describe non-ready pods ==="
-                                        for p in $(kubectl get pods -n default -l app=ty-multiverse-gateway -o jsonpath='{.items[?(@.status.conditions[?(@.type=="Ready")].status!="True")].metadata.name}'); do
-                                          echo "--- $p"
+                                        echo "=== Debug: describe all pods ==="
+                                        for p in $(kubectl get pods -n default -l app=ty-multiverse-gateway -o jsonpath='{.items[*].metadata.name}'); do
+                                          echo "--- Pod: $p ---"
                                           kubectl describe pod -n default "$p" || true
                                           echo "=== Last 200 logs for $p ==="
                                           kubectl logs -n default "$p" --tail=200 || true
+                                          echo ""
                                         done
 
                                         echo "=== Recent events (default ns) ==="
