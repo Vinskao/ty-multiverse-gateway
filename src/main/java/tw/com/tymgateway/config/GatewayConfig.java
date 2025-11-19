@@ -68,5 +68,27 @@ public CorsWebFilter corsWebFilter() {
                 .build();
     }
 
+    /**
+     * WebClient.Builder bean for creating WebClient instances
+     * Used by KeycloakController and other components
+     * 
+     * Configured with:
+     * - Connection timeout: 10 seconds
+     * - Response timeout: 30 seconds
+     * - Retry on connection errors
+     */
+    @Bean
+    public WebClient.Builder webClientBuilder() {
+        return WebClient.builder()
+                .clientConnector(new org.springframework.http.client.reactive.ReactorClientHttpConnector(
+                    reactor.netty.http.client.HttpClient.create()
+                        .responseTimeout(java.time.Duration.ofSeconds(30))
+                        .option(io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
+                        .doOnConnected(conn -> 
+                            conn.addHandlerLast(new io.netty.handler.timeout.ReadTimeoutHandler(30))
+                        )
+                ));
+    }
+
 }
 

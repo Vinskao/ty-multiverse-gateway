@@ -276,6 +276,8 @@ EOF
                     withCredentials([
                         string(credentialsId: 'KEYCLOAK_AUTH_SERVER_URL', variable: 'KEYCLOAK_AUTH_SERVER_URL'),
                         string(credentialsId: 'PUBLIC_REALM', variable: 'PUBLIC_REALM'),
+                        string(credentialsId: 'PUBLIC_CLIENT_ID', variable: 'PUBLIC_CLIENT_ID'),
+                        string(credentialsId: 'KEYCLOAK_CREDENTIALS_SECRET', variable: 'KEYCLOAK_CREDENTIALS_SECRET'),
                         string(credentialsId: 'PUBLIC_TYMB_URL', variable: 'PUBLIC_TYMB_URL'),
                         string(credentialsId: 'PUBLIC_FRONTEND_URL', variable: 'PUBLIC_FRONTEND_URL'),
                         string(credentialsId: 'REDIS_HOST', variable: 'REDIS_HOST'),
@@ -339,6 +341,8 @@ EOF
                                         kubectl create secret generic ty-multiverse-gateway-secrets \
                                           --from-literal=KEYCLOAK_AUTH_SERVER_URL="${KEYCLOAK_AUTH_SERVER_URL}" \
                                           --from-literal=PUBLIC_REALM="${PUBLIC_REALM}" \
+                                          --from-literal=PUBLIC_CLIENT_ID="${PUBLIC_CLIENT_ID}" \
+                                          --from-literal=KEYCLOAK_CREDENTIALS_SECRET="${KEYCLOAK_CREDENTIALS_SECRET}" \
                                           --from-literal=PUBLIC_TYMB_URL="${PUBLIC_TYMB_URL}" \
                                           --from-literal=PUBLIC_FRONTEND_URL="${PUBLIC_FRONTEND_URL}" \
                                           --from-literal=REDIS_HOST="${REDIS_HOST}" \

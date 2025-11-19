@@ -3,21 +3,21 @@ spring:
     name: ty-multiverse-gateway
   profiles:
     active: '@env@'
-gateway:
-  async:
-    timeout: 30
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:admin}
     password: ${RABBITMQ_PASSWORD:admin123}
     virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
+gateway:
+  async:
+    timeout: 30
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/${KEYCLOAK_REALM:ty-multiverse}
-          jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/${KEYCLOAK_REALM:ty-multiverse}/protocol/openid-connect/certs
+          issuer-uri: '@KEYCLOAK_AUTH_SERVER_URL@/realms/@PUBLIC_REALM@'
+          jwk-set-uri: '@KEYCLOAK_AUTH_SERVER_URL@/realms/@PUBLIC_REALM@/protocol/openid-connect/certs'
   cloud:
     gateway:
       # CORS configuration is handled by CorsWebFilter in GatewayConfig.java
@@ -38,7 +38,8 @@ gateway:
         # NOTE: /tymg/api/people/** routes are handled by AsyncPeopleProxyController
         # and should NOT be forwarded by Gateway routes
         - id: people-routes
-          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
+          # Note: uri should be base URL without /tymb, RewritePath will add /tymb
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/people/**
             - Path!=/tymg/api/people/**  # Exclude API proxy routes
@@ -49,7 +50,7 @@ gateway:
         # Weapons Module Routes
         # ========================================
         - id: weapons-routes
-          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/weapons
             - Method=GET
@@ -57,7 +58,7 @@ gateway:
             - RewritePath=/tymg/weapons, /tymb/weapons
 
         - id: weapons-detail-route
-          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/weapons/**
             - Method=GET
@@ -68,7 +69,7 @@ gateway:
         # Gallery Module Routes
         # ========================================
         - id: gallery-routes
-          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/gallery/**
             - Method=POST
@@ -79,7 +80,7 @@ gateway:
         # Deckofcards (Blackjack) Routes
         # ========================================
         - id: deckofcards-routes
-          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/deckofcards/**
             - Method=GET,POST
@@ -90,7 +91,7 @@ gateway:
         # CKEditor Module Routes
         # ========================================
         - id: ckeditor-routes
-          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/ckeditor/**
           filters:
@@ -100,14 +101,14 @@ gateway:
         # Infrastructure Routes
         # ========================================
         - id: people-images-route
-          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/people-images/**
           filters:
             - RewritePath=/tymg/people-images/(?<segment>.*), /tymb/people-images/$\{segment}
 
         - id: async-request-status-route
-          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/api/request-status/**
             - Method=GET,DELETE
@@ -115,7 +116,7 @@ gateway:
             - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}
 
         - id: sync-characters-route
-          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/api/sync-characters
             - Method=POST
@@ -123,7 +124,7 @@ gateway:
             - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}
 
         - id: health-consumer-route
-          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/health/consumer
             - Method=GET
@@ -131,7 +132,7 @@ gateway:
             - RewritePath=/tymg/health/consumer, /tymb/health/consumer
 
         - id: actuator-route
-          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/actuator/**
           filters:
@@ -179,11 +180,34 @@ gateway:
             - RewritePath=/tymg/api-docs/routes, /api-docs/routes
 
         - id: health-route
-          uri: '${PUBLIC_TYMB_URL:http://localhost:8080}'
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/health
           filters:
             - RewritePath=/tymg/health, /tymb/actuator/health
+
+        # ========================================
+        # Auth Routes - Forward to Backend
+        # ========================================
+        - id: auth-routes
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+          predicates:
+            - Path=/tymg/auth/**
+          filters:
+            - RewritePath=/tymg/auth/(?<segment>.*), /tymb/auth/$\{segment}
+
+        # ========================================
+        # Keycloak Routes - Forward to Gateway's own controller
+        # ========================================
+        # Note: This route forwards to Gateway's own KeycloakController (@RequestMapping("/tymg/keycloak"))
+        # The forward: URI forwards to Gateway's own handlers (without /tymg prefix in forward target)
+        # Path rewriting ensures the controller receives the correct path
+        - id: keycloak-routes
+          uri: 'forward:/tymg/keycloak'  # Forward to Gateway's own KeycloakController
+          predicates:
+            - Path=/tymg/keycloak/**
+          filters:
+            - RewritePath=/tymg/keycloak/(?<segment>.*), /tymg/keycloak/$\{segment}
 
       # Default filters applied to all routes
       default-filters:
@@ -277,9 +301,12 @@ backend:
 
 # Keycloak Configuration
 keycloak:
-  auth-server-url: ${KEYCLOAK_URL:http://localhost:8180}
-  realm: ${KEYCLOAK_REALM:ty-multiverse}
-  resource: ${KEYCLOAK_CLIENT_ID:ty-multiverse-gateway}
+  auth-server-url: '@KEYCLOAK_AUTH_SERVER_URL@'
+  realm: '@PUBLIC_REALM@'
+  resource: '@PUBLIC_CLIENT_ID@'
+  clientId: '@PUBLIC_CLIENT_ID@'
+  credentials:
+    secret: '@KEYCLOAK_CREDENTIALS_SECRET@'
 
 # SpringDoc OpenAPI 配置 for WebFlux
 springdoc:

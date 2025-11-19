@@ -84,6 +84,9 @@ public class SecurityConfig {
                 .pathMatchers("/tymg/webjars/**").permitAll()
                 .pathMatchers("/tymg/api-docs/**").permitAll()
 
+                // Keycloak OAuth endpoints
+                .pathMatchers("/tymg/keycloak/**").permitAll()
+
                 // ========================================
                 // 业务路径：GET 请求放行，其他方法需要有效 Token
                 // ========================================
@@ -117,20 +120,18 @@ public class SecurityConfig {
                 .pathMatchers("/tymg/api/**").authenticated()
 
                 // ========================================
-                // 默认规则：开发模式下允许所有请求（JWT 验证已禁用）
-                // 生产环境请启用 JWT 验证并改为 .authenticated()
+                // 默认规则：需要有效 Token（JWT 验证已启用）
                 // ========================================
-                .anyExchange().permitAll()
+                .anyExchange().authenticated()
             )
 
             // OAuth2 Resource Server：JWT Token 验证
-            // 暂时禁用 JWT 验证，因为 Keycloak 未运行
-            // 如果需要启用，请确保 Keycloak 在 localhost:8180 运行
-            // .oauth2ResourceServer(oauth2 -> oauth2
-            //     .jwt(jwt -> jwt
-            //         .jwtDecoder(reactiveJwtDecoder())
-            //     )
-            // )
+            // Gateway 负责统一认证入口（粗粒度）
+            .oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(jwt -> jwt
+                    .jwtDecoder(reactiveJwtDecoder())
+                )
+            )
 
             .build();
     }

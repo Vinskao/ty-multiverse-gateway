@@ -1,8 +1,22 @@
 # Local Environment Configuration for Gateway
 
+spring:
+  config:
+    import: classpath:env/local.properties
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: admin123
+    virtual-host: /
+
 # Backend Service URL - Local environment
 # Gateway routes will strip /tymg prefix and forward to this URL
-PUBLIC_TYMB_URL: http://localhost:8080
+# Note: Backend has context-path /tymb
+# BACKEND_BASE_URL: base URL without /tymb (used by Gateway routes with RewritePath)
+# PUBLIC_TYMB_URL: full URL with /tymb (used by backendWebClient)
+BACKEND_BASE_URL: http://localhost:8080
+PUBLIC_TYMB_URL: http://localhost:8080/tymb
 
 # Frontend URL for CORS
 PUBLIC_FRONTEND_URL: http://localhost:4321/tymultiverse
@@ -15,15 +29,6 @@ gateway:
 # REDIS_HOST: localhost
 # REDIS_CUSTOM_PORT: 6379
 # REDIS_PASSWORD: ""
-
-# RabbitMQ Configuration for async result listening
-spring:
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: admin
-    password: admin123
-    virtual-host: /
 
 # Logging
 logging:
