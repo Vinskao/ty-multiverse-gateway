@@ -8,10 +8,27 @@ WORKDIR /app
 ARG GITHUB_TOKEN
 ARG GITHUB_USERNAME=Vinskao
 
+# Convert ARG to ENV to ensure availability in RUN commands
+ENV GITHUB_TOKEN=${GITHUB_TOKEN}
+ENV GITHUB_USERNAME=${GITHUB_USERNAME}
+
 # Create Maven settings.xml for GitHub Packages authentication
-# Using printf to ensure proper variable expansion
 RUN mkdir -p /root/.m2 && \
-    printf '<?xml version="1.0" encoding="UTF-8"?>\n<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"\n          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0\n                              http://maven.apache.org/xsd/settings-1.0.0.xsd">\n  <servers>\n    <server>\n      <id>github</id>\n      <username>%s</username>\n      <password>%s</password>\n    </server>\n  </servers>\n</settings>\n' "${GITHUB_USERNAME}" "${GITHUB_TOKEN}" > /root/.m2/settings.xml
+    cat > /root/.m2/settings.xml <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                              http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <servers>
+    <server>
+      <id>github</id>
+      <username>${GITHUB_USERNAME}</username>
+      <password>${GITHUB_TOKEN}</password>
+    </server>
+  </servers>
+</settings>
+EOF
 
 # Copy pom.xml and download dependencies
 COPY pom.xml .
