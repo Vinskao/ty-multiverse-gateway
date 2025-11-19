@@ -22,7 +22,7 @@ metadata:
   labels:
     app: ty-multiverse-gateway
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: ty-multiverse-gateway
@@ -31,9 +31,11 @@ spec:
       labels:
         app: ty-multiverse-gateway
     spec:
+      imagePullSecrets:
+      - name: dockerhub-credentials
       containers:
       - name: gateway
-        image: your-registry/ty-multiverse-gateway:latest
+        image: papakao/ty-multiverse-gateway:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8082
@@ -41,35 +43,48 @@ spec:
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: "platform"
+        - name: KEYCLOAK_URL
+          valueFrom:
+            secretKeyRef:
+              name: ty-multiverse-gateway-secrets
+              key: KEYCLOAK_AUTH_SERVER_URL
+        - name: KEYCLOAK_REALM
+          valueFrom:
+            secretKeyRef:
+              name: ty-multiverse-gateway-secrets
+              key: PUBLIC_REALM
         - name: PUBLIC_TYMB_URL
-          value: "https://peoplesystem.tatdvsonorth.com/tymb"
+          valueFrom:
+            secretKeyRef:
+              name: ty-multiverse-gateway-secrets
+              key: PUBLIC_TYMB_URL
+        - name: PUBLIC_FRONTEND_URL
+          valueFrom:
+            secretKeyRef:
+              name: ty-multiverse-gateway-secrets
+              key: PUBLIC_FRONTEND_URL
         - name: REDIS_HOST
           valueFrom:
-            configMapKeyRef:
-              name: ty-multiverse-config
-              key: redis.host
+            secretKeyRef:
+              name: ty-multiverse-gateway-secrets
+              key: REDIS_HOST
         - name: REDIS_CUSTOM_PORT
           valueFrom:
-            configMapKeyRef:
-              name: ty-multiverse-config
-              key: redis.port
+            secretKeyRef:
+              name: ty-multiverse-gateway-secrets
+              key: REDIS_CUSTOM_PORT
         - name: REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: ty-multiverse-secret
-              key: redis.password
-        - name: PUBLIC_FRONTEND_URL
-          valueFrom:
-            configMapKeyRef:
-              name: ty-multiverse-config
-              key: frontend.url
+              name: ty-multiverse-gateway-secrets
+              key: REDIS_PASSWORD
         resources:
           requests:
-            memory: "512Mi"
-            cpu: "250m"
+            memory: "256Mi"
+            cpu: "10m"
           limits:
-            memory: "1Gi"
-            cpu: "500m"
+            memory: "512Mi"
+            cpu: "20m"
         livenessProbe:
           httpGet:
             path: /actuator/health/liveness
@@ -90,20 +105,16 @@ spec:
 
 ---
 apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: ty-multiverse-config
-data:
-  redis.host: "redis-service"
-  redis.port: "6379"
-  frontend.url: "https://your-frontend-domain.com"
-
----
-apiVersion: v1
 kind: Secret
 metadata:
-  name: ty-multiverse-secret
+  name: ty-multiverse-gateway-secrets
 type: Opaque
 stringData:
-  redis.password: "your-redis-password"
+  KEYCLOAK_AUTH_SERVER_URL: "${KEYCLOAK_AUTH_SERVER_URL}"
+  PUBLIC_REALM: "${PUBLIC_REALM}"
+  PUBLIC_TYMB_URL: "${PUBLIC_TYMB_URL}"
+  PUBLIC_FRONTEND_URL: "${PUBLIC_FRONTEND_URL}"
+  REDIS_HOST: "${REDIS_HOST}"
+  REDIS_CUSTOM_PORT: "${REDIS_CUSTOM_PORT}"
+  REDIS_PASSWORD: "${REDIS_PASSWORD}"
 

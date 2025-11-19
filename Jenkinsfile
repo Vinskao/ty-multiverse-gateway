@@ -323,24 +323,15 @@ EOF
                                             kubectl set image deployment/ty-multiverse-gateway gateway=${DOCKER_IMAGE}:${DOCKER_TAG} -n default
                                         fi
 
-                                        # Set environment variables
-                                        kubectl set env deployment/ty-multiverse-gateway \
-                                          KEYCLOAK_URL="${KEYCLOAK_AUTH_SERVER_URL}" \
-                                          KEYCLOAK_REALM="${PUBLIC_REALM}" \
-                                          PUBLIC_FRONTEND_URL="${PUBLIC_FRONTEND_URL}" \
-                                          PUBLIC_TYMB_URL="${PUBLIC_TYMB_URL}" \
-                                          -n default
-
-                                        # Update ConfigMap
-                                        kubectl create configmap ty-multiverse-config \
-                                          --from-literal=redis.host="${REDIS_HOST}" \
-                                          --from-literal=redis.port="${REDIS_CUSTOM_PORT}" \
-                                          --from-literal=frontend.url="${PUBLIC_FRONTEND_URL}" \
-                                          -n default --dry-run=client -o yaml | kubectl apply -f -
-
-                                        # Update Secret
-                                        kubectl create secret generic ty-multiverse-secret \
-                                          --from-literal=redis.password="${REDIS_PASSWORD}" \
+                                        # Create Secret with all gateway secrets
+                                        kubectl create secret generic ty-multiverse-gateway-secrets \
+                                          --from-literal=KEYCLOAK_AUTH_SERVER_URL="${KEYCLOAK_AUTH_SERVER_URL}" \
+                                          --from-literal=PUBLIC_REALM="${PUBLIC_REALM}" \
+                                          --from-literal=PUBLIC_TYMB_URL="${PUBLIC_TYMB_URL}" \
+                                          --from-literal=PUBLIC_FRONTEND_URL="${PUBLIC_FRONTEND_URL}" \
+                                          --from-literal=REDIS_HOST="${REDIS_HOST}" \
+                                          --from-literal=REDIS_CUSTOM_PORT="${REDIS_CUSTOM_PORT}" \
+                                          --from-literal=REDIS_PASSWORD="${REDIS_PASSWORD}" \
                                           -n default --dry-run=client -o yaml | kubectl apply -f -
 
                                         kubectl rollout status deployment/ty-multiverse-gateway -n default
