@@ -83,24 +83,24 @@ public class SecurityConfig {
                 .pathMatchers("/tymg/v3/api-docs/**").permitAll()
                 .pathMatchers("/tymg/webjars/**").permitAll()
                 .pathMatchers("/tymg/api-docs/**").permitAll()
+                // SpringDoc 默认路径（不带 /tymg 前缀）
+                .pathMatchers("/swagger-ui/**").permitAll()
+                .pathMatchers("/swagger-ui.html").permitAll()
+                .pathMatchers("/swagger-ui/index.html").permitAll()
+                .pathMatchers("/v3/api-docs/**").permitAll()
+                .pathMatchers("/webjars/**").permitAll()
 
                 // Keycloak OAuth endpoints
                 .pathMatchers("/tymg/keycloak/**").permitAll()
+                
+                // Auth endpoints - Forward to Backend
+                .pathMatchers("/tymg/auth/**").permitAll()
 
                 // ========================================
                 // 业务路径：GET 请求放行，其他方法需要有效 Token
                 // ========================================
-                // People Module - GET 请求放行，其他方法需要 Token
-                .pathMatchers(HttpMethod.GET, "/tymg/people/**").permitAll()
-                // 特殊放行：所有 People CRUD 操作 (無需認證)
-                .pathMatchers("/tymg/people/get-all").permitAll()
-                .pathMatchers("/tymg/people/get-by-name").permitAll()
-                .pathMatchers("/tymg/people/insert").permitAll()
-                .pathMatchers("/tymg/people/update").permitAll()
-                .pathMatchers("/tymg/people/delete-all").permitAll()
-                .pathMatchers(HttpMethod.POST, "/tymg/people/**").authenticated()
-                .pathMatchers(HttpMethod.PUT, "/tymg/people/**").authenticated()
-                .pathMatchers(HttpMethod.DELETE, "/tymg/people/**").authenticated()
+                // People Module - 所有操作放行（由 AsyncPeopleProxyController 处理，保持 gateway -> backend -> consumer 流程）
+                .pathMatchers("/tymg/people/**").permitAll()
 
                 // Weapon Module - GET 请求放行，其他方法需要 Token
                 .pathMatchers(HttpMethod.GET, "/tymg/weapons/**").permitAll()
@@ -114,8 +114,6 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.PUT, "/tymg/gallery/**").authenticated()
                 .pathMatchers(HttpMethod.DELETE, "/tymg/gallery/**").authenticated()
 
-                // People 同步代理 API - 放行
-                .pathMatchers("/tymg/api/people/**").permitAll()
                 // 其他 Async API - 需要 Token（这些通常是异步操作）
                 .pathMatchers("/tymg/api/**").authenticated()
 

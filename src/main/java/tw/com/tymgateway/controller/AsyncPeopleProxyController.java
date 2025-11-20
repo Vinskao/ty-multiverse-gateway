@@ -29,16 +29,18 @@ import tw.com.tymgateway.service.AsyncResultRegistry;
 /**
  * People 模組同步代理 Controller
  *
- * <p>前端請求 /tymg/api/people/names 時，Gateway 會：
+ * <p>前端請求 /tymg/people/** 時，Gateway 會：
  * <ol>
  *     <li>向 Backend 發送請求，獲得 requestId</li>
  *     <li>於 Gateway 端等待 Consumer 實際處理結果</li>
  *     <li>將最終資料以 HTTP 200 回傳給前端</li>
  * </ol>
  * </p>
+ * 
+ * <p>統一使用 /tymg/people/** 路徑，保持 gateway -> backend -> consumer 的流程</p>
  */
 @RestController
-@RequestMapping("/tymg/api/people")
+@RequestMapping("/tymg/people")
 public class AsyncPeopleProxyController {
 
     private static final Logger logger = LoggerFactory.getLogger(AsyncPeopleProxyController.class);
@@ -218,6 +220,63 @@ public class AsyncPeopleProxyController {
             backendWebClient.get().uri(uriBuilder -> uriBuilder.path("/people/damageWithWeapon").queryParam("name", name).build()),
             authorization
         );
+    }
+
+    /**
+     * 直接同步計算傷害（不走異步流程）
+     * 此端點直接代理到後端的同步 API，立即返回結果
+     * 
+     * Gateway → Backend 路徑：
+     * - Gateway 接收: /tymg/people/damageWithWeapon?name={name}
+     * - Gateway 轉發到 Backend: {PUBLIC_TYMB_URL}/people/damageWithWeapon?name={name}
+     * - Backend 完整路徑: http://localhost:8080/tymb/people/damageWithWeapon?name={name}
+     *
+     * @param name 角色名稱
+     * @param authorization Authorization header (可為空)
+     * @return 傷害計算結果
+     */
+    @GetMapping(value = "/damageWithWeapon", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Object>> calculateDamageWithWeapon(
+        @RequestParam String name,
+        @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
+    ) {
+        // 構建後端完整路徑：/people/damageWithWeapon（WebClient baseUrl 已包含 /tymb）
+        String backendPath = "/people/damageWithWeapon";
+        String fullBackendUrl = backendPath + "?name=" + name;
+        logger.info("🔁 Gateway → Backend 同步代理請求: {} (完整路徑: {})", fullBackendUrl, fullBackendUrl);
+        
+        return backendWebClient
+            .get()
+            .uri(uriBuilder -> uriBuilder.path(backendPath).queryParam("name", name).build())
+            .headers(headers -> {
+                if (authorization != null && !authorization.isBlank()) {
+                    headers.set(HttpHeaders.AUTHORIZATION, authorization);
+                    logger.debug("✅ 已設置 Authorization header");
+                }
+            })
+            .retrieve()
+            .bodyToMono(new ParameterizedBackendResponse())
+            .map(response -> {
+                if (response.isSuccess() && response.getData() != null) {
+                    logger.info("✅ Gateway → Backend 成功: name={}, damage={}", name, response.getData());
+                    // 直接返回數據部分，前端期望的是數字值
+                    return ResponseEntity.ok(response.getData());
+                } else {
+                    logger.warn("⚠️ Backend 返回錯誤響應: name={}, code={}, message={}", name, response.getCode(), response.getMessage());
+                    return ResponseEntity.status(response.getCode())
+                        .body((Object) response);
+                }
+            })
+            .onErrorResume(throwable -> {
+                logger.error("❌ Gateway → Backend 調用失敗: name={}, path={}, error={}", name, backendPath, throwable.getMessage());
+                if (throwable instanceof org.springframework.web.reactive.function.client.WebClientResponseException) {
+                    org.springframework.web.reactive.function.client.WebClientResponseException ex = 
+                        (org.springframework.web.reactive.function.client.WebClientResponseException) throwable;
+                    logger.error("❌ Backend HTTP 錯誤: status={}, body={}", ex.getStatusCode(), ex.getResponseBodyAsString());
+                }
+                return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body((Object) ("傷害計算失敗: " + throwable.getMessage())));
+            });
     }
 
     /**

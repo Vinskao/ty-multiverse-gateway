@@ -124,9 +124,12 @@ public class KeycloakController {
                     String accessToken = (String) tokenBody.get("access_token");
                     // 取得 refresh token
                     String refreshToken = (String) tokenBody.get("refresh_token");
+                    // 取得 id token（用於登出時清除 session）
+                    String idToken = (String) tokenBody.get("id_token");
 
                     log.info("Access Token: {}", accessToken);
                     log.info("Refresh Token: {}", refreshToken);
+                    log.info("ID Token: {}", idToken != null ? "存在" : "不存在");
 
                     // 若其中任一 token 為 null，表示取得失敗，則拋出異常
                     if (accessToken == null || refreshToken == null) {
@@ -171,6 +174,11 @@ public class KeycloakController {
                                             + "&lastName=" + URLEncoder.encode(lastName, StandardCharsets.UTF_8)
                                             + "&token=" + URLEncoder.encode(accessToken, StandardCharsets.UTF_8)
                                             + "&refreshToken=" + URLEncoder.encode(refreshToken, StandardCharsets.UTF_8);
+                                    
+                                    // 如果有 id_token，也傳遞給前端（用於登出時清除 session）
+                                    if (idToken != null) {
+                                        redirectTarget += "&id_token=" + URLEncoder.encode(idToken, StandardCharsets.UTF_8);
+                                    }
 
                                     // 添加詳細日誌
                                     log.info("=== 重定向診斷 ===");
@@ -219,29 +227,83 @@ public class KeycloakController {
      */
     @CrossOrigin
     @PostMapping("/logout")
-    public Mono<org.springframework.http.ResponseEntity<String>> logout(@RequestParam("refreshToken") String refreshToken) {
-        // 組合 Keycloak 的登出 endpoint URL
+    public Mono<org.springframework.http.ResponseEntity<String>> logout(
+            @RequestParam("refreshToken") String refreshToken,
+            @RequestParam(value = "idToken", required = false) String idToken) {
+        log.info("收到登出請求，refreshToken 長度: {}, idToken: {}", 
+                refreshToken != null ? refreshToken.length() : 0, 
+                idToken != null ? "存在" : "不存在");
+        
+        // Step 1: 撤銷 refresh token（使用 /logout 端點）
+        // 端點: POST /realms/{realm}/protocol/openid-connect/logout
+        // 參數: client_id, client_secret, refresh_token
         String logoutUrl = ssoUrl + "/realms/" + realm + "/protocol/openid-connect/logout";
+        log.info("Step 1: 調用 Keycloak logout 端點撤銷 refresh token: {}", logoutUrl);
 
         MultiValueMap<String, String> bodyParams = new LinkedMultiValueMap<>();
         bodyParams.add("client_id", clientId);
         bodyParams.add("client_secret", clientSecret);
         bodyParams.add("refresh_token", refreshToken);
 
-        return getWebClient()
+        Mono<String> revokeTokenResult = getWebClient()
                 .post()
                 .uri(logoutUrl)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData(bodyParams))
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), response -> {
+                    log.warn("Keycloak logout 端點返回錯誤: HTTP {} (token 可能已過期)", response.statusCode());
+                    return response.bodyToMono(String.class)
+                            .doOnNext(errorBody -> log.warn("Keycloak logout 錯誤響應: {}", errorBody))
+                            .flatMap(errorBody -> Mono.error(new RuntimeException("Keycloak logout failed: " + response.statusCode())));
+                })
                 .bodyToMono(String.class)
-                .then(Mono.just(org.springframework.http.ResponseEntity.ok(MessageKey.LOGOUT_SUCCESS.getMessage())))
-                .onErrorResume(e -> {
-                    log.error("登出失敗", e);
-                    return Mono.just(org.springframework.http.ResponseEntity
-                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body(ErrorCode.LOGOUT_FAILED.getMessage()));
-                });
+                .doOnSuccess(result -> {
+                    log.info("✅ Step 1 完成: Refresh token 已撤銷，響應: {}", result);
+                })
+                .doOnError(error -> {
+                    log.warn("⚠️ Step 1 警告: Keycloak logout 端點調用失敗 (token 可能已過期)", error);
+                })
+                .onErrorReturn("Token revocation completed (may have been already invalid)");
+
+        // Step 2: 如果有 id_token，調用 end_session_endpoint 清除服務器端 session
+        if (idToken != null && !idToken.isEmpty()) {
+            // 端點: GET /realms/{realm}/protocol/openid-connect/logout (end_session_endpoint)
+            // 參數: id_token_hint, post_logout_redirect_uri (可選)
+            String endSessionUrl = ssoUrl + "/realms/" + realm + "/protocol/openid-connect/logout" +
+                    "?id_token_hint=" + java.net.URLEncoder.encode(idToken, StandardCharsets.UTF_8) +
+                    "&post_logout_redirect_uri=" + java.net.URLEncoder.encode(frontendUrl, StandardCharsets.UTF_8);
+            
+            log.info("Step 2: 調用 Keycloak end_session_endpoint 清除服務器端 session: {}", endSessionUrl);
+            
+            Mono<String> endSessionResult = getWebClient()
+                    .get()
+                    .uri(endSessionUrl)
+                    .retrieve()
+                    .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), response -> {
+                        log.warn("Keycloak end_session_endpoint 返回錯誤: HTTP {}", response.statusCode());
+                        return response.bodyToMono(String.class)
+                                .doOnNext(errorBody -> log.warn("Keycloak end_session 錯誤響應: {}", errorBody))
+                                .flatMap(errorBody -> Mono.error(new RuntimeException("Keycloak end_session failed: " + response.statusCode())));
+                    })
+                    .bodyToMono(String.class)
+                    .doOnSuccess(result -> {
+                        log.info("✅ Step 2 完成: 服務器端 session 已清除，響應: {}", result);
+                    })
+                    .doOnError(error -> {
+                        log.warn("⚠️ Step 2 警告: Keycloak end_session_endpoint 調用失敗", error);
+                    })
+                    .onErrorReturn("End session completed (may have failed)");
+
+            // 等待兩個操作都完成
+            return Mono.zip(revokeTokenResult, endSessionResult)
+                    .then(Mono.just(org.springframework.http.ResponseEntity.ok(MessageKey.LOGOUT_SUCCESS.getMessage())));
+        } else {
+            log.warn("⚠️ 沒有 id_token，無法調用 end_session_endpoint 清除服務器端 session");
+            log.warn("⚠️ 只有 refresh token 被撤銷，服務器端 session 可能仍然存在");
+            return revokeTokenResult
+                    .then(Mono.just(org.springframework.http.ResponseEntity.ok(MessageKey.LOGOUT_SUCCESS.getMessage())));
+        }
     }
 
     /**
@@ -256,10 +318,30 @@ public class KeycloakController {
      * @return Mono<ResponseEntity> 包含 token 檢查結果、刷新後的 token 資訊或錯誤訊息的回應
      */
     @CrossOrigin
-    @PostMapping("/introspect")
+    @PostMapping(value = "/introspect", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public Mono<org.springframework.http.ResponseEntity<?>> introspectToken(
-            @RequestParam("token") String token,
-            @RequestParam(value = "refreshToken", required = false) String refreshToken) {
+            ServerWebExchange exchange) {
+        
+        // 從 form-urlencoded body 中讀取參數
+        return exchange.getFormData()
+                .flatMap(formData -> {
+                    String token = formData.getFirst("token");
+                    String refreshToken = formData.getFirst("refreshToken");
+                    
+                    if (token == null || token.isEmpty()) {
+                        log.error("Token 參數缺失");
+                        return Mono.just(org.springframework.http.ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body("Required parameter 'token' is not present."));
+                    }
+                    
+                    return introspectTokenInternal(token, refreshToken);
+                });
+    }
+    
+    private Mono<org.springframework.http.ResponseEntity<?>> introspectTokenInternal(
+            String token,
+            String refreshToken) {
 
         String introspectUrl = ssoUrl + "/realms/" + realm + "/protocol/openid-connect/token/introspect";
         String tokenUrl = ssoUrl + "/realms/" + realm + "/protocol/openid-connect/token";
@@ -276,6 +358,23 @@ public class KeycloakController {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData(bodyParams))
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), response -> {
+                    log.error("Keycloak introspection 請求失敗: HTTP {}", response.statusCode());
+                    return response.bodyToMono(String.class)
+                            .doOnNext(errorBody -> log.error("Keycloak introspection 錯誤響應: {}", errorBody))
+                            .flatMap(errorBody -> {
+                                // 返回錯誤響應，保持原始狀態碼
+                                org.springframework.web.reactive.function.client.WebClientResponseException exception = 
+                                    org.springframework.web.reactive.function.client.WebClientResponseException.create(
+                                        response.statusCode().value(),
+                                        response.statusCode().toString(),
+                                        response.headers().asHttpHeaders(),
+                                        errorBody.getBytes(),
+                                        java.nio.charset.StandardCharsets.UTF_8
+                                    );
+                                return Mono.error(exception);
+                            });
+                })
                 .bodyToMono(new org.springframework.core.ParameterizedTypeReference<Map<String, Object>>() {})
                 .flatMap(result -> {
                     if (result == null) {
@@ -303,6 +402,22 @@ public class KeycloakController {
                                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                                 .body(BodyInserters.fromFormData(refreshParams))
                                 .retrieve()
+                                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), response -> {
+                                    log.error("Keycloak token refresh 請求失敗: HTTP {}", response.statusCode());
+                                    return response.bodyToMono(String.class)
+                                            .doOnNext(errorBody -> log.error("Keycloak token refresh 錯誤響應: {}", errorBody))
+                                            .flatMap(errorBody -> {
+                                                org.springframework.web.reactive.function.client.WebClientResponseException exception = 
+                                                    org.springframework.web.reactive.function.client.WebClientResponseException.create(
+                                                        response.statusCode().value(),
+                                                        response.statusCode().toString(),
+                                                        response.headers().asHttpHeaders(),
+                                                        errorBody.getBytes(),
+                                                        java.nio.charset.StandardCharsets.UTF_8
+                                                    );
+                                                return Mono.error(exception);
+                                            });
+                                })
                                 .bodyToMono(new org.springframework.core.ParameterizedTypeReference<Map<String, Object>>() {})
                                 .flatMap(refreshResult -> {
                                     if (refreshResult == null || refreshResult.get("access_token") == null) {
@@ -321,10 +436,23 @@ public class KeycloakController {
                             .body(ErrorCode.TOKEN_INVALID_OR_REFRESH_FAILED.getMessage()));
                 })
                 .onErrorResume(e -> {
-                    log.error("內省失敗", e);
-                    return Mono.just(org.springframework.http.ResponseEntity
-                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body(ErrorCode.TOKEN_CHECK_FAILED.getMessage()));
+                    if (e instanceof org.springframework.web.reactive.function.client.WebClientResponseException) {
+                        org.springframework.web.reactive.function.client.WebClientResponseException responseEx = 
+                            (org.springframework.web.reactive.function.client.WebClientResponseException) e;
+                        log.error("Keycloak introspection 錯誤: HTTP {} - {}", 
+                                responseEx.getStatusCode(), responseEx.getResponseBodyAsString());
+                        
+                        // 返回原始錯誤狀態碼和消息
+                        String errorBody = responseEx.getResponseBodyAsString();
+                        return Mono.just(org.springframework.http.ResponseEntity
+                                .status(responseEx.getStatusCode())
+                                .body(errorBody != null ? errorBody : ErrorCode.TOKEN_CHECK_FAILED.getMessage()));
+                    } else {
+                        log.error("內省失敗", e);
+                        return Mono.just(org.springframework.http.ResponseEntity
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(ErrorCode.TOKEN_CHECK_FAILED.getMessage()));
+                    }
                 });
     }
 }
