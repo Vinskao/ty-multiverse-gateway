@@ -126,7 +126,13 @@ public class AsyncPeopleProxyController {
         @RequestBody List<People> peopleList,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
     ) {
-        logger.info("🔁 Gateway 同步代理請求: /people/insert-multiple");
+        logger.info("🔁 Gateway 同步代理請求: /people/insert-multiple, 接收到 {} 個角色", peopleList.size());
+        if (!peopleList.isEmpty()) {
+            People first = peopleList.get(0);
+            logger.info("🔍 第一個角色數據: name={}, codeName={}, dob={}, race={}, gender={}, job={}, email={}, age={}", 
+                first.getName(), first.getCodeName(), first.getDob(), first.getRace(), 
+                first.getGender(), first.getJob(), first.getEmail(), first.getAge());
+        }
         return proxyAsyncBackendCall(
             backendWebClient.post().uri("/people/insert-multiple").bodyValue(peopleList),
             authorization
@@ -270,9 +276,32 @@ public class AsyncPeopleProxyController {
             .onErrorResume(throwable -> {
                 logger.error("❌ Gateway → Backend 調用失敗: name={}, path={}, error={}", name, backendPath, throwable.getMessage());
                 if (throwable instanceof org.springframework.web.reactive.function.client.WebClientResponseException) {
-                    org.springframework.web.reactive.function.client.WebClientResponseException ex = 
+                    org.springframework.web.reactive.function.client.WebClientResponseException ex =
                         (org.springframework.web.reactive.function.client.WebClientResponseException) throwable;
                     logger.error("❌ Backend HTTP 錯誤: status={}, body={}", ex.getStatusCode(), ex.getResponseBodyAsString());
+
+                    // 嘗試解析 Backend 返回的錯誤響應
+                    try {
+                        String responseBody = ex.getResponseBodyAsString();
+                        if (responseBody != null && !responseBody.trim().isEmpty()) {
+                            // 嘗試解析為 BackendApiResponse 格式
+                            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                            java.util.Map<String, Object> errorResponse = mapper.readValue(responseBody, java.util.Map.class);
+                            if (errorResponse.containsKey("message")) {
+                                String backendMessage = (String) errorResponse.get("message");
+                                return Mono.just(ResponseEntity.status(ex.getStatusCode())
+                                    .body((Object) backendMessage));
+                            }
+                        }
+                    } catch (Exception parseError) {
+                        logger.warn("無法解析 Backend 錯誤響應: {}", parseError.getMessage());
+                    }
+
+                    // 如果無法解析，使用原始響應體
+                    if (ex.getResponseBodyAsString() != null && !ex.getResponseBodyAsString().trim().isEmpty()) {
+                        return Mono.just(ResponseEntity.status(ex.getStatusCode())
+                            .body((Object) ex.getResponseBodyAsString()));
+                    }
                 }
                 return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body((Object) ("傷害計算失敗: " + throwable.getMessage())));
