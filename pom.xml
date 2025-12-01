@@ -30,7 +30,7 @@
         <dependency>
             <groupId>tw.com.ty</groupId>
             <artifactId>ty-multiverse-common</artifactId>
-            <version>2.1</version>
+            <version>2.2.1</version>
         </dependency>
 
         <!-- Removed dependency on backend module - Gateway should be independent -->
@@ -200,6 +200,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>tw.com.tymgateway.TYMGatewayApplication</mainClass>
+                    <jvmArguments>-Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8</jvmArguments>
                 </configuration>
             </plugin>
         </plugins>
