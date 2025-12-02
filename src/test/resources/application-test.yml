@@ -1,0 +1,54 @@
+# Test configuration for Gateway
+# This profile provides mock values for testing without external dependencies
+
+spring:
+  application:
+    name: ty-multiverse-gateway-test
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      routes: []  # Disable routes for unit tests
+  # Disable RabbitMQ for tests
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/test-realm
+          jwk-set-uri: http://localhost:8180/realms/test-realm/protocol/openid-connect/certs
+
+# Server configuration
+server:
+  port: 0  # Random port for tests
+
+# Keycloak Configuration - Mock values for testing
+keycloak:
+  auth-server-url: http://localhost:8180
+  realm: test-realm
+  resource: test-client
+  clientId: test-client
+  credentials:
+    secret: test-secret
+
+# Backend Service Configuration
+backend:
+  service:
+    url: http://localhost:8080
+    timeout: 5000
+
+# URL configuration
+url:
+  frontend: http://localhost:4321
+
+# Logging - reduce noise during tests
+logging:
+  level:
+    root: WARN
+    org.springframework.cloud.gateway: WARN
+    tw.com.tymgateway: DEBUG
+
