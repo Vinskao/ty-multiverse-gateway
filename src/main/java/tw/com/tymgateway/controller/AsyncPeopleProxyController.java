@@ -1,11 +1,7 @@
 package tw.com.tymgateway.controller;
 
-import java.time.Duration;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,14 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Mono;
-import tw.com.ty.common.response.BackendApiResponse;
-import tw.com.tymgateway.dto.AsyncResultMessage;
 import tw.com.tymgateway.dto.People;
-import tw.com.tymgateway.dto.PeopleNameRequestDTO;
+import tw.com.tymgateway.dto.PeopleNameRequest;
 import tw.com.tymgateway.service.AsyncResultRegistry;
 
 /**
- * People 模組同步代理 Controller
+ * People 模組異步代理 Controller
  *
  * <p>前端請求 /tymg/people/** 時，Gateway 會：
  * <ol>
@@ -36,27 +30,19 @@ import tw.com.tymgateway.service.AsyncResultRegistry;
  *     <li>將最終資料以 HTTP 200 回傳給前端</li>
  * </ol>
  * </p>
- * 
+ *
  * <p>統一使用 /tymg/people/** 路徑，保持 gateway -> backend -> consumer 的流程</p>
  */
 @RestController
 @RequestMapping("/tymg/people")
-public class AsyncPeopleProxyController {
-
-    private static final Logger logger = LoggerFactory.getLogger(AsyncPeopleProxyController.class);
-
-    private final WebClient backendWebClient;
-    private final AsyncResultRegistry asyncResultRegistry;
-    private final Duration gatewayWaitTimeout;
+public class AsyncPeopleProxyController extends BaseAsyncProxyController {
 
     public AsyncPeopleProxyController(
         WebClient backendWebClient,
         AsyncResultRegistry asyncResultRegistry,
-        @Value("${gateway.async.timeout:30}") long waitTimeoutSeconds
+        long waitTimeoutSeconds
     ) {
-        this.backendWebClient = backendWebClient;
-        this.asyncResultRegistry = asyncResultRegistry;
-        this.gatewayWaitTimeout = Duration.ofSeconds(waitTimeoutSeconds);
+        super(backendWebClient, asyncResultRegistry, waitTimeoutSeconds);
     }
 
     /**
@@ -165,7 +151,7 @@ public class AsyncPeopleProxyController {
      */
     @PostMapping(value = "/get-by-name", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Object>> getPeopleByName(
-        @RequestBody PeopleNameRequestDTO request,
+        @RequestBody PeopleNameRequest request,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
     ) {
         logger.info("🔁 Gateway 同步代理請求: /people/get-by-name");
@@ -192,22 +178,6 @@ public class AsyncPeopleProxyController {
         );
     }
 
-    /**
-     * 同步獲取所有武器
-     *
-     * @param authorization Authorization header (可為空)
-     * @return 所有武器列表
-     */
-    @GetMapping(value = "/weapons", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<Object>> getAllWeapons(
-        @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
-    ) {
-        logger.info("🔁 Gateway 同步代理請求: /people/weapons");
-        return proxyAsyncBackendCall(
-            backendWebClient.get().uri("/weapons"),
-            authorization
-        );
-    }
 
     /**
      * 同步計算傷害
@@ -308,66 +278,4 @@ public class AsyncPeopleProxyController {
             });
     }
 
-    /**
-     * 代理異步後端調用，並等待結果
-     *
-     * @param requestSpec WebClient request spec
-     * @param authorization Authorization header
-     * @return 最終響應
-     */
-    private Mono<ResponseEntity<Object>> proxyAsyncBackendCall(
-    WebClient.RequestHeadersSpec<?> requestSpec,
-    String authorization
-    ) {
-    return requestSpec
-        .headers(headers -> {
-            if (authorization != null && !authorization.isBlank()) {
-                headers.set(HttpHeaders.AUTHORIZATION, authorization);
-            }
-        })
-        .retrieve()
-        .bodyToMono(new ParameterizedBackendResponse())
-        .flatMap(response -> {
-            if (!response.isSuccess()
-                || response.getRequestId() == null
-                || response.getCode() != HttpStatus.ACCEPTED.value()) {
-                logger.error("後端未返回有效的 requestId 或狀態碼不是 202, response={}", response);
-                return Mono.just(ResponseEntity.status(response.getCode())
-                    .body((Object) response));
-            }
-
-            String requestId = response.getRequestId();
-            logger.info("✅ 後端接受請求，requestId={}", requestId);
-
-            return asyncResultRegistry.awaitResult(requestId, gatewayWaitTimeout)
-                .map(this::toSuccessResponse)
-                .onErrorResume(throwable -> {
-                    logger.error("等待異步結果超時或失敗: requestId={}, error={}", requestId, throwable.getMessage());
-                    return Mono.just(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT)
-                        .body((Object) String.format("等待異步結果超時或失敗: %s", throwable.getMessage())));
-                });
-        });
-    }
-    
-    private ResponseEntity<Object> toSuccessResponse(AsyncResultMessage resultMessage) {
-        if (!"completed".equalsIgnoreCase(resultMessage.getStatus())) {
-            String errorMessage = resultMessage.getError() != null
-                ? resultMessage.getError()
-                : "異步處理失敗";
-            logger.error("異步請求處理失敗: requestId={}, error={}",
-                resultMessage.getRequestId(), errorMessage);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(errorMessage);
-        }
-    
-        Object data = resultMessage.getData();
-        logger.info("📤 返回最終結果: requestId={}", resultMessage.getRequestId());
-        return ResponseEntity.ok(data);
-    }
-
-    /**
-     * 解析 BackendApiResponse 的 ParameterizedTypeReference
-     */
-    private static class ParameterizedBackendResponse extends org.springframework.core.ParameterizedTypeReference<BackendApiResponse<Object>> {
-    }
 }
