@@ -2,6 +2,7 @@ package tw.com.tymgateway.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,7 +41,7 @@ public class AsyncPeopleProxyController extends BaseAsyncProxyController {
     public AsyncPeopleProxyController(
         WebClient backendWebClient,
         AsyncResultRegistry asyncResultRegistry,
-        long waitTimeoutSeconds
+        @Value("${gateway.async.timeout:30}") long waitTimeoutSeconds
     ) {
         super(backendWebClient, asyncResultRegistry, waitTimeoutSeconds);
     }
