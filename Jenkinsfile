@@ -19,7 +19,7 @@ pipeline {
                         memory: "1024Mi"  # 提高到 1GB
                       limits:
                         cpu: "100m"       # 提高到 2 CPU cores
-                        memory: "1024Mi"  # 提高到 2GB
+                        memory: "1024Mi"  # 提高到 2GB  
                     volumeMounts:
                     - mountPath: /root/.m2
                       name: maven-repo
@@ -322,7 +322,7 @@ EOF
                                         echo "PUBLIC_FRONTEND_URL=${PUBLIC_FRONTEND_URL}"
                                         echo "REDIS_HOST=${REDIS_HOST}:${REDIS_CUSTOM_PORT}"
 
-                                        # Update deployment image
+                                        # Update deployment - always apply full deployment.yaml to ensure all env vars are applied
                                         DEPLOYMENT_FILE=""
                                         if [ -f "k8s/deployment.yaml" ]; then
                                             DEPLOYMENT_FILE="k8s/deployment.yaml"
@@ -331,7 +331,9 @@ EOF
                                         fi
                                         
                                         if [ -n "$DEPLOYMENT_FILE" ]; then
-                                            kubectl set image deployment/ty-multiverse-gateway gateway=${DOCKER_IMAGE}:${DOCKER_TAG} -n default || \
+                                            # Update the image tag in deployment.yaml before applying
+                                            sed -i "s|papakao/ty-multiverse-gateway:latest|${DOCKER_IMAGE}:${DOCKER_TAG}|g" ${DEPLOYMENT_FILE}
+                                            # Always apply full deployment.yaml to ensure all env vars (including RabbitMQ) are applied
                                             kubectl apply -f ${DEPLOYMENT_FILE} -n default
                                         else
                                             kubectl set image deployment/ty-multiverse-gateway gateway=${DOCKER_IMAGE}:${DOCKER_TAG} -n default
