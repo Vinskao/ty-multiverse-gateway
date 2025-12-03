@@ -31,9 +31,11 @@ import tw.com.tymgateway.service.AsyncResultRegistry;
 public abstract class BaseAsyncProxyController {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-
+    // 後端 WebClient
     protected final WebClient backendWebClient;
+    // 異步結果註冊表
     protected final AsyncResultRegistry asyncResultRegistry;
+    // 網關等待超時時間
     protected final Duration gatewayWaitTimeout;
 
     protected BaseAsyncProxyController(
@@ -48,6 +50,14 @@ public abstract class BaseAsyncProxyController {
 
     /**
      * 代理異步後端調用，並等待結果
+     * 
+     * <p>前端請求 /tymg/people/** 時，Gateway 會：
+     * <ol>
+     *     <li>向 Backend 發送請求，獲得 requestId</li>
+     *     <li>於 Gateway 端等待 Consumer 實際處理結果</li>
+     *     <li>將最終資料以 HTTP 200 回傳給前端</li>
+     * </ol>
+     * </p>
      *
      * @param requestSpec WebClient request spec
      * @param authorization Authorization header
@@ -58,14 +68,18 @@ public abstract class BaseAsyncProxyController {
         String authorization
     ) {
         return requestSpec
+            // 設置 Authorization header
             .headers(headers -> {
                 if (authorization != null && !authorization.isBlank()) {
                     headers.set(HttpHeaders.AUTHORIZATION, authorization);
                 }
             })
+            // 發送請求，並獲得 response
             .retrieve()
+            // 將 response 轉換為 BackendApiResponse
             .bodyToMono(new ParameterizedBackendResponse())
             .flatMap(response -> {
+                // 如果 response 不是成功，則返回錯誤響應
                 if (!response.isSuccess()
                     || response.getRequestId() == null
                     || response.getCode() != HttpStatus.ACCEPTED.value()) {
