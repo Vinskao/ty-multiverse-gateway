@@ -345,6 +345,17 @@ GATEWAY_PORT=8082
 LOGGING_LEVEL_TW_COM_TYMGATEWAY=INFO
 ```
 
+### RabbitMQ Configuration
+**注意：RabbitMQ 配置已經在 `k8s/deployment.yaml` 中寫死為 K8s 內部服務名稱**
+
+- **Host**: `rabbitmq-service` (K8s Service name)
+- **Port**: `5672`
+- **Username**: `admin`
+- **Password**: `admin123`
+- **Virtual Host**: `/`
+
+此配置適用於生產環境，使用 K8s 內部服務發現。不需要通過 Jenkins Credentials 配置。
+
 ### Development Workflow
 1. **Configuration**: Update route configurations for new endpoints
 2. **Testing**: Test route matching and filtering
