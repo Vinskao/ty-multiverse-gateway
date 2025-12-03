@@ -282,11 +282,7 @@ EOF
                         string(credentialsId: 'PUBLIC_FRONTEND_URL', variable: 'PUBLIC_FRONTEND_URL'),
                         string(credentialsId: 'REDIS_HOST', variable: 'REDIS_HOST'),
                         string(credentialsId: 'REDIS_CUSTOM_PORT', variable: 'REDIS_CUSTOM_PORT'),
-                        string(credentialsId: 'REDIS_PASSWORD', variable: 'REDIS_PASSWORD'),
-                        string(credentialsId: 'RABBITMQ_HOST', variable: 'RABBITMQ_HOST'),
-                        string(credentialsId: 'RABBITMQ_PORT', variable: 'RABBITMQ_PORT'),
-                        string(credentialsId: 'RABBITMQ_USERNAME', variable: 'RABBITMQ_USERNAME'),
-                        string(credentialsId: 'RABBITMQ_PASSWORD', variable: 'RABBITMQ_PASSWORD')
+                        string(credentialsId: 'REDIS_PASSWORD', variable: 'REDIS_PASSWORD')
                     ]) {
                         withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                             script {
@@ -341,7 +337,7 @@ EOF
                                             kubectl set image deployment/ty-multiverse-gateway gateway=${DOCKER_IMAGE}:${DOCKER_TAG} -n default
                                         fi
 
-                                        # Create Secret with all gateway secrets
+                                        # Create Secret with all gateway secrets (RabbitMQ uses hardcoded K8s service name)
                                         kubectl create secret generic ty-multiverse-gateway-secrets \
                                           --from-literal=KEYCLOAK_AUTH_SERVER_URL="${KEYCLOAK_AUTH_SERVER_URL}" \
                                           --from-literal=PUBLIC_REALM="${PUBLIC_REALM}" \
@@ -352,10 +348,6 @@ EOF
                                           --from-literal=REDIS_HOST="${REDIS_HOST}" \
                                           --from-literal=REDIS_CUSTOM_PORT="${REDIS_CUSTOM_PORT}" \
                                           --from-literal=REDIS_PASSWORD="${REDIS_PASSWORD}" \
-                                          --from-literal=RABBITMQ_HOST="${RABBITMQ_HOST}" \
-                                          --from-literal=RABBITMQ_PORT="${RABBITMQ_PORT}" \
-                                          --from-literal=RABBITMQ_USERNAME="${RABBITMQ_USERNAME}" \
-                                          --from-literal=RABBITMQ_PASSWORD="${RABBITMQ_PASSWORD}" \
                                           -n default --dry-run=client -o yaml | kubectl apply -f -
 
                                         kubectl rollout status deployment/ty-multiverse-gateway -n default

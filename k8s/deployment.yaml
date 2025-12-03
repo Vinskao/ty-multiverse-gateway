@@ -88,26 +88,17 @@ spec:
             secretKeyRef:
               name: ty-multiverse-gateway-secrets
               key: REDIS_PASSWORD
+        # RabbitMQ 配置 - 使用 K8s 內部服務名稱（寫死）
         - name: RABBITMQ_HOST
-          valueFrom:
-            secretKeyRef:
-              name: ty-multiverse-gateway-secrets
-              key: RABBITMQ_HOST
+          value: "rabbitmq-service"
         - name: RABBITMQ_PORT
-          valueFrom:
-            secretKeyRef:
-              name: ty-multiverse-gateway-secrets
-              key: RABBITMQ_PORT
+          value: "5672"
         - name: RABBITMQ_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: ty-multiverse-gateway-secrets
-              key: RABBITMQ_USERNAME
+          value: "admin"
         - name: RABBITMQ_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: ty-multiverse-gateway-secrets
-              key: RABBITMQ_PASSWORD
+          value: "admin123"
+        - name: RABBITMQ_VIRTUAL_HOST
+          value: "/"
         resources:
           requests:
             memory: "256Mi"
@@ -149,8 +140,4 @@ stringData:
   REDIS_HOST: "${REDIS_HOST}"
   REDIS_CUSTOM_PORT: "${REDIS_CUSTOM_PORT}"
   REDIS_PASSWORD: "${REDIS_PASSWORD}"
-  RABBITMQ_HOST: "${RABBITMQ_HOST}"
-  RABBITMQ_PORT: "${RABBITMQ_PORT}"
-  RABBITMQ_USERNAME: "${RABBITMQ_USERNAME}"
-  RABBITMQ_PASSWORD: "${RABBITMQ_PASSWORD}"
 
