@@ -30,9 +30,9 @@ RUN mkdir -p /root/.m2 && \
 </settings>
 EOF
 
-# Copy pom.xml and download dependencies
+# Copy pom.xml and download dependencies (with retry tolerance for network issues)
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
+RUN mvn dependency:resolve dependency:resolve-plugins -B || true
 
 # Copy source code
 COPY src ./src

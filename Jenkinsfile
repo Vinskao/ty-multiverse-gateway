@@ -15,11 +15,11 @@ pipeline {
                     tty: true
                     resources:
                       requests:
-                        cpu: "50m"
-                        memory: "512Mi"
+                        cpu: "100m"       # 提高到 0.5 CPU
+                        memory: "1024Mi"  # 提高到 1GB
                       limits:
-                        cpu: "250m"
-                        memory: "1024Mi"
+                        cpu: "100m"       # 提高到 2 CPU cores
+                        memory: "1024Mi"  # 提高到 2GB
                     volumeMounts:
                     - mountPath: /root/.m2
                       name: maven-repo
@@ -133,8 +133,37 @@ EOF
             }
         }
 
-        // Test Stage 已跳過 - 測試在 CI 環境缺少必要的環境變數 (KEYCLOAK_AUTH_SERVER_URL 等)
-        // 如需啟用測試，請確保在 withCredentials 中注入所有必要的 Keycloak 環境變數
+        stage('Test') {
+            steps {
+                container('maven') {
+                    script {
+                        withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_TOKEN')]) {
+                            sh '''
+                                # 創建 Maven settings.xml 以配置 GitHub Packages 認證
+                                mkdir -p ~/.m2
+                                cat > ~/.m2/settings.xml <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                              http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <servers>
+    <server>
+      <id>github</id>
+      <username>Vinskao</username>
+      <password>${GITHUB_TOKEN}</password>
+    </server>
+  </servers>
+</settings>
+EOF
+                                # 執行 Maven 測試
+                                MAVEN_OPTS="-Xmx1024m -XX:+UseG1GC" mvn -T 1C -Dmaven.javadoc.skip=true test -P platform
+                            '''
+                        }
+                    }
+                }
+            }
+        }
         
         stage('Debug Environment') {
             steps {

@@ -16,8 +16,8 @@ gateway:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: '@KEYCLOAK_AUTH_SERVER_URL@/realms/@PUBLIC_REALM@'
-          jwk-set-uri: '@KEYCLOAK_AUTH_SERVER_URL@/realms/@PUBLIC_REALM@/protocol/openid-connect/certs'
+          issuer-uri: '@BUILD_KEYCLOAK_AUTH_SERVER_URL@/realms/@BUILD_PUBLIC_REALM@'
+          jwk-set-uri: '@BUILD_KEYCLOAK_AUTH_SERVER_URL@/realms/@BUILD_PUBLIC_REALM@/protocol/openid-connect/certs'
   cloud:
     gateway:
       # CORS configuration is handled by CorsWebFilter in GatewayConfig.java
@@ -268,7 +268,7 @@ logging:
 
 # Application specific properties
 url:
-  frontend: '@PUBLIC_FRONTEND_URL@'
+  frontend: '@BUILD_PUBLIC_FRONTEND_URL@'
 
 # Backend Service Configuration
 backend:
@@ -278,12 +278,12 @@ backend:
 
 # Keycloak Configuration
 keycloak:
-  auth-server-url: '@KEYCLOAK_AUTH_SERVER_URL@'
-  realm: '@PUBLIC_REALM@'
-  resource: '@PUBLIC_CLIENT_ID@'
-  clientId: '@PUBLIC_CLIENT_ID@'
+  auth-server-url: '@BUILD_KEYCLOAK_AUTH_SERVER_URL@'
+  realm: '@BUILD_PUBLIC_REALM@'
+  resource: '@BUILD_PUBLIC_CLIENT_ID@'
+  clientId: '@BUILD_PUBLIC_CLIENT_ID@'
   credentials:
-    secret: '@KEYCLOAK_CREDENTIALS_SECRET@'
+    secret: '@BUILD_KEYCLOAK_CREDENTIALS_SECRET@'
 
 # SpringDoc OpenAPI 配置 for WebFlux
 springdoc:
