@@ -2,7 +2,6 @@ package tw.com.tymgateway.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,7 +17,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Mono;
 import tw.com.tymgateway.dto.People;
-import tw.com.tymgateway.dto.PeopleNameRequest;
+import tw.com.tymgateway.dto.PeopleNameRequestDTO;
 import tw.com.tymgateway.service.AsyncResultRegistry;
 
 /**
@@ -41,7 +40,7 @@ public class AsyncPeopleProxyController extends BaseAsyncProxyController {
     public AsyncPeopleProxyController(
         WebClient backendWebClient,
         AsyncResultRegistry asyncResultRegistry,
-        @Value("${gateway.async.timeout:30}") long waitTimeoutSeconds
+        long waitTimeoutSeconds
     ) {
         super(backendWebClient, asyncResultRegistry, waitTimeoutSeconds);
     }
@@ -152,7 +151,7 @@ public class AsyncPeopleProxyController extends BaseAsyncProxyController {
      */
     @PostMapping(value = "/get-by-name", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Object>> getPeopleByName(
-        @RequestBody PeopleNameRequest request,
+        @RequestBody PeopleNameRequestDTO request,
         @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization
     ) {
         logger.info("🔁 Gateway 同步代理請求: /people/get-by-name");

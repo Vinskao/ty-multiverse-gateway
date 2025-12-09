@@ -6,6 +6,6 @@ import lombok.Data;
  * 人物名稱請求 DTO
  */
 @Data
-public class PeopleNameRequest {
+public class PeopleNameRequestDTO {
     private String name;
 }

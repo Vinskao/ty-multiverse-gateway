@@ -1,6 +1,5 @@
 package tw.com.tymgateway.controller;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +31,7 @@ public class AsyncWeaponProxyController extends BaseAsyncProxyController {
     public AsyncWeaponProxyController(
         WebClient backendWebClient,
         AsyncResultRegistry asyncResultRegistry,
-        @Value("${gateway.async.timeout:30}") long waitTimeoutSeconds
+        long waitTimeoutSeconds
     ) {
         super(backendWebClient, asyncResultRegistry, waitTimeoutSeconds);
     }

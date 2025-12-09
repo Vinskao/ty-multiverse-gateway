@@ -160,33 +160,11 @@ public class BadFilter implements GlobalFilter {
 src/main/java/tw/com/tymgateway/
 ├── config/           # Configuration classes
 ├── controller/       # REST controllers
-│   ├── BaseAsyncProxyController.java  # 異步代理控制器基類
-│   ├── AsyncPeopleProxyController.java  # People 模組代理
-│   ├── AsyncWeaponProxyController.java  # Weapon 模組代理
-│   └── ...
 ├── filter/          # Gateway filters
 ├── grpc/            # gRPC client integrations
-├── dto/             # Data transfer objects (統一命名，無 DTO 後綴)
+├── dto/             # Data transfer objects
 └── TymGatewayApplication.java
 ```
-
-### Controller Architecture
-
-#### BaseAsyncProxyController
-通用的異步代理控制器基類，提供：
-- `proxyAsyncBackendCall()` - 代理異步後端調用
-- `toSuccessResponse()` - 轉換成功響應
-- 統一的錯誤處理和日誌記錄
-
-#### Specialized Controllers
-各模組特定的控制器繼承 `BaseAsyncProxyController`：
-- `AsyncPeopleProxyController` - People 相關端點 (`/tymg/people/**`)
-- `AsyncWeaponProxyController` - Weapon 相關端點 (`/tymg/weapons/**`)
-
-這種架構確保：
-- 代碼重用：通用邏輯在基類中
-- 關注點分離：各模組專注自己的業務邏輯
-- 易於擴展：新增模組只需繼承基類
 
 ## Testing Instructions
 
@@ -366,17 +344,6 @@ KEYCLOAK_REALM=your-realm
 GATEWAY_PORT=8082
 LOGGING_LEVEL_TW_COM_TYMGATEWAY=INFO
 ```
-
-### RabbitMQ Configuration
-**注意：RabbitMQ 配置已經在 `k8s/deployment.yaml` 中寫死為 K8s 內部服務名稱**
-
-- **Host**: `rabbitmq-service` (K8s Service name)
-- **Port**: `5672`
-- **Username**: `admin`
-- **Password**: `admin123`
-- **Virtual Host**: `/`
-
-此配置適用於生產環境，使用 K8s 內部服務發現。不需要通過 Jenkins Credentials 配置。
 
 ### Development Workflow
 1. **Configuration**: Update route configurations for new endpoints
