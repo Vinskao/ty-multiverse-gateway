@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 import tw.com.tymgateway.dto.People;
 import tw.com.tymgateway.dto.PeopleNameRequestDTO;
 import tw.com.tymgateway.service.AsyncResultRegistry;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * People 模組異步代理 Controller
@@ -40,7 +41,7 @@ public class AsyncPeopleProxyController extends BaseAsyncProxyController {
     public AsyncPeopleProxyController(
         WebClient backendWebClient,
         AsyncResultRegistry asyncResultRegistry,
-        long waitTimeoutSeconds
+        @Value("${gateway.async.timeout:30}") long waitTimeoutSeconds
     ) {
         super(backendWebClient, asyncResultRegistry, waitTimeoutSeconds);
     }
