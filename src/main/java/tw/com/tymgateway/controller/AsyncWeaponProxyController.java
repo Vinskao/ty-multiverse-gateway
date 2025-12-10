@@ -12,6 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Mono;
 import tw.com.tymgateway.service.AsyncResultRegistry;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Weapon 模組異步代理 Controller
@@ -31,7 +32,7 @@ public class AsyncWeaponProxyController extends BaseAsyncProxyController {
     public AsyncWeaponProxyController(
         WebClient backendWebClient,
         AsyncResultRegistry asyncResultRegistry,
-        long waitTimeoutSeconds
+        @Value("${gateway.async.timeout:30}") long waitTimeoutSeconds
     ) {
         super(backendWebClient, asyncResultRegistry, waitTimeoutSeconds);
     }
