@@ -25,6 +25,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import tw.com.ty.common.response.ErrorCode;
 import tw.com.ty.common.response.MessageKey;
+import jakarta.annotation.PostConstruct;
 
 /**
  * Keycloak 控制器
@@ -40,6 +41,38 @@ public class KeycloakController {
     private String frontendUrl;
 
     private static final Logger log = LoggerFactory.getLogger(KeycloakController.class);
+    private static final String[] DEBUG_LOG_PATHS = new String[] {
+            "f:\\002-workspace\\ty-multiverse\\.cursor\\debug.log", // workspace absolute (Windows)
+            ".cursor/debug.log" // relative fallback (e.g., different cwd/platform)
+    };
+
+    private String safe(String value) {
+        return value == null ? "" : value.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    private void agentLog(String hypothesisId, String location, String message, String dataJson) {
+        // #region agent log
+        boolean written = false;
+        for (String path : DEBUG_LOG_PATHS) {
+            try {
+                java.io.File file = new java.io.File(path);
+                file.getParentFile().mkdirs();
+                try (java.io.FileWriter fw = new java.io.FileWriter(file, true)) {
+                    fw.write("{\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\""
+                            + hypothesisId + "\",\"location\":\"" + location + "\",\"message\":\"" + message
+                            + "\",\"data\":" + dataJson + ",\"timestamp\":" + System.currentTimeMillis() + "}\n");
+                }
+                written = true;
+                break;
+            } catch (Exception ignored) {
+                // try next path
+            }
+        }
+        if (!written) {
+            log.warn("agentLog failed to write debug entry for {} {}", hypothesisId, location);
+        }
+        // #endregion
+    }
 
     @Autowired
     private WebClient.Builder webClientBuilder;
@@ -51,7 +84,7 @@ public class KeycloakController {
     @Value("${keycloak.realm}")
     private String realm;
 
-    @Value("${keycloak.resource}")
+    @Value("${keycloak.clientId:${keycloak.resource}}")
     private String clientId;
 
     @Value("${keycloak.credentials.secret}")
@@ -59,6 +92,16 @@ public class KeycloakController {
 
     @Value("${keycloak.auth-server-url}")
     private String ssoUrl;
+
+    @PostConstruct
+    public void init() {
+        log.info("=== Keycloak Configuration ===");
+        log.info("Auth Server URL: {}", ssoUrl);
+        log.info("Realm: {}", realm);
+        log.info("Client ID: {}", clientId);
+        log.info("Client Secret configured: {}", clientSecret != null && !clientSecret.isEmpty());
+        log.info("Frontend URL: {}", frontendUrl);
+    }
 
     /**
      * 處理從 Keycloak 認證後重導向回來的請求
@@ -101,6 +144,15 @@ public class KeycloakController {
         log.info("Token 請求參數: client_id={}, grant_type=authorization_code, redirect_uri={}", 
                 clientId, redirectUri);
 
+        agentLog("H1", "KeycloakController.keycloakRedirect", "token_request_params",
+                "{\"realm\":\"" + safe(realm) + "\","
+                        + "\"clientId\":\"" + safe(clientId) + "\","
+                        + "\"secretLength\":" + (clientSecret == null ? 0 : clientSecret.length()) + ","
+                        + "\"redirectUri\":\"" + safe(redirectUri) + "\","
+                        + "\"ssoUrl\":\"" + safe(ssoUrl) + "\","
+                        + "\"grantType\":\"authorization_code\","
+                        + "\"codeLength\":" + (code != null ? code.length() : 0) + "}");
+
         // 使用 WebClient 發送 POST 請求給 Keycloak 的 token endpoint
         return getWebClient()
                 .post()
@@ -110,6 +162,8 @@ public class KeycloakController {
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), response -> {
                     log.error("Keycloak token 請求失敗: HTTP {}", response.statusCode());
+                    agentLog("H2", "KeycloakController.keycloakRedirect", "token_error_status",
+                            "{\"status\":\"" + response.statusCode() + "\"}");
                     return response.bodyToMono(String.class)
                             .doOnNext(errorBody -> log.error("Keycloak 錯誤響應: {}", errorBody))
                             .then(Mono.error(new RuntimeException("Keycloak token 請求失敗: " + response.statusCode())));
@@ -198,6 +252,9 @@ public class KeycloakController {
                             });
                 })
                 .onErrorResume(e -> {
+                    agentLog("H3", "KeycloakController.keycloakRedirect", "token_error_caught",
+                            "{\"exception\":\"" + safe(e.getClass().getSimpleName()) + "\","
+                                    + "\"message\":\"" + safe(e.getMessage()) + "\"}");
                     // 若有任何錯誤，記錄詳細錯誤信息
                     if (e instanceof org.springframework.web.reactive.function.client.WebClientRequestException) {
                         log.error("Keycloak 請求錯誤: {}", e.getMessage());
