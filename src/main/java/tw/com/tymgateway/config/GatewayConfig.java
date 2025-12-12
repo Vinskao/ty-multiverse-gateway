@@ -41,8 +41,9 @@ public CorsWebFilter corsWebFilter() {
     // 必須設置具體的來源域名
     corsConfig.setAllowedOriginPatterns(List.of(
         "http://localhost:4321",    // 前端開發環境
-        "http://localhost:3000",    // 其他可能的開發端口
         "https://localhost:4321",   // HTTPS 版本
+        "http://127.0.0.1:4321",    // 本機 IP
+        "http://localhost:3000",    // 其他可能的開發端口
         "https://localhost:3000"
     ));
     corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
