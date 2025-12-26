@@ -114,8 +114,11 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.PUT, "/tymg/gallery/**").authenticated()
                 .pathMatchers(HttpMethod.DELETE, "/tymg/gallery/**").authenticated()
 
-                // 其他 Async API - 需要 Token（这些通常是异步操作）
+                // 其他 Async API - 需要 Token（這些通常是异步操作）
                 .pathMatchers("/tymg/api/**").authenticated()
+
+                // CKEditor Module - 允許公開訪問 (Token 在 Query Param 中，Gateway 默認 Resolver 無法讀取，故先放行)
+                .pathMatchers("/tymg/ckeditor/**").permitAll()
 
                 // ========================================
                 // 默认规则：需要有效 Token（JWT 验证已启用）
