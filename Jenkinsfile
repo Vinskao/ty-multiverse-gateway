@@ -15,11 +15,11 @@ pipeline {
                     tty: true
                     resources:
                       requests:
-                        cpu: "500m"
-                        memory: "2048Mi"
+                        cpu: "50m"       # 提高到 0.5 CPU
+                        memory: "1024Mi"  # 提高到 1GB
                       limits:
-                        cpu: "1000m"
-                        memory: "4096Mi"
+                        cpu: "75m"       # 提高到 2 CPU cores
+                        memory: "1024Mi"  # 提高到 2GB  
                     volumeMounts:
                     - mountPath: /root/.m2
                       name: maven-repo
