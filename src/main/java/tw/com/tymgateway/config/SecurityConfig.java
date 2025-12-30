@@ -68,15 +68,18 @@ public class SecurityConfig {
             .authorizeExchange(exchanges -> exchanges
                 // ========================================
                 // CORS 预检请求：OPTIONS 方法完全放行
+                // CORS 預檢請求：OPTIONS 方法完全放行
                 // ========================================
                 .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 // ========================================
                 // 公共路径：无需 Token
                 // ========================================
-                // 健康检查和监控
+                // 健康檢查和监控
                 .pathMatchers("/tymg/health/**").permitAll()
                 .pathMatchers("/tymg/actuator/**").permitAll()
+                .pathMatchers("/health/**").permitAll()     // 內部探針對應路徑
+                .pathMatchers("/actuator/**").permitAll()   // 內部探針對應路徑
 
                 // Swagger UI 和 API 文档
                 .pathMatchers("/tymg/swagger-ui/**").permitAll()
