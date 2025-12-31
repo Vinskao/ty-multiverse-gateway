@@ -15,11 +15,11 @@ pipeline {
                     tty: true
                     resources:
                       requests:
-                        cpu: "25m"
+                        cpu: "100m"
                         memory: "1024Mi"
                       limits:
-                        cpu: "100m"
-                        memory: "1024Mi"  
+                        cpu: "1000m"
+                        memory: "2048Mi"  
                     volumeMounts:
                     - mountPath: /root/.m2
                       name: maven-repo
@@ -33,11 +33,11 @@ pipeline {
                       privileged: true
                     resources:
                       requests:
-                        cpu: "10m"
+                        cpu: "50m"
                         memory: "256Mi"
                       limits:
-                        cpu: "50m"
-                        memory: "512Mi"
+                        cpu: "1000m"
+                        memory: "1024Mi"
                     env:
                     - name: DOCKER_TLS_CERTDIR
                       value: ""
@@ -237,7 +237,8 @@ EOF
                                     --cache-from ${DOCKER_IMAGE}:latest \
                                     -t ${DOCKER_IMAGE}:${DOCKER_TAG} \
                                     -t ${DOCKER_IMAGE}:latest \
-                                    .
+                                    -f Dockerfile .
+                                    
                                     
                                 # Push with retry mechanism
                                 echo "Pushing Docker images..."
