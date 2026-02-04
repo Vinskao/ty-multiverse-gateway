@@ -55,7 +55,7 @@ spec:
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: "platform"
-        - name: KEYCLOAK_URL
+        - name: KEYCLOAK_AUTH_SERVER_URL
           valueFrom:
             secretKeyRef:
               name: ty-multiverse-gateway-secrets
@@ -114,25 +114,25 @@ spec:
         resources:
           requests:
             memory: "256Mi"
-            cpu: "50m"
+            cpu: "200m"
           limits:
             memory: "512Mi"
-            cpu: "100m"
+            cpu: "500m"
         startupProbe:
           httpGet:
             path: /actuator/health
             port: 8082
-          initialDelaySeconds: 20
+          initialDelaySeconds: 40
           periodSeconds: 10
-          timeoutSeconds: 3
-          failureThreshold: 60  # 最多等待 620 秒 (約 10 分鐘)
+          timeoutSeconds: 5
+          failureThreshold: 30  # 30 * 10s = 300s (5 minutes)
         livenessProbe:
           httpGet:
             path: /actuator/health/liveness
             port: 8082
           initialDelaySeconds: 60
-          periodSeconds: 10
-          timeoutSeconds: 3
+          periodSeconds: 15
+          timeoutSeconds: 5
           failureThreshold: 3
         readinessProbe:
           httpGet:
