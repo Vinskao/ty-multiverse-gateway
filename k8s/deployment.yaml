@@ -76,10 +76,7 @@ spec:
               name: ty-multiverse-gateway-secrets
               key: KEYCLOAK_CREDENTIALS_SECRET
         - name: PUBLIC_TYMB_URL
-          valueFrom:
-            secretKeyRef:
-              name: ty-multiverse-gateway-secrets
-              key: PUBLIC_TYMB_URL
+          value: "http://ty-multiverse-backend/tymb"
         - name: PUBLIC_FRONTEND_URL
           valueFrom:
             secretKeyRef:
