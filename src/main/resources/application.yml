@@ -46,7 +46,7 @@ gateway:
           uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/weapons
-            - Method=GET
+            - Method=GET,POST,PUT,DELETE
           filters:
             - RewritePath=/tymg/weapons, /tymb/weapons
 
@@ -54,7 +54,7 @@ gateway:
           uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/weapons/**
-            - Method=GET
+            - Method=GET,POST,PUT,DELETE
           filters:
             - RewritePath=/tymg/weapons/(?<segment>.*), /tymb/weapons/$\{segment}
 
@@ -65,7 +65,7 @@ gateway:
           uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymg/gallery/**
-            - Method=POST
+            - Method=GET,POST,PUT,DELETE
           filters:
             - RewritePath=/tymg/gallery/(?<segment>.*), /tymb/gallery/$\{segment}
 
