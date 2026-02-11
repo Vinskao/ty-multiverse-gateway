@@ -23,22 +23,22 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class RabbitMQConfig {
-    
+
     /**
      * 交換機名稱（與 Backend/Consumer 保持一致）
      */
     public static final String TYMB_EXCHANGE = "tymb-exchange";
-    
+
     /**
      * 異步結果隊列名稱
      */
     public static final String ASYNC_RESULT_QUEUE = "async-result";
-    
+
     /**
      * 異步結果路由鍵
      */
     public static final String ASYNC_RESULT_ROUTING_KEY = "async.result";
-    
+
     /**
      * 創建交換機
      */
@@ -46,7 +46,7 @@ public class RabbitMQConfig {
     public DirectExchange tymbExchange() {
         return new DirectExchange(TYMB_EXCHANGE, true, false);
     }
-    
+
     /**
      * 創建異步結果隊列
      *
@@ -59,7 +59,7 @@ public class RabbitMQConfig {
                 .withArgument("x-message-ttl", 300000) // 5分鐘 TTL，與 Consumer 保持一致
                 .build();
     }
-    
+
     /**
      * 綁定異步結果隊列到交換機
      */
@@ -69,15 +69,31 @@ public class RabbitMQConfig {
                 .to(tymbExchange)
                 .with(ASYNC_RESULT_ROUTING_KEY);
     }
-    
+
+    /**
+     * 配置 JSON 消息轉換器
+     */
     /**
      * 配置 JSON 消息轉換器
      */
     @Bean
     public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
+        converter.setClassMapper(classMapper());
+        return converter;
     }
-    
+
+    @Bean
+    public org.springframework.amqp.support.converter.DefaultClassMapper classMapper() {
+        org.springframework.amqp.support.converter.DefaultClassMapper classMapper = new org.springframework.amqp.support.converter.DefaultClassMapper();
+        classMapper.setTrustedPackages("*");
+        java.util.Map<String, Class<?>> idClassMapping = new java.util.HashMap<>();
+        idClassMapping.put("com.vinskao.ty_multiverse_consumer.core.dto.AsyncResultMessage",
+                tw.com.tymgateway.dto.AsyncResultMessage.class);
+        classMapper.setIdClassMapping(idClassMapping);
+        return classMapper;
+    }
+
     /**
      * 配置 RabbitTemplate
      */
@@ -88,4 +104,3 @@ public class RabbitMQConfig {
         return rabbitTemplate;
     }
 }
-
