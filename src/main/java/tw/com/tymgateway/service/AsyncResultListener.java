@@ -1,7 +1,9 @@
 package tw.com.tymgateway.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,30 +24,33 @@ public class AsyncResultListener {
     @Autowired
     private AsyncResultRegistry asyncResultRegistry;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     /**
      * 監聽異步結果隊列
      *
-     * Spring AMQP 會自動使用配置的 Jackson2JsonMessageConverter 將 JSON 消息轉換為 AsyncResultMessage 對象
-     *
-     * @param resultMessage 自動反序列化的結果消息對象
+     * 直接接收 raw Message 並手動用 Jackson 反序列化，
+     * 避免因 Consumer 未帶 __TypeId__ header 導致的 MessageConversionException。
      */
     @RabbitListener(queues = RabbitMQConfig.ASYNC_RESULT_QUEUE)
-    public void handleAsyncResult(AsyncResultMessage resultMessage) {
-        logger.info("📥 Gateway 收到異步結果消息: requestId={}, status={}, source={}",
-            resultMessage.getRequestId(), resultMessage.getStatus(), resultMessage.getSource());
+    public void handleAsyncResult(Message rawMessage) {
+        String body = new String(rawMessage.getBody());
+        logger.debug("📥 Gateway 收到原始異步結果訊息: {}", body);
 
         try {
-            logger.info("✅ 消息解析成功，數據內容: {}", resultMessage.getData());
+            AsyncResultMessage resultMessage = objectMapper.readValue(body, AsyncResultMessage.class);
 
-            // 通知等待中的請求
+            logger.info("📥 Gateway 收到異步結果: requestId={}, status={}, source={}",
+                    resultMessage.getRequestId(), resultMessage.getStatus(), resultMessage.getSource());
+
             asyncResultRegistry.complete(resultMessage);
 
             logger.info("✅ 已發送異步結果到註冊中心: requestId={}, status={}",
-                resultMessage.getRequestId(), resultMessage.getStatus());
+                    resultMessage.getRequestId(), resultMessage.getStatus());
 
         } catch (Exception e) {
-            logger.error("❌ 處理異步結果失敗: requestId={}, error={}",
-                resultMessage.getRequestId(), e.getMessage(), e);
+            logger.error("❌ 解析或處理異步結果訊息失敗: body={}, error={}", body, e.getMessage(), e);
         }
     }
 }
