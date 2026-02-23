@@ -12,19 +12,23 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.core.publisher.Mono;
 import tw.com.ty.common.response.BackendApiResponse;
+import tw.com.ty.common.response.ErrorCode;
 import tw.com.tymgateway.dto.AsyncResultMessage;
 import tw.com.tymgateway.service.AsyncResultRegistry;
 
 /**
  * 異步代理控制器基類
  *
- * <p>提供通用的異步代理功能，讓子類繼承使用。</p>
+ * <p>
+ * 提供通用的異步代理功能，讓子類繼承使用。
+ * </p>
  *
- * <p>異步代理流程：
+ * <p>
+ * 異步代理流程：
  * <ol>
- *     <li>向 Backend 發送請求，獲得 requestId</li>
- *     <li>於 Gateway 端等待 Consumer 實際處理結果</li>
- *     <li>將最終資料以 HTTP 200 回傳給前端</li>
+ * <li>向 Backend 發送請求，獲得 requestId</li>
+ * <li>於 Gateway 端等待 Consumer 實際處理結果</li>
+ * <li>將最終資料以 HTTP 200 回傳給前端</li>
  * </ol>
  * </p>
  */
@@ -39,10 +43,9 @@ public abstract class BaseAsyncProxyController {
     protected final Duration gatewayWaitTimeout;
 
     protected BaseAsyncProxyController(
-        WebClient backendWebClient,
-        AsyncResultRegistry asyncResultRegistry,
-        @Value("${gateway.async.timeout:30}") long waitTimeoutSeconds
-    ) {
+            WebClient backendWebClient,
+            AsyncResultRegistry asyncResultRegistry,
+            @Value("${gateway.async.timeout:30}") long waitTimeoutSeconds) {
         this.backendWebClient = backendWebClient;
         this.asyncResultRegistry = asyncResultRegistry;
         this.gatewayWaitTimeout = Duration.ofSeconds(waitTimeoutSeconds);
@@ -51,54 +54,55 @@ public abstract class BaseAsyncProxyController {
     /**
      * 代理異步後端調用，並等待結果
      * 
-     * <p>前端請求 /tymg/people/** 時，Gateway 會：
+     * <p>
+     * 前端請求 /tymg/people/** 時，Gateway 會：
      * <ol>
-     *     <li>向 Backend 發送請求，獲得 requestId</li>
-     *     <li>於 Gateway 端等待 Consumer 實際處理結果</li>
-     *     <li>將最終資料以 HTTP 200 回傳給前端</li>
+     * <li>向 Backend 發送請求，獲得 requestId</li>
+     * <li>於 Gateway 端等待 Consumer 實際處理結果</li>
+     * <li>將最終資料以 HTTP 200 回傳給前端</li>
      * </ol>
      * </p>
      *
-     * @param requestSpec WebClient request spec
+     * @param requestSpec   WebClient request spec
      * @param authorization Authorization header
      * @return 最終響應
      */
     protected Mono<ResponseEntity<Object>> proxyAsyncBackendCall(
-        WebClient.RequestHeadersSpec<?> requestSpec,
-        String authorization
-    ) {
+            WebClient.RequestHeadersSpec<?> requestSpec,
+            String authorization) {
         return requestSpec
-            // 設置 Authorization header
-            .headers(headers -> {
-                if (authorization != null && !authorization.isBlank()) {
-                    headers.set(HttpHeaders.AUTHORIZATION, authorization);
-                }
-            })
-            // 發送請求，並獲得 response
-            .retrieve()
-            // 將 response 轉換為 BackendApiResponse
-            .bodyToMono(new ParameterizedBackendResponse())
-            .flatMap(response -> {
-                // 如果 response 不是成功，則返回錯誤響應
-                if (!response.isSuccess()
-                    || response.getRequestId() == null
-                    || response.getCode() != HttpStatus.ACCEPTED.value()) {
-                    logger.error("後端未返回有效的 requestId 或狀態碼不是 202, response={}", response);
-                    return Mono.just(ResponseEntity.status(response.getCode())
-                        .body((Object) response));
-                }
+                // 設置 Authorization header
+                .headers(headers -> {
+                    if (authorization != null && !authorization.isBlank()) {
+                        headers.set(HttpHeaders.AUTHORIZATION, authorization);
+                    }
+                })
+                // 發送請求，並獲得 response
+                .retrieve()
+                // 將 response 轉換為 BackendApiResponse
+                .bodyToMono(new ParameterizedBackendResponse())
+                .flatMap(response -> {
+                    // 如果 response 不是成功，則返回錯誤響應
+                    if (!response.isSuccess()
+                            || response.getRequestId() == null
+                            || response.getCode() != HttpStatus.ACCEPTED.value()) {
+                        logger.error("後端未返回有效的 requestId 或狀態碼不是 202, response={}", response);
+                        return Mono.just(ResponseEntity.status(response.getCode())
+                                .body((Object) response));
+                    }
 
-                String requestId = response.getRequestId();
-                logger.info("✅ 後端接受請求，requestId={}", requestId);
+                    String requestId = response.getRequestId();
+                    logger.info("✅ 後端接受請求，requestId={}", requestId);
 
-                return asyncResultRegistry.awaitResult(requestId, gatewayWaitTimeout)
-                    .map(this::toSuccessResponse)
-                    .onErrorResume(throwable -> {
-                        logger.error("等待異步結果超時或失敗: requestId={}, error={}", requestId, throwable.getMessage());
-                        return Mono.just(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT)
-                            .body((Object) String.format("等待異步結果超時或失敗: %s", throwable.getMessage())));
-                    });
-            });
+                    return asyncResultRegistry.awaitResult(requestId, gatewayWaitTimeout)
+                            .map(this::toSuccessResponse)
+                            .onErrorResume(throwable -> {
+                                logger.error("等待異步結果超時或失敗: requestId={}, error={}", requestId, throwable.getMessage());
+                                return Mono.just(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT)
+                                        .body(BackendApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR,
+                                                "等待異步結果超時或失敗: " + throwable.getMessage())));
+                            });
+                });
     }
 
     /**
@@ -110,12 +114,12 @@ public abstract class BaseAsyncProxyController {
     protected ResponseEntity<Object> toSuccessResponse(AsyncResultMessage resultMessage) {
         if (!"completed".equalsIgnoreCase(resultMessage.getStatus())) {
             String errorMessage = resultMessage.getError() != null
-                ? resultMessage.getError()
-                : "異步處理失敗";
+                    ? resultMessage.getError()
+                    : "異步處理失敗";
             logger.error("異步請求處理失敗: requestId={}, error={}",
-                resultMessage.getRequestId(), errorMessage);
+                    resultMessage.getRequestId(), errorMessage);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(errorMessage);
+                    .body(BackendApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR, errorMessage));
         }
 
         Object data = resultMessage.getData();
@@ -126,6 +130,7 @@ public abstract class BaseAsyncProxyController {
     /**
      * 解析 BackendApiResponse 的 ParameterizedTypeReference
      */
-    protected static class ParameterizedBackendResponse extends org.springframework.core.ParameterizedTypeReference<BackendApiResponse<Object>> {
+    protected static class ParameterizedBackendResponse
+            extends org.springframework.core.ParameterizedTypeReference<BackendApiResponse<Object>> {
     }
 }
