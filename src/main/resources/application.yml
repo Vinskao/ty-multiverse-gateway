@@ -11,7 +11,7 @@ spring:
     virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
 gateway:
   async:
-    timeout: 30
+    timeout: 120
   security:
     oauth2:
       resourceserver:
