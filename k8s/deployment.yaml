@@ -59,6 +59,16 @@ spec:
             secretKeyRef:
               name: ty-multiverse-gateway-secrets
               key: PUBLIC_CLIENT_ID
+        - name: PUBLIC_REALM
+          valueFrom:
+            secretKeyRef:
+              name: ty-multiverse-gateway-secrets
+              key: PUBLIC_REALM
+        - name: PUBLIC_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: ty-multiverse-gateway-secrets
+              key: PUBLIC_CLIENT_ID
         - name: KEYCLOAK_CREDENTIALS_SECRET
           valueFrom:
             secretKeyRef:
