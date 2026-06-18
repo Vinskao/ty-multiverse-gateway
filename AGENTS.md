@@ -364,3 +364,96 @@ LOGGING_LEVEL_TW_COM_TYMGATEWAY=INFO
 # - Java 21 support
 # - Maven integration
 ```
+
+---
+
+## 啟動順序（必須先 Backend）
+
+```bash
+# 1. 先啟動 Backend
+cd ../ty-multiverse-backend
+mvn spring-boot:run
+
+# 2. 再啟動 Gateway
+cd ../ty-multiverse-gateway
+./mvnw clean generate-sources compile test-compile
+mvn spring-boot:run
+```
+
+服務端點：`http://localhost:8082`
+
+## API 測試指令
+
+```bash
+# 健康檢查
+curl http://localhost:8082/actuator/health
+curl http://localhost:8082/tymg/actuator/health
+curl http://localhost:8082/actuator/gateway/routes
+
+# People API
+curl -X GET "http://localhost:8082/tymg/api/people/names"
+curl -X POST "http://localhost:8082/tymg/api/people/get-by-name" \
+  -H "Content-Type: application/json" -d '{"name": "Maya"}'
+curl -X POST "http://localhost:8082/tymg/api/people/get-all"
+
+# Weapons API
+curl -X GET "http://localhost:8082/tymg/api/people/weapons"
+curl -X GET "http://localhost:8082/tymg/api/people/damage?name=Maya"
+
+# 監控指標
+curl http://localhost:8082/actuator/metrics
+curl http://localhost:8082/actuator/prometheus
+
+# 非同步 Consumer 測試
+curl "http://localhost:8082/tymg/api/request-status?requestId=your-request-id"
+curl -X POST "http://localhost:8082/tymg/api/test/async/damage-calculation" \
+  -H "Content-Type: application/json" -d '{"requestId": "uuid-123", "characterName": "Maya"}'
+```
+
+## Docker 部署
+
+```bash
+docker build -t ty-multiverse-gateway:latest .
+docker run -p 8081:8081 \
+  -e PUBLIC_TYMB_URL=http://backend:8080 \
+  -e PUBLIC_FRONTEND_URL=http://your-frontend-url \
+  ty-multiverse-gateway:latest
+```
+
+## Kubernetes 部署
+
+```bash
+cd k8s
+kubectl apply -f deployment.yaml -n ty-multiverse
+kubectl get pods -n ty-multiverse -l app=ty-multiverse-gateway
+kubectl logs -f -n ty-multiverse -l app=ty-multiverse-gateway
+kubectl get svc -n ty-multiverse ty-multiverse-gateway-service
+```
+
+## 性能調優配置
+
+限流（`application.yml`）：
+```yaml
+redis-rate-limiter.replenishRate: 100  # 每秒補充令牌數
+redis-rate-limiter.burstCapacity: 200  # 令牌桶容量
+```
+
+熔斷器：
+```yaml
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 100
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+```
+
+本地 `local.properties` 配置：
+```properties
+PUBLIC_TYMB_URL=http://localhost:8080
+PUBLIC_FRONTEND_URL=http://localhost:4321
+REDIS_HOST=localhost
+REDIS_CUSTOM_PORT=6379
+REDIS_PASSWORD=
+```
