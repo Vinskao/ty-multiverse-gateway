@@ -181,8 +181,9 @@ public class KeycloakController {
                     // 取得 id token（用於登出時清除 session）
                     String idToken = (String) tokenBody.get("id_token");
 
-                    log.info("Access Token: {}", accessToken);
-                    log.info("Refresh Token: {}", refreshToken);
+                    // #4：不可將 token 明文寫入日誌（會洩漏到日誌系統）
+                    log.info("Access Token: {}", accessToken != null ? "已取得(len=" + accessToken.length() + ")" : "null");
+                    log.info("Refresh Token: {}", refreshToken != null ? "已取得" : "null");
                     log.info("ID Token: {}", idToken != null ? "存在" : "不存在");
 
                     // 若其中任一 token 為 null，表示取得失敗，則拋出異常
@@ -234,13 +235,12 @@ public class KeycloakController {
                                         redirectTarget += "&id_token=" + URLEncoder.encode(idToken, StandardCharsets.UTF_8);
                                     }
 
-                                    // 添加詳細日誌
+                                    // 添加詳細日誌（#4：不可印出 token 或含 token 的完整 URL）
                                     log.info("=== 重定向診斷 ===");
                                     log.info("前端URL: {}", frontendUrl);
                                     log.info("用戶名: {}", preferredUsername);
                                     log.info("Token長度: {}", accessToken.length());
-                                    log.info("Token前20字符: {}", accessToken.substring(0, Math.min(20, accessToken.length())));
-                                    log.info("完整重定向URL: {}", redirectTarget);
+                                    log.info("重定向目標(不含機密): {}?username=...", frontendUrl);
 
                                     // 執行 HTTP 重導向
                                     exchange.getResponse().setStatusCode(HttpStatus.FOUND);
