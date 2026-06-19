@@ -27,6 +27,35 @@ TY Multiverse Gateway is a Spring Cloud Gateway application that serves as the u
 - **CORS Handling**: Cross-origin resource sharing configuration
 - **Metrics Collection**: Request metrics and performance monitoring
 
+## Security Hardening (2026-06-19)
+
+### #4 Keycloak Callback: Stop Logging Tokens (P4a Log Redaction)
+
+**問題**：[KeycloakController.java](src/main/java/tw/com/tymgateway/controller/KeycloakController.java) 在 Keycloak 回呼時
+- 第 184–185 行明文輸出整個 access_token / refresh_token 到日誌
+- 第 241–243 行輸出完整 redirect URL（含所有 token 明文）
+- 日誌會被收集到中央日誌系統，形成長期機密洩漏
+
+**修正** (KeycloakController.java)：
+1. 第 184–186 行：不輸出 token 明文，改輸出長度與 "already obtained" 標記
+   ```java
+   log.info("Access Token: {}", accessToken != null ? "已取得(len=" + accessToken.length() + ")" : "null");
+   ```
+
+2. 第 237–243 行：移除輸出完整 redirect URL，改輸出只有 username 的提示
+   ```java
+   log.info("重定向目標(不含機密): {}?username=...", frontendUrl);
+   ```
+
+**部署注意**：
+- 此改動僅影響日誌輸出，不改功能邏輯
+- Build & deploy 照常（無行為改變）
+- 日誌審計：檢查舊日誌是否已歸檔、刪除或 redact（不在本改動範圍，需 DevOps/InfoSec 跟進）
+
+**後續** (P4b 待做)：回呼的 redirect URL 本身仍會把 token 帶過去（給前端 JS）。前端 P2 已在落地後立刻 replaceState 洗網址；P4b 計畫改用 httpOnly cookie。
+
+---
+
 ## Build and Test Commands
 
 ### Prerequisites
