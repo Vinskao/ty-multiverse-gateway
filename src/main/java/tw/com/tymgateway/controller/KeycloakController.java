@@ -460,20 +460,13 @@ public class KeycloakController {
                                 .body(BodyInserters.fromFormData(refreshParams))
                                 .retrieve()
                                 .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), response -> {
-                                    log.error("Keycloak token refresh 請求失敗: HTTP {}", response.statusCode());
+                                    // refresh token 已失效（rotation 後作廢、過期或已登出）屬於預期情況：
+                                    // 不把 Keycloak 原始錯誤 body（如 invalid_grant）往外拋，統一轉成 401
+                                    log.warn("Keycloak token refresh 失敗: HTTP {} (refresh token 已失效)", response.statusCode());
                                     return response.bodyToMono(String.class)
-                                            .doOnNext(errorBody -> log.error("Keycloak token refresh 錯誤響應: {}", errorBody))
-                                            .flatMap(errorBody -> {
-                                                org.springframework.web.reactive.function.client.WebClientResponseException exception = 
-                                                    org.springframework.web.reactive.function.client.WebClientResponseException.create(
-                                                        response.statusCode().value(),
-                                                        response.statusCode().toString(),
-                                                        response.headers().asHttpHeaders(),
-                                                        errorBody.getBytes(),
-                                                        java.nio.charset.StandardCharsets.UTF_8
-                                                    );
-                                                return Mono.error(exception);
-                                            });
+                                            .defaultIfEmpty("")
+                                            .doOnNext(errorBody -> log.warn("Keycloak token refresh 錯誤響應: {}", errorBody))
+                                            .then(Mono.error(new TokenRefreshFailedException()));
                                 })
                                 .bodyToMono(new org.springframework.core.ParameterizedTypeReference<Map<String, Object>>() {})
                                 .flatMap(refreshResult -> {
@@ -493,6 +486,12 @@ public class KeycloakController {
                             .body(ErrorCode.TOKEN_INVALID_OR_REFRESH_FAILED.getMessage()));
                 })
                 .onErrorResume(e -> {
+                    if (e instanceof TokenRefreshFailedException) {
+                        // refresh token 失效 → 回乾淨的 401，讓前端走「清除狀態 + 重新登入」流程
+                        return Mono.just(org.springframework.http.ResponseEntity
+                                .status(HttpStatus.UNAUTHORIZED)
+                                .body(ErrorCode.TOKEN_REFRESH_FAILED.getMessage()));
+                    }
                     if (e instanceof org.springframework.web.reactive.function.client.WebClientResponseException) {
                         org.springframework.web.reactive.function.client.WebClientResponseException responseEx = 
                             (org.springframework.web.reactive.function.client.WebClientResponseException) e;
@@ -511,6 +510,10 @@ public class KeycloakController {
                                 .body(ErrorCode.TOKEN_CHECK_FAILED.getMessage()));
                     }
                 });
+    }
+
+    /** refresh token 失效的內部標記例外（預期情況，統一轉為 401） */
+    private static class TokenRefreshFailedException extends RuntimeException {
     }
 }
 
