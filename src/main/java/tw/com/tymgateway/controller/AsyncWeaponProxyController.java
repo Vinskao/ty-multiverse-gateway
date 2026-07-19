@@ -90,6 +90,19 @@ public class AsyncWeaponProxyController extends BaseAsyncProxyController {
     }
 
     /**
+     * Proxy a batch weapon upload as one request.
+     */
+    @PostMapping(value = "/insert-multiple", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Object>> insertMultipleWeapons(
+            @RequestBody Object weapons,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
+        logger.info("Gateway proxy request: POST /weapons/insert-multiple");
+        return proxyAsyncBackendCall(
+                backendWebClient.post().uri("/weapons/insert-multiple").bodyValue(weapons),
+                authorization);
+    }
+
+    /**
      * 同步刪除單個武器
      *
      * @param weaponId      武器 ID
