@@ -32,6 +32,15 @@ gateway:
       # Spring Cloud Gateway (WebFlux) → Backend REST Controllers
       # 所有请求通过路由配置转发到 Backend REST API
       routes:
+        # Learn Module Routes (JWT Authorization header is forwarded unchanged)
+        - id: learn-routes
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+          predicates:
+            - Path=/tymg/learn/**
+            - Method=GET,POST
+          filters:
+            - RewritePath=/tymg/learn/(?<segment>.*), /tymb/learn/$\{segment}
+
         # ========================================
         # People Module Routes
         # ========================================
