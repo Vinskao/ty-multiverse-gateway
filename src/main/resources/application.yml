@@ -9,15 +9,6 @@ spring:
     username: ${RABBITMQ_USERNAME:admin}
     password: ${RABBITMQ_PASSWORD:admin123}
     virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
-gateway:
-  async:
-    timeout: 120
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${KEYCLOAK_AUTH_SERVER_URL:@BUILD_KEYCLOAK_AUTH_SERVER_URL@}/realms/${PUBLIC_REALM:@BUILD_PUBLIC_REALM@}
-          jwk-set-uri: ${KEYCLOAK_AUTH_SERVER_URL:@BUILD_KEYCLOAK_AUTH_SERVER_URL@}/realms/${PUBLIC_REALM:@BUILD_PUBLIC_REALM@}/protocol/openid-connect/certs
   cloud:
     gateway:
       # CORS configuration is handled by CorsWebFilter in GatewayConfig.java
@@ -212,6 +203,16 @@ gateway:
   #         max-idle: 8
   #         min-idle: 2
   #         max-wait: 5000ms
+
+gateway:
+  async:
+    timeout: 120
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_AUTH_SERVER_URL:@BUILD_KEYCLOAK_AUTH_SERVER_URL@}/realms/${PUBLIC_REALM:@BUILD_PUBLIC_REALM@}
+          jwk-set-uri: ${KEYCLOAK_AUTH_SERVER_URL:@BUILD_KEYCLOAK_AUTH_SERVER_URL@}/realms/${PUBLIC_REALM:@BUILD_PUBLIC_REALM@}/protocol/openid-connect/certs
 
 # Server configuration  
 server:

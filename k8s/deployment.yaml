@@ -76,6 +76,8 @@ spec:
               key: KEYCLOAK_CREDENTIALS_SECRET
         - name: PUBLIC_TYMB_URL
           value: "http://ty-multiverse-backend/tymb"
+        - name: BACKEND_BASE_URL
+          value: "http://ty-multiverse-backend"
         - name: PUBLIC_FRONTEND_URL
           valueFrom:
             secretKeyRef:
@@ -139,4 +141,3 @@ spec:
           timeoutSeconds: 3
           failureThreshold: 3
       restartPolicy: Always
-
