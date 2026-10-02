@@ -27,6 +27,17 @@ TY Multiverse Gateway is a Spring Cloud Gateway application that serves as the u
 - **CORS Handling**: Cross-origin resource sharing configuration
 - **Metrics Collection**: Request metrics and performance monitoring
 
+## Security Hardening (2026-10-02)
+
+- `/tymg` 寫入（people insert/update/delete-all、weapons、gallery、ckeditor save）在 gateway 就要 JWT；
+  讀取、以 POST 實作的查詢、OPTIONS 維持公開。回歸保護：`GatewaySecurityRulesTest`。
+- 已移除 actuator 的 `gateway` 端點：`POST /actuator/gateway/routes/**` 讓叢集內任何 pod 都能新增代理路由
+  （叢集目前沒有生效的 NetworkPolicy）。health 細節只給 `manage-users`。見 `GatewayActuatorExposureTest`。
+- Proxy controller 不再把 throwable / 非同步錯誤訊息回給呼叫端，只回通用訊息與 requestId。
+- 使用 common 2.3.0（`ReactiveExceptionAdvice` + 日誌遮罩）。**自訂 `logging.pattern.console` 必須以 `%maskedEx` 結尾**，
+  否則 logback 會自動補上未遮罩的 `%ex`（`LogMaskingConfigTest` 會讀 application.yml 的 pattern 驗證）。
+- 未處理：`KeycloakController` introspect 失敗時會原樣轉回 Keycloak 的錯誤 JSON（OAuth 錯誤碼，風險低）。
+
 ## Security Hardening (2026-06-19)
 
 ### #4 Keycloak Callback: Stop Logging Tokens (P4a Log Redaction)
