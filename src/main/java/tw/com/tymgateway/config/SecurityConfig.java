@@ -110,28 +110,22 @@ public class SecurityConfig {
                         // ========================================
                         // 业务路径：GET 请求放行，其他方法需要有效 Token
                         // ========================================
-                        // People Module - 所有操作放行（由 AsyncPeopleProxyController 处理，保持 gateway -> backend
-                        // -> consumer 流程）
-                        .pathMatchers("/tymg/people/**").permitAll()
-
-                        // Weapon Module - 修改端點公開以利於同步腳本
-                        .pathMatchers(HttpMethod.GET, "/tymg/weapons/**").permitAll()
-                        .pathMatchers(HttpMethod.POST, "/tymg/weapons/**").permitAll()
-                        .pathMatchers(HttpMethod.PUT, "/tymg/weapons/**").permitAll()
-                        .pathMatchers(HttpMethod.DELETE, "/tymg/weapons/**").permitAll()
-
-                        // Gallery Module - 修改端點公開以利於同步腳本
+                        // People：讀取公開（含以 POST 實作的查詢），寫入需 JWT（落到下方 anyExchange）
+                        .pathMatchers(HttpMethod.GET, "/tymg/people/**").permitAll()
+                        .pathMatchers(HttpMethod.POST,
+                                "/tymg/people/get-all",
+                                "/tymg/people/get-by-name",
+                                "/tymg/people/batchDamageWithWeapon").permitAll()
+                        // Weapons：讀取公開，寫入需 JWT
+                        .pathMatchers(HttpMethod.GET, "/tymg/weapons", "/tymg/weapons/**").permitAll()
+                        // Gallery：讀取公開（getAll/getById 為 POST 查詢），寫入需 JWT
                         .pathMatchers(HttpMethod.GET, "/tymg/gallery/**").permitAll()
-                        .pathMatchers(HttpMethod.POST, "/tymg/gallery/**").permitAll()
-                        .pathMatchers(HttpMethod.PUT, "/tymg/gallery/**").permitAll()
-                        .pathMatchers(HttpMethod.DELETE, "/tymg/gallery/**").permitAll()
-
-                        // 其他 Async API - 需要 Token（這些通常是异步操作）
+                        .pathMatchers(HttpMethod.POST, "/tymg/gallery/getAll", "/tymg/gallery/getById").permitAll()
+                        // CKEditor：讀取公開（前端以 POST get-content 讀取），save-content 需 JWT
+                        .pathMatchers(HttpMethod.GET, "/tymg/ckeditor/**").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/tymg/ckeditor/get-content").permitAll()
+                        // 其他 Async API - 需要 Token
                         .pathMatchers("/tymg/api/**").authenticated()
-
-                        // CKEditor Module - 允許公開訪問 (Token 在 Query Param 中，Gateway 默認 Resolver
-                        // 無法讀取，故先放行)
-                        .pathMatchers("/tymg/ckeditor/**").permitAll()
 
                         // ========================================
                         // 默认规则：需要有效 Token（JWT 验证已启用）

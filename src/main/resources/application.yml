@@ -248,15 +248,18 @@ management:
     web:
       base-path: /actuator
       exposure:
-        include: health,info,metrics,prometheus,gateway
+        # no "gateway": its POST /actuator/gateway/routes/** lets any caller in the cluster add proxy routes
+        include: health,info,metrics,prometheus
   endpoint:
     health:
-      show-details: always
-      show-components: always
+      # status is public (probes); components/details only for admins
+      show-details: when-authorized
+      show-components: when-authorized
+      roles: manage-users
       probes:
         enabled: true
     gateway:
-      enabled: true
+      enabled: false
   metrics:
     tags:
       application: ${spring.application.name}
@@ -272,7 +275,8 @@ logging:
     org.springframework.web: INFO
     reactor.netty: INFO
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    # must end with %maskedEx (ty-multiverse-common): without an exception word logback appends an unmasked %ex
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n%maskedEx"
   charset:
     console: UTF-8
 

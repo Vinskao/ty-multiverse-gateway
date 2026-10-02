@@ -98,9 +98,10 @@ public abstract class BaseAsyncProxyController {
                             .map(this::toSuccessResponse)
                             .onErrorResume(throwable -> {
                                 logger.error("等待異步結果超時或失敗: requestId={}, error={}", requestId, throwable.getMessage());
+                                // 細節只進日誌（由 logback 遮罩），不回給呼叫端
                                 return Mono.just(ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT)
-                                        .body(BackendApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR,
-                                                "等待異步結果超時或失敗: " + throwable.getMessage())));
+                                        .body(BackendApiResponse.error(ErrorCode.EXTERNAL_SERVICE_TIMEOUT,
+                                                "等待異步結果逾時或失敗 (requestId=" + requestId + ")")));
                             });
                 });
     }
@@ -118,8 +119,10 @@ public abstract class BaseAsyncProxyController {
                     : "異步處理失敗";
             logger.error("異步請求處理失敗: requestId={}, error={}",
                     resultMessage.getRequestId(), errorMessage);
+            // consumer 回報的錯誤細節可能含連線字串或 SQL：只記日誌，回應給通用訊息與 requestId
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(BackendApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR, errorMessage));
+                    .body(BackendApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR,
+                            "異步處理失敗 (requestId=" + resultMessage.getRequestId() + ")"));
         }
 
         Object data = resultMessage.getData();

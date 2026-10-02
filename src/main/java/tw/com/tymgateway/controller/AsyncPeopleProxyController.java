@@ -281,7 +281,7 @@ public class AsyncPeopleProxyController extends BaseAsyncProxyController {
                         }
                     }
                     return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body((Object) ("傷害計算失敗: " + throwable.getMessage())));
+                            .body((Object) "傷害計算失敗"));
                 });
     }
 
