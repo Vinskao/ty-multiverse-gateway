@@ -365,12 +365,12 @@ EOF
                                           --from-literal=REDIS_PASSWORD="${REDIS_PASSWORD}" \
                                           -n default --dry-run=client -o yaml | kubectl apply -f -
 
-                                        kubectl rollout status deployment/ty-multiverse-gateway -n default
+                                        kubectl rollout status deployment/ty-multiverse-gateway -n default --timeout=20m
                                     '''
 
                                     // 檢查部署狀態
                                     sh 'kubectl get deployments -n default'
-                                    sh 'kubectl rollout status deployment/ty-multiverse-gateway -n default'
+                                    sh 'kubectl rollout status deployment/ty-multiverse-gateway -n default --timeout=20m'
                                 } catch (Exception e) {
                                     echo "Error during deployment: ${e.message}"
                                     // Debug non-ready pods and recent events
