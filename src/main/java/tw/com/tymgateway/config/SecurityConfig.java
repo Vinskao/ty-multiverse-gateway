@@ -107,6 +107,9 @@ public class SecurityConfig {
                         // Auth endpoints - Forward to Backend
                         .pathMatchers("/tymg/auth/**").permitAll()
 
+                        // Public learning uses backend validated guest identity; private learner/mentor APIs stay authenticated.
+                        .pathMatchers("/tymg/learn/public/**").permitAll()
+
                         // ========================================
                         // 业务路径：GET 请求放行，其他方法需要有效 Token
                         // ========================================

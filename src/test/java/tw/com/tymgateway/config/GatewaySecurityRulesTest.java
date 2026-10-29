@@ -86,6 +86,8 @@ class GatewaySecurityRulesTest {
                 Arguments.of("GET", "/tymg/health/consumer"), Arguments.of("GET", "/tymg/actuator/health"),
                 Arguments.of("GET", "/tymg/keycloak/redirect"), Arguments.of("POST", "/tymg/keycloak/introspect"),
                 Arguments.of("GET", "/tymg/auth/visitor"), Arguments.of("GET", "/tymg/swagger-ui/index.html"),
+                Arguments.of("GET", "/tymg/learn/public/topics"),
+                Arguments.of("POST", "/tymg/learn/public/topics/q/session"),
                 Arguments.of("OPTIONS", "/tymg/people/insert"));
     }
 
@@ -97,7 +99,9 @@ class GatewaySecurityRulesTest {
 
     /** Everything else keeps requiring a login (rules that already worked). */
     static Stream<Arguments> loginRequiredEndpoints() {
-        return Stream.of(Arguments.of("GET", "/tymg/learn/topics"), Arguments.of("POST", "/tymg/api/sync-characters"),
+        return Stream.of(Arguments.of("GET", "/tymg/learn/topics"),
+                Arguments.of("GET", "/tymg/learn/mentor/overview"),
+                Arguments.of("POST", "/tymg/api/sync-characters"),
                 Arguments.of("GET", "/tymg/people-images"), Arguments.of("GET", "/tymg/unknown"));
     }
 
