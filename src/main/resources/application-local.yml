@@ -19,7 +19,7 @@ BACKEND_BASE_URL: http://localhost:8080
 PUBLIC_TYMB_URL: http://localhost:8080/tymb
 
 # Frontend URL for CORS
-PUBLIC_FRONTEND_URL: http://localhost:4321/tymultiverse
+PUBLIC_FRONTEND_URL: http://localhost:4321/
 
 gateway:
   async:

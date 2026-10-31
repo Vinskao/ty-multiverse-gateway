@@ -53,7 +53,7 @@ public class SwaggerConfig {
                                 .url(gatewaySwaggerUrl)
                                 .description("本地開發環境 Gateway"),
                         new Server()
-                                .url("https://peoplesystem.tatdvsonorth.com")
+                                .url("https://tymultiverse.cc")
                                 .description("生產環境 Gateway")
                 ));
     }
