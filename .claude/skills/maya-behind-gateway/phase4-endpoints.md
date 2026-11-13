@@ -8,7 +8,7 @@
 | 類別 | 端點 |
 |---|---|
 | 市場報價與期貨 | `GET /market/taiex-futures`、`GET /market/mini-tsmc-futures`、`GET /market/watch`、`GET /market/timestamps`、`/timestamps/{day}/manifest`、`/timestamps/{day}/proof` |
-| 儀表板 | `GET /market/dashboard`、`/dashboard/brief`、`/dashboard/events`、`/dashboard/fundamentals/{code}`、`/dashboard/history/{code}`（持股結構另有擁有者判斷）、`/dashboard/industries`、`/dashboard/industries/unclassified`、`/dashboard/macro`、`/dashboard/macro/nodes`、`/dashboard/overseas/{code}`、`/dashboard/research` |
+| 儀表板 | `GET /market/dashboard`、`/dashboard/brief`、`/dashboard/events`、`/dashboard/fundamentals/{code}`、`/dashboard/history/{code}`（持股結構另有擁有者判斷）、`/dashboard/industries`、`/dashboard/industries/unclassified`、`/dashboard/macro`、`/dashboard/macro/nodes`、`/dashboard/overseas/{code}`、`/dashboard/research`、`/dashboard/relative/{code}`、`/dashboard/tx-settlements`、`GET /market/signal-events` |
 | 分析（公開讀，擁有者看更多） | `GET /market/dashboard/analysis/{code}`、`GET /market/dashboard/targets/{code}`、`GET /market/reports`、`GET /market/reports/{report_id}`、`GET /market/notifications` |
 | Benchmark | `GET /market/benchmark`、`/benchmark/monitor`、`/benchmark/versions` |
 | 報告 | `GET /market/reports/claims`、`/reports/collector`、`/reports/fulltext`、`/reports/claim-proposals/sources`、`/reports/claim-proposals/source/{report_id}` |
@@ -37,7 +37,7 @@ Maya 依賴：`require_manage_users`、`require_manage_users_request`（擁有�
 
 雲端排程帶 `X-Market-Agent-Key`；Gateway 只能轉發，不可記錄或改寫這個 header。
 
-- 帶 agent key：`PUT /market/benchmark/{code}`、`/benchmark/{code}/selection`、`/benchmark/monitor/{code}`、`GET /market/daily-maya/proposals`、`POST /market/daily-maya/proposals/{id}/review`、`GET /market/reports/claim-proposals`、`POST /market/reports/claim-proposals/{report_id}`、`POST /market/reports/claim-proposals/{proposal_id}/review`、`GET /market/reports/pending`、`GET /market/reports/search`、`PUT /market/reports/{report_id}/claims`、`POST /market/notify`、`POST /market/routine-usage`、`POST /market/watch`、`POST /market/watch/weekly`、`GET /market/watch/weekly/proposals`、`POST /market/watch/weekly/proposals/{id}/review`、`POST /otel/v1/metrics`（另有 IP allowlist）
+- 帶 agent key：`PUT /market/benchmark/{code}`、`/benchmark/{code}/selection`、`/benchmark/monitor/{code}`、`GET /market/daily-maya/proposals`、`POST /market/daily-maya/proposals/{id}/review`、`GET /market/reports/claim-proposals`、`POST /market/reports/claim-proposals/{report_id}`、`POST /market/reports/claim-proposals/{proposal_id}/review`、`GET /market/reports/pending`、`GET /market/reports/search`、`PUT /market/reports/{report_id}/claims`、`POST /market/notify`、`POST /market/routine-usage`、`POST /market/signal-events`、`POST /market/watch`、`POST /market/watch/weekly`、`GET /market/watch/weekly/proposals`、`POST /market/watch/weekly/proposals/{id}/review`、`POST /otel/v1/metrics`（另有 IP allowlist）
 - 刻意無 key 的投遞箱（只存成 pending，不改網站）：`POST /market/daily-maya/proposals`（ChatGPT 每日草稿）、`POST /market/watch/weekly/proposals`。Gateway 對這兩條加嚴格限流即可。
 - 混用：上面 B 的 `analysis_editor` 端點也接受 agent key，所以 Gateway 對它們**不可強制 JWT**；規則是「有 Bearer 就驗，沒有就交給 Maya 驗 agent key」。
 
