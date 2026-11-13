@@ -48,3 +48,8 @@ description: 讓 Maya Sawa 不對外暴露、只經 ty-multiverse-gateway（Spri
 - 不讀、不印 agent key、Keycloak secret 等任何密鑰；密鑰只走 Jenkins credential → K8s secret。
 - 推送：gateway 與 maya-sawa 依各自 repo 的分支慣例；maya-sawa main 即 prod。
 - 切 Ingress（階段 2）是對外行為改變，執行前跟使用者確認。
+
+
+## Phase 2 deployed (2026-11-13)
+
+Legacy ingress manifests now live in gateway `k8s/maya-ingress.yaml` under their existing names, including `portfolio-api-protected-ingress`. Maya deployment no longer declares ingress. Both legacy and new-domain rules target Gateway. See `docs/routing/MAYA_PHASE2_RESULT.md` for verification, remaining checks and rollback.

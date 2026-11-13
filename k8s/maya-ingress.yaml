@@ -1,0 +1,80 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: maya-sawa-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/proxy-body-size: 1024m
+    nginx.ingress.kubernetes.io/proxy-request-buffering: 'off'
+    nginx.ingress.kubernetes.io/proxy-buffer-size: 128k
+    nginx.ingress.kubernetes.io/proxy-buffers-number: '4'
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: '30'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '1800'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '1800'
+    nginx.ingress.kubernetes.io/use-forwarded-headers: 'true'
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    cert-manager.io/certificate-name: peoplesystem-tls
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - peoplesystem.tatdvsonorth.com
+    secretName: peoplesystem-tls
+  rules:
+  - host: peoplesystem.tatdvsonorth.com
+    http:
+      paths:
+      - path: /maya-sawa/
+        pathType: Prefix
+        backend:
+          service:
+            name: ty-multiverse-gateway-service
+            port:
+              number: 8082
+      - path: /maya-v2/
+        pathType: Prefix
+        backend:
+          service:
+            name: ty-multiverse-gateway-service
+            port:
+              number: 8082
+      - path: /voyeur/
+        pathType: Prefix
+        backend:
+          service:
+            name: ty-multiverse-gateway-service
+            port:
+              number: 8082
+      - path: /paprika/
+        pathType: Prefix
+        backend:
+          service:
+            name: ty-multiverse-gateway-service
+            port:
+              number: 8082
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: portfolio-api-protected-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /maya-sawa/market/portfolio
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: peoplesystem.tatdvsonorth.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: ty-multiverse-gateway-service
+            port:
+              number: 8082
+        path: /tymultiverse/api/market/portfolio
+        pathType: Exact
+  tls:
+  - hosts:
+    - peoplesystem.tatdvsonorth.com
+    secretName: peoplesystem-tls
