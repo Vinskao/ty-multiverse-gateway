@@ -14,6 +14,19 @@ description: 讓 Maya Sawa 不對外暴露、只經 ty-multiverse-gateway（Spri
 3. **先加路由、再切 Ingress、最後才搬驗證。** 順序反了會出現：路由還沒有就斷線，或 Maya 信任 header 卻仍可被直連偽造。
 4. **舊網域不可回 301。** peoplesystem.tatdvsonorth.com 仍被 Apps Script、ChatGPT connector 使用。
 
+## 階段 4：驗證與限流收進 Gateway
+
+**先讀 `phase4-endpoints.md`**，裡面有端點分類、執行順序和驗收方式。重點如下：
+
+- 端點分成五類：A 公開讀取（未登入也要能看）、B 需要登入、C 機器呼叫（agent key）、D 叢集內專用、E 掃描未見驗證的端點。
+- **D 類現在就該擋**：`/market/internal/**`、`/runpod/internal/**` 目前從外網打得到，只靠一個共享密鑰保護。
+- **E 類要逐條處理**：付費（ask-with-model、qa/query）、刪除聊天紀錄、1GB 影片上傳等端點沒有看到驗證。逐條確認之前，不要宣稱它們已受保護，也不要直接封掉。
+- **trusted proxy 網段是定時炸彈**：Gateway 剛好落在 `10.244.1.0/24` 所以現在正常。換到別台 node，Maya 會把全站流量當成同一個 IP，公開限流觸發 429。
+- **混用端點不可強制 JWT**：`analysis_editor` 類端點也接受 agent key，規則是「有 Bearer 就驗，沒有就交給 Maya」。
+- **publishing/mcp 不可套一般 JWT 規則**：它用專用 audience 的 token，原樣放行給 Maya。
+- **不要和 Maya 的限流打架**：Maya 已有每個 IP／使用者、每條路徑的 Redis 限流。Gateway 只做粗粒度的總量保護。
+- **清單會過期**：Maya 新增端點後，重跑 `scripts/list_maya_routes.py`，更新分類表。
+
 ## 必踩的坑（已查證）
 
 | 症狀 | 原因 | 處理 |

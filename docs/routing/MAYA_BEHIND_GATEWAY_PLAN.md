@@ -75,7 +75,9 @@ flannel 不執行 NetworkPolicy，所以：
 
 **不要寫一份不會被執行的 NetworkPolicy 然後宣稱已鎖住。**
 
-### 階段 4：驗證與限流收進 Gateway（另開計畫）
+### 階段 4：驗證與限流收進 Gateway
+
+完整端點分類、執行順序與驗收：`.claude/skills/maya-behind-gateway/phase4-endpoints.md`（2026-11-13 盤點）。下列為原始摘要。
 
 - Gateway 驗 Keycloak JWT，覆寫外部帶入的 `X-User`／`X-Roles`，Maya 改信任 header。
 - 限流用 `RequestRateLimiter` + 現有 Redis（`application.yml` 已有被註解的 Redis 設定）。
