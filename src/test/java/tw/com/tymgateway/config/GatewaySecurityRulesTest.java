@@ -97,6 +97,18 @@ class GatewaySecurityRulesTest {
         call(method, path, false).expectStatus().isOk();
     }
 
+    static Stream<String> mayaPaths() {
+        return Stream.of("/maya-sawa/probe", "/maya-v2/probe", "/voyeur/probe", "/paprika/probe");
+    }
+
+    @ParameterizedTest
+    @MethodSource("mayaPaths")
+    void mayaOwnsAuthentication(String path) {
+        client.post().uri(path).exchange().expectStatus().isOk();
+        client.post().uri(path).header("Authorization", "Bearer maya-agent-key")
+                .exchange().expectStatus().isOk();
+    }
+
     /** Everything else keeps requiring a login (rules that already worked). */
     static Stream<Arguments> loginRequiredEndpoints() {
         return Stream.of(Arguments.of("GET", "/tymg/learn/topics"),

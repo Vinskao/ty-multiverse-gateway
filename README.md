@@ -135,3 +135,5 @@ graph TD
 - Redis（分散式限流）/ Resilience4j（熔斷器）
 
 > 啟動指令、API 測試 curl 範例、Docker/K8s 部署、性能調優請見 [AGENTS.md](AGENTS.md)。
+
+Maya ???????????[????](docs/routing/MAYA_BEHIND_GATEWAY_PLAN.md)?

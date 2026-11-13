@@ -52,7 +52,13 @@ public CorsWebFilter corsWebFilter() {
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", corsConfig);
 
-    return new CorsWebFilter(source);
+    return new CorsWebFilter(exchange -> {
+        String path = exchange.getRequest().getPath().value();
+        if (path.matches("/(maya-sawa|maya-v2|voyeur|paprika)(/.*)?")) {
+            return null; // Maya owns CORS, including preflight responses.
+        }
+        return source.getCorsConfiguration(exchange);
+    });
 }
 
     @Value("${PUBLIC_TYMB_URL:http://localhost:8080}")

@@ -133,11 +133,23 @@ public class SecurityConfig {
                         // ========================================
                         // 默认规则：需要有效 Token（JWT 验证已启用）
                         // ========================================
+                        .pathMatchers("/maya-sawa/**", "/maya-v2/**", "/voyeur/**", "/paprika/**").permitAll()
                         .anyExchange().authenticated())
 
                 // OAuth2 Resource Server：JWT Token 验证
                 // Gateway 负责统一认证入口（粗粒度）
                 .oauth2ResourceServer(oauth2 -> oauth2
+                        .bearerTokenConverter(exchange -> {
+                            String path = exchange.getRequest().getPath().value();
+                            if (path.equals("/maya-sawa") || path.startsWith("/maya-sawa/")
+                                    || path.equals("/maya-v2") || path.startsWith("/maya-v2/")
+                                    || path.equals("/voyeur") || path.startsWith("/voyeur/")
+                                    || path.equals("/paprika") || path.startsWith("/paprika/")) {
+                                return reactor.core.publisher.Mono.empty();
+                            }
+                            return new org.springframework.security.oauth2.server.resource.web.server.authentication.ServerBearerTokenAuthenticationConverter()
+                                    .convert(exchange);
+                        })
                         .jwt(jwt -> jwt
                                 .jwtDecoder(reactiveJwtDecoder())))
 
