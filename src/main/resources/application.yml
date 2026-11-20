@@ -11,230 +11,236 @@ spring:
     virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
   cloud:
     gateway:
-      # CORS configuration is handled by CorsWebFilter in GatewayConfig.java
-      # Global CORS configuration removed to avoid conflicts
+      server:
+        webflux:
+          # Gateway 4.3+ drops X-Forwarded-* entries that do not match this pattern (CVE-2025-41235).
+          # Keep the whole chain: maya-sawa resolves the client IP itself by walking X-Forwarded-For from the
+          # right against its own trusted-proxy CIDRs (per-IP rate limits), so it needs the public client hop.
+          trusted-proxies: '.*'
+          # CORS configuration is handled by CorsWebFilter in GatewayConfig.java
+          # Global CORS configuration removed to avoid conflicts
 
-      # Route configurations - Spring Cloud Gateway 纯路由转发
-      # Gateway context-path: /tymg (自動添加)
-      # 前端請求格式：http://localhost:8082/tymg/**
-      # Gateway 轉發到：http://localhost:8080/tymb/**
-      #
-      # 架构说明：
-      # Spring Cloud Gateway (WebFlux) → Backend REST Controllers
-      # 所有请求通过路由配置转发到 Backend REST API
-      routes:
-        - id: maya-sawa-routes
-          uri: '${MAYA_SAWA_BASE_URL:http://maya-sawa}'
-          predicates:
-            - Path=/maya-sawa/**
-          metadata:
-            response-timeout: 1800000
-            connect-timeout: 30000
+          # Route configurations - Spring Cloud Gateway 纯路由转发
+          # Gateway context-path: /tymg (自動添加)
+          # 前端請求格式：http://localhost:8082/tymg/**
+          # Gateway 轉發到：http://localhost:8080/tymb/**
+          #
+          # 架构说明：
+          # Spring Cloud Gateway (WebFlux) → Backend REST Controllers
+          # 所有请求通过路由配置转发到 Backend REST API
+          routes:
+            - id: maya-sawa-routes
+              uri: '${MAYA_SAWA_BASE_URL:http://maya-sawa}'
+              predicates:
+                - Path=/maya-sawa/**
+              metadata:
+                response-timeout: 1800000
+                connect-timeout: 30000
 
-        - id: maya-v2-routes
-          uri: '${MAYA_SAWA_BASE_URL:http://maya-sawa}'
-          predicates:
-            - Path=/maya-v2/**
-          metadata:
-            response-timeout: 1800000
-            connect-timeout: 30000
+            - id: maya-v2-routes
+              uri: '${MAYA_SAWA_BASE_URL:http://maya-sawa}'
+              predicates:
+                - Path=/maya-v2/**
+              metadata:
+                response-timeout: 1800000
+                connect-timeout: 30000
 
-        - id: voyeur-routes
-          uri: '${MAYA_SAWA_BASE_URL:http://maya-sawa}'
-          predicates:
-            - Path=/voyeur/**
-          metadata:
-            response-timeout: 1800000
-            connect-timeout: 30000
+            - id: voyeur-routes
+              uri: '${MAYA_SAWA_BASE_URL:http://maya-sawa}'
+              predicates:
+                - Path=/voyeur/**
+              metadata:
+                response-timeout: 1800000
+                connect-timeout: 30000
 
-        - id: paprika-routes
-          uri: '${MAYA_SAWA_BASE_URL:http://maya-sawa}'
-          predicates:
-            - Path=/paprika/**
-          metadata:
-            response-timeout: 1800000
-            connect-timeout: 30000
+            - id: paprika-routes
+              uri: '${MAYA_SAWA_BASE_URL:http://maya-sawa}'
+              predicates:
+                - Path=/paprika/**
+              metadata:
+                response-timeout: 1800000
+                connect-timeout: 30000
 
-        # Learn Module Routes (JWT Authorization header is forwarded unchanged)
-        - id: learn-routes
-          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
-          predicates:
-            - Path=/tymg/learn/**
-            - Method=GET,POST
-          filters:
-            - RewritePath=/tymg/learn/(?<segment>.*), /tymb/learn/$\{segment}
+            # Learn Module Routes (JWT Authorization header is forwarded unchanged)
+            - id: learn-routes
+              uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+              predicates:
+                - Path=/tymg/learn/**
+                - Method=GET,POST
+              filters:
+                - RewritePath=/tymg/learn/(?<segment>.*), /tymb/learn/$\{segment}
 
-        # ========================================
-        # People Module Routes
-        # ========================================
-        # NOTE: /tymg/people/** routes are handled by AsyncPeopleProxyController
-        # AsyncPeopleProxyController 會處理所有 /tymg/people/** 請求，保持 gateway -> backend -> consumer 流程
-        # 不需要在這裡配置路由，因為 AsyncPeopleProxyController 會直接處理
+            # ========================================
+            # People Module Routes
+            # ========================================
+            # NOTE: /tymg/people/** routes are handled by AsyncPeopleProxyController
+            # AsyncPeopleProxyController 會處理所有 /tymg/people/** 請求，保持 gateway -> backend -> consumer 流程
+            # 不需要在這裡配置路由，因為 AsyncPeopleProxyController 會直接處理
 
-        # ========================================
-        # Weapons Module Routes
-        # ========================================
-        - id: weapons-routes
-          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
-          predicates:
-            - Path=/tymg/weapons
-            - Method=GET,POST,PUT,DELETE
-          filters:
-            - RewritePath=/tymg/weapons, /tymb/weapons
+            # ========================================
+            # Weapons Module Routes
+            # ========================================
+            - id: weapons-routes
+              uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+              predicates:
+                - Path=/tymg/weapons
+                - Method=GET,POST,PUT,DELETE
+              filters:
+                - RewritePath=/tymg/weapons, /tymb/weapons
 
-        - id: weapons-detail-route
-          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
-          predicates:
-            - Path=/tymg/weapons/**
-            - Method=GET,POST,PUT,DELETE
-          filters:
-            - RewritePath=/tymg/weapons/(?<segment>.*), /tymb/weapons/$\{segment}
+            - id: weapons-detail-route
+              uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+              predicates:
+                - Path=/tymg/weapons/**
+                - Method=GET,POST,PUT,DELETE
+              filters:
+                - RewritePath=/tymg/weapons/(?<segment>.*), /tymb/weapons/$\{segment}
 
-        # ========================================
-        # Gallery Module Routes
-        # ========================================
-        - id: gallery-routes
-          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
-          predicates:
-            - Path=/tymg/gallery/**
-            - Method=GET,POST,PUT,DELETE
-          filters:
-            - RewritePath=/tymg/gallery/(?<segment>.*), /tymb/gallery/$\{segment}
+            # ========================================
+            # Gallery Module Routes
+            # ========================================
+            - id: gallery-routes
+              uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+              predicates:
+                - Path=/tymg/gallery/**
+                - Method=GET,POST,PUT,DELETE
+              filters:
+                - RewritePath=/tymg/gallery/(?<segment>.*), /tymb/gallery/$\{segment}
 
-        # ========================================
-        # Deckofcards (Blackjack) Routes
-        # ========================================
-        - id: deckofcards-routes
-          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
-          predicates:
-            - Path=/tymg/deckofcards/**
-            - Method=GET,POST
-          filters:
-            - RewritePath=/tymg/deckofcards/(?<segment>.*), /tymb/deckofcards/$\{segment}
+            # ========================================
+            # Deckofcards (Blackjack) Routes
+            # ========================================
+            - id: deckofcards-routes
+              uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+              predicates:
+                - Path=/tymg/deckofcards/**
+                - Method=GET,POST
+              filters:
+                - RewritePath=/tymg/deckofcards/(?<segment>.*), /tymb/deckofcards/$\{segment}
 
-        # ========================================
-        # CKEditor Module Routes
-        # ========================================
-        - id: ckeditor-routes
-          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
-          predicates:
-            - Path=/tymg/ckeditor/**
-          filters:
-            - RewritePath=/tymg/ckeditor/(?<segment>.*), /tymb/ckeditor/$\{segment}
+            # ========================================
+            # CKEditor Module Routes
+            # ========================================
+            - id: ckeditor-routes
+              uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+              predicates:
+                - Path=/tymg/ckeditor/**
+              filters:
+                - RewritePath=/tymg/ckeditor/(?<segment>.*), /tymb/ckeditor/$\{segment}
 
-        # ========================================
-        # Infrastructure Routes
-        # ========================================
-        - id: people-images-route
-          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
-          predicates:
-            - Path=/tymg/people-images/**
-          filters:
-            - RewritePath=/tymg/people-images/(?<segment>.*), /tymb/people-images/$\{segment}
+            # ========================================
+            # Infrastructure Routes
+            # ========================================
+            - id: people-images-route
+              uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+              predicates:
+                - Path=/tymg/people-images/**
+              filters:
+                - RewritePath=/tymg/people-images/(?<segment>.*), /tymb/people-images/$\{segment}
 
-        - id: palais-access-route
-          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
-          predicates:
-            - Path=/tymg/palais-access/**
-          filters:
-            - RewritePath=/tymg/palais-access/(?<segment>.*), /tymb/palais-access/$\{segment}
+            - id: palais-access-route
+              uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+              predicates:
+                - Path=/tymg/palais-access/**
+              filters:
+                - RewritePath=/tymg/palais-access/(?<segment>.*), /tymb/palais-access/$\{segment}
 
-        - id: business-process-bpmn-route
-          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
-          predicates:
-            - Path=/tymg/api/business-processes.bpmn,/tymg/api/palais-access.bpmn
-            - Method=GET
-          filters:
-            - RewritePath=/tymg/api/(?<diagram>[^/]+), /tymb/api/$\{diagram}
+            - id: business-process-bpmn-route
+              uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+              predicates:
+                - Path=/tymg/api/business-processes.bpmn,/tymg/api/palais-access.bpmn
+                - Method=GET
+              filters:
+                - RewritePath=/tymg/api/(?<diagram>[^/]+), /tymb/api/$\{diagram}
 
-        - id: async-request-status-route
-          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
-          predicates:
-            - Path=/tymg/api/request-status/**
-            - Method=GET,DELETE
-          filters:
-            - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}
+            - id: async-request-status-route
+              uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+              predicates:
+                - Path=/tymg/api/request-status/**
+                - Method=GET,DELETE
+              filters:
+                - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}
 
-        - id: sync-characters-route
-          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
-          predicates:
-            - Path=/tymg/api/sync-characters
-            - Method=POST
-          filters:
-            - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}
+            - id: sync-characters-route
+              uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+              predicates:
+                - Path=/tymg/api/sync-characters
+                - Method=POST
+              filters:
+                - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}
 
-        - id: health-consumer-route
-          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
-          predicates:
-            - Path=/tymg/health/consumer
-            - Method=GET
-          filters:
-            - RewritePath=/tymg/health/consumer, /tymb/health/consumer
+            - id: health-consumer-route
+              uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+              predicates:
+                - Path=/tymg/health/consumer
+                - Method=GET
+              filters:
+                - RewritePath=/tymg/health/consumer, /tymb/health/consumer
 
-        - id: actuator-route
-          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
-          predicates:
-            - Path=/tymg/actuator/**
-          filters:
-            - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}
+            - id: actuator-route
+              uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+              predicates:
+                - Path=/tymg/actuator/**
+              filters:
+                - RewritePath=/tymg/(?<segment>.*), /tymb/$\{segment}
 
-        # ========================================
-        # Swagger UI Routes - 排除这些路径，让 SpringDoc 直接处理
-        # ========================================
-        # 注意：Swagger UI 路径不需要 Gateway 路由，SpringDoc 会自动处理
-        # 但我们需要确保这些路径不被其他路由拦截
+            # ========================================
+            # Swagger UI Routes - 排除这些路径，让 SpringDoc 直接处理
+            # ========================================
+            # 注意：Swagger UI 路径不需要 Gateway 路由，SpringDoc 会自动处理
+            # 但我们需要确保这些路径不被其他路由拦截
 
-        # ========================================
-        # Custom API Docs Routes
-        # ========================================
-        - id: api-docs-ui-route
-          uri: 'forward:/api-docs/ui'  # Forward to Gateway's API docs page
-          predicates:
-            - Path=/tymg/api-docs/ui
-          filters:
-            - RewritePath=/tymg/api-docs/ui, /api-docs/ui
+            # ========================================
+            # Custom API Docs Routes
+            # ========================================
+            - id: api-docs-ui-route
+              uri: 'forward:/api-docs/ui'  # Forward to Gateway's API docs page
+              predicates:
+                - Path=/tymg/api-docs/ui
+              filters:
+                - RewritePath=/tymg/api-docs/ui, /api-docs/ui
 
-        - id: api-docs-routes-route
-          uri: 'forward:/api-docs/routes'  # Forward to Gateway's routes info
-          predicates:
-            - Path=/tymg/api-docs/routes
-          filters:
-            - RewritePath=/tymg/api-docs/routes, /api-docs/routes
+            - id: api-docs-routes-route
+              uri: 'forward:/api-docs/routes'  # Forward to Gateway's routes info
+              predicates:
+                - Path=/tymg/api-docs/routes
+              filters:
+                - RewritePath=/tymg/api-docs/routes, /api-docs/routes
 
-        - id: health-route
-          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
-          predicates:
-            - Path=/tymg/health
-          filters:
-            - RewritePath=/tymg/health, /tymb/actuator/health
+            - id: health-route
+              uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+              predicates:
+                - Path=/tymg/health
+              filters:
+                - RewritePath=/tymg/health, /tymb/actuator/health
 
-        # ========================================
-        # Auth Routes - Forward to Backend
-        # ========================================
-        - id: auth-routes
-          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
-          predicates:
-            - Path=/tymg/auth/**
-          filters:
-            - RewritePath=/tymg/auth/(?<segment>.*), /tymb/auth/$\{segment}
+            # ========================================
+            # Auth Routes - Forward to Backend
+            # ========================================
+            - id: auth-routes
+              uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+              predicates:
+                - Path=/tymg/auth/**
+              filters:
+                - RewritePath=/tymg/auth/(?<segment>.*), /tymb/auth/$\{segment}
 
-        # ========================================
-        # Keycloak Routes - Forward to Gateway's own controller
-        # ========================================
-        # Note: This route forwards to Gateway's own KeycloakController (@RequestMapping("/tymg/keycloak"))
-        # The forward: URI forwards to Gateway's own handlers (without /tymg prefix in forward target)
-        # Path rewriting ensures the controller receives the correct path
-        - id: keycloak-routes
-          uri: 'forward:/tymg/keycloak'  # Forward to Gateway's own KeycloakController
-          predicates:
-            - Path=/tymg/keycloak/**
-          filters:
-            - RewritePath=/tymg/keycloak/(?<segment>.*), /tymg/keycloak/$\{segment}
+            # ========================================
+            # Keycloak Routes - Forward to Gateway's own controller
+            # ========================================
+            # Note: This route forwards to Gateway's own KeycloakController (@RequestMapping("/tymg/keycloak"))
+            # The forward: URI forwards to Gateway's own handlers (without /tymg prefix in forward target)
+            # Path rewriting ensures the controller receives the correct path
+            - id: keycloak-routes
+              uri: 'forward:/tymg/keycloak'  # Forward to Gateway's own KeycloakController
+              predicates:
+                - Path=/tymg/keycloak/**
+              filters:
+                - RewritePath=/tymg/keycloak/(?<segment>.*), /tymg/keycloak/$\{segment}
 
-      # Default filters applied to all routes
-      default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
-        - AddResponseHeader=X-Gateway-Response, TYM-Gateway
+          # Default filters applied to all routes
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+            - AddResponseHeader=X-Gateway-Response, TYM-Gateway
 
   # Redis configuration for rate limiting (currently disabled)
   # data:
@@ -306,7 +312,7 @@ management:
       probes:
         enabled: true
     gateway:
-      enabled: false
+      access: none
   metrics:
     tags:
       application: ${spring.application.name}
