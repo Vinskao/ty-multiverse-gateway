@@ -132,13 +132,20 @@ spring:
           filters:
             - RewritePath=/tymg/people-images/(?<segment>.*), /tymb/people-images/$\{segment}
 
+        - id: palais-access-route
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+          predicates:
+            - Path=/tymg/palais-access/**
+          filters:
+            - RewritePath=/tymg/palais-access/(?<segment>.*), /tymb/palais-access/$\{segment}
+
         - id: business-process-bpmn-route
           uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
-            - Path=/tymg/api/business-processes.bpmn
+            - Path=/tymg/api/business-processes.bpmn,/tymg/api/palais-access.bpmn
             - Method=GET
           filters:
-            - SetPath=/tymb/api/business-processes.bpmn
+            - RewritePath=/tymg/api/(?<diagram>[^/]+), /tymb/api/$\{diagram}
 
         - id: async-request-status-route
           uri: '${BACKEND_BASE_URL:http://localhost:8080}'

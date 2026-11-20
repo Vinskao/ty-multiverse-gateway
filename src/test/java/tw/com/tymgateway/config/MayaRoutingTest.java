@@ -27,7 +27,21 @@ class MayaRoutingTest {
         registry.add("BACKEND_BASE_URL", () -> "http://localhost:" + upstream.port());
         registry.add("MAYA_SAWA_BASE_URL", () -> "http://localhost:" + upstream.port());
     }
+    @org.springframework.boot.test.mock.mockito.MockBean
+    org.springframework.security.oauth2.jwt.ReactiveJwtDecoder decoder;
+
     @LocalServerPort int port;
+
+    @Test void routesAuthenticatedPalaisApiRequests() {
+        var jwt = org.springframework.security.oauth2.jwt.Jwt.withTokenValue("fixture")
+                .header("alg", "RS256").subject("maker").build();
+        org.mockito.Mockito.when(decoder.decode("fixture")).thenReturn(Mono.just(jwt));
+        WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build()
+                .get().uri("/tymg/palais-access/me").headers(headers -> headers.setBearerAuth("fixture"))
+                .exchange().expectStatus().isOk()
+                .expectHeader().valueEquals("X-Upstream-Path", "/tymb/palais-access/me")
+                .expectHeader().valueEquals("X-Upstream-Auth", "Bearer fixture");
+    }
     @AfterAll static void stop() { upstream.disposeNow(); }
     @Test void preservesPathsCredentialsCorsAndLargeStreamingBody() {
         WebTestClient client = WebTestClient.bindToServer().baseUrl("http://localhost:" + port)
@@ -50,6 +64,14 @@ class MayaRoutingTest {
         WebTestClient client = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
         client.get().uri("/tymg/api/business-processes.bpmn").exchange()
             .expectStatus().isOk().expectHeader().valueEquals("X-Upstream-Path", "/tymb/api/business-processes.bpmn");
+        client.get().uri("/tymg/api/palais-access.bpmn").exchange()
+                .expectStatus().isOk().expectHeader().valueEquals("X-Upstream-Path", "/tymb/api/palais-access.bpmn");
+        client.post().uri("/tymg/api/palais-access.bpmn").exchange().expectStatus().isUnauthorized();
         client.post().uri("/tymg/api/business-processes.bpmn").exchange().expectStatus().isUnauthorized();
+    }
+    @Test void refusesAnonymousPalaisAccessApiRequests() {
+        WebTestClient client = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
+        client.get().uri("/tymg/palais-access/review-queue").exchange().expectStatus().isUnauthorized();
+        client.post().uri("/tymg/palais-access/requests").exchange().expectStatus().isUnauthorized();
     }
 }
