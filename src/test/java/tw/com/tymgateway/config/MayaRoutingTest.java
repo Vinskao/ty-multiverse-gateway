@@ -24,6 +24,7 @@ class MayaRoutingTest {
     }).bindNow();
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
+        registry.add("BACKEND_BASE_URL", () -> "http://localhost:" + upstream.port());
         registry.add("MAYA_SAWA_BASE_URL", () -> "http://localhost:" + upstream.port());
     }
     @LocalServerPort int port;
@@ -44,5 +45,11 @@ class MayaRoutingTest {
                     .expectHeader().valueEquals("Access-Control-Allow-Origin", "https://tymultiverse.cc")
                     .expectBody().consumeWith(result -> org.assertj.core.api.Assertions.assertThat(result.getResponseBody()).isEqualTo(payload));
         }
+    }
+    @Test void forwardsPublicBpmnReadToBackend() {
+        WebTestClient client = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
+        client.get().uri("/tymg/api/business-processes.bpmn").exchange()
+            .expectStatus().isOk().expectHeader().valueEquals("X-Upstream-Path", "/tymb/api/business-processes.bpmn");
+        client.post().uri("/tymg/api/business-processes.bpmn").exchange().expectStatus().isUnauthorized();
     }
 }

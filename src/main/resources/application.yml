@@ -132,6 +132,14 @@ spring:
           filters:
             - RewritePath=/tymg/people-images/(?<segment>.*), /tymb/people-images/$\{segment}
 
+        - id: business-process-bpmn-route
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+          predicates:
+            - Path=/tymg/api/business-processes.bpmn
+            - Method=GET
+          filters:
+            - SetPath=/tymb/api/business-processes.bpmn
+
         - id: async-request-status-route
           uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:

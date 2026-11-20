@@ -497,3 +497,5 @@ REDIS_HOST=localhost
 REDIS_CUSTOM_PORT=6379
 REDIS_PASSWORD=
 ```
+
+公開業務流程圖：[BPMN 路由與開發方法](docs/BUSINESS_PROCESS_BPMN.md)。
