@@ -27,7 +27,7 @@ class MayaRoutingTest {
         registry.add("BACKEND_BASE_URL", () -> "http://localhost:" + upstream.port());
         registry.add("MAYA_SAWA_BASE_URL", () -> "http://localhost:" + upstream.port());
     }
-    @org.springframework.boot.test.mock.mockito.MockBean
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
     org.springframework.security.oauth2.jwt.ReactiveJwtDecoder decoder;
 
     @LocalServerPort int port;

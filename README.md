@@ -1,6 +1,6 @@
 # TY Multiverse Gateway
 
-![Java](https://img.shields.io/badge/Java-21%2B-ED8B00.svg) ![Spring Cloud Gateway](https://img.shields.io/badge/Spring%20Cloud%20Gateway-2023.0-6DB33F.svg) ![gRPC](https://img.shields.io/badge/gRPC-Enabled-244C5A.svg)
+![Java](https://img.shields.io/badge/Java-21%2B-ED8B00.svg) ![Spring Cloud Gateway](https://img.shields.io/badge/Spring%20Cloud%20Gateway-2025.0-6DB33F.svg)
 
 > The unified API gateway and routing layer for the system, featuring rate limiting, circuit breaking, and centralized security.
 
@@ -29,88 +29,91 @@
 
 | 路徑 | 目標服務 | 說明 |
 |------|---------|------|
-| `/tymb/people/**` | Backend | 人物管理 API |
-| `/tymb/weapons/**` | Backend | 武器管理 API |
-| `/tymb/gallery/**` | Backend | 圖庫管理 API |
-| `/tymb/deckofcards/blackjack/**` | Backend | 21點遊戲 API |
-| `/tymb/auth/**` | Backend | 認證 API |
-| `/tymb/keycloak/**` | Backend | Keycloak 整合 |
-| `/tymb/api/request-status/**` | Backend | 異步請求狀態 |
-| `/tymb/swagger-ui/**` | Backend | Swagger UI |
+| `/tymg/people/**` | Backend（`AsyncPeopleProxyController`） | 人物管理 API（非同步代理） |
+| `/tymg/weapons/**` | Backend | 武器管理 API |
+| `/tymg/gallery/**` | Backend | 圖庫管理 API |
+| `/tymg/deckofcards/**` | Backend | 21點遊戲 API |
+| `/tymg/learn/**` | Backend | 學習模組 API |
+| `/tymg/palais-access/**` | Backend | Palais 存取審核 API |
+| `/tymg/auth/**` | Backend | 認證 API |
+| `/tymg/keycloak/**` | Gateway 自身 `KeycloakController` | Keycloak 登入回呼、登出、introspect |
+| `/tymg/api/request-status/**` | Backend | 異步請求狀態 |
+| `/maya-sawa/**`、`/maya-v2/**`、`/voyeur/**`、`/paprika/**` | maya-sawa | Maya 服務 |
 
 ## Architecture
 
-### gRPC 三層架構
+### 整體架構
 
 ```mermaid
-flowchart TD
-    subgraph Backend_App [Backend (ty-multiverse-backend)]
+flowchart LR
+    Frontend["Frontend (瀏覽器)"]
+    Agents["排程 agent / 外部呼叫端"]
+
+    subgraph GW["ty-multiverse-gateway (Spring Cloud Gateway, WebFlux, :8082)"]
         direction TB
-        subgraph GrpcServerGroup [GrpcServerConfig]
-            A1[啟動 gRPC Server<br/>端口 50051]
-            A2[註冊 PeopleService]
-            A3[註冊 KeycloakService]
-        end
-        subgraph GrpcPeopleServiceGroup [GrpcPeopleServiceImpl]
-            B1[getAllPeople]
-            B2[getPeopleByName]
-            B3[insertPeople]
-        end
+        Security["SecurityConfig - JWT 驗證 (OAuth2 Resource Server)"]
+        CorsFilter["GatewayConfig - CorsWebFilter"]
+        LogFilter["LoggingGlobalFilter"]
+        Routes["YAML 路由 - spring.cloud.gateway.server.webflux.routes"]
+        AsyncProxy["AsyncPeopleProxyController - AsyncWeaponProxyController"]
+        Registry["AsyncResultRegistry"]
+        Listener["AsyncResultListener"]
+        KeycloakCtl["KeycloakController - /tymg/keycloak/*"]
+        Docs["ApiDocsController / SwaggerUiController - springdoc"]
+        Actuator["Actuator - health, info, metrics, prometheus"]
     end
 
-    subgraph Gateway_App [Gateway (ty-multiverse-gateway)]
-        direction TB
-        subgraph PeopleGrpcClientGroup [PeopleGrpcClient]
-            D1[getAllPeople]
-            D2[getPeopleByName]
-            D3[insertPeople]
-        end
-        subgraph HttpControllersGroup [HTTP Controllers]
-            F1[PeopleController]
-            F2[KeycloakController]
-        end
-    end
+    Backend["ty-multiverse-backend (/tymb)"]
+    Maya["maya-sawa"]
+    Keycloak["Keycloak"]
+    RabbitMQ[("RabbitMQ - tymb-exchange / async-result")]
+    Prometheus["Prometheus"]
 
-    Gateway_App -- "gRPC 調用" --> Backend_App
+    Frontend -- "HTTPS /tymg/**" --> Security
+    Agents -- "HTTPS /maya-sawa/** 等" --> Security
+    Security --> CorsFilter --> LogFilter
+    LogFilter --> Routes
+    LogFilter --> AsyncProxy
+    LogFilter --> KeycloakCtl
+    LogFilter --> Docs
+    Routes -- "HTTP /tymg/* 改寫為 /tymb/*" --> Backend
+    Routes -- "HTTP /maya-sawa, /maya-v2, /voyeur, /paprika" --> Maya
+    AsyncProxy -- "HTTP WebClient, 取得 requestId" --> Backend
+    AsyncProxy -- "等待結果" --> Registry
+    RabbitMQ -- "AMQP async-result" --> Listener
+    Listener --> Registry
+    Security -- "JWKS 驗簽" --> Keycloak
+    KeycloakCtl -- "HTTP token / logout / introspect" --> Keycloak
+    Prometheus -- "HTTP /actuator/prometheus" --> Actuator
 ```
 
-### 完整系統架構
+### 非同步代理流程（`controller/BaseAsyncProxyController.java`、`service/`）
 
 ```mermaid
-graph TD
-    Frontend["Frontend<br/>(Astro/JS)"]
+sequenceDiagram
+    participant FE as Frontend
+    participant GW as AsyncPeopleProxyController
+    participant REG as AsyncResultRegistry
+    participant BE as Backend (/tymb)
+    participant MQ as RabbitMQ (async-result)
+    participant L as AsyncResultListener
 
-    subgraph Gateway ["TY Multiverse Gateway<br/>(Spring Cloud Gateway)"]
-        direction TB
-        GlobalFilters["Global Filters<br/>• Logging<br/>• CORS<br/>• Rate Limiting<br/>• Circuit Breaker"]
-        Routes["Route Configurations<br/>• /tymb/people/** → Backend<br/>• /tymb/weapons/** → Backend<br/>• /tymb/gallery/** → Backend"]
-        GrpcClients["gRPC Clients<br/>• PeopleGrpcClient<br/>• KeycloakGrpcClient"]
-        GlobalFilters --> Routes
-        GlobalFilters --> GrpcClients
-    end
-
-    subgraph Backend ["TY Multiverse Backend Service"]
-        direction TB
-        GrpcServer["gRPC Server"]
-        Services["Services<br/>• People / Weapons / Gallery<br/>• Authentication (Keycloak)<br/>• Async Processing"]
-    end
-
-    PGDB[(PostgreSQL)]
-    RedisDB[(Redis)]
-    RabbitMQ[(RabbitMQ)]
-
-    Frontend -- "HTTP/HTTPS" --> Gateway
-    Gateway -- "Load Balanced HTTP + gRPC" --> Backend
-    Backend --> PGDB
-    Backend --> RedisDB
-    Backend --> RabbitMQ
+    FE->>GW: /tymg/people/* 或 /tymg/weapons/*
+    GW->>BE: HTTP WebClient
+    BE-->>GW: 202 + requestId
+    GW->>REG: 註冊 requestId，等待 (gateway.async.timeout)
+    Note over BE,MQ: 實際處理在 Backend 之後的非同步流程，結果寫入 tymb-exchange / async-result
+    MQ->>L: AsyncResultMessage
+    L->>REG: complete(requestId)
+    REG-->>GW: 結果
+    GW-->>FE: HTTP 200 + 最終資料（逾時回錯誤與 requestId）
 ```
 
 ### 請求流程
 
 ```
-客戶端請求 → Gateway → LoggingGlobalFilter → CORS Filter → RequestRateLimiter
-→ 路由匹配 → CircuitBreaker → 轉發到 Backend → 返回響應
+客戶端請求 → SecurityConfig (JWT) → CorsWebFilter → LoggingGlobalFilter
+→ 路由匹配（YAML 路由或 Async*ProxyController）→ 轉發到 Backend / maya-sawa → 返回響應
 ```
 
 ## Design Patterns
@@ -127,13 +130,13 @@ graph TD
 
 - **Gateway API**: `http://localhost:8082`
 - **健康檢查**: `http://localhost:8082/actuator/health`
-- **路由資訊**: `http://localhost:8082/actuator/gateway/routes`
+- **路由資訊**: `http://localhost:8082/api-docs/routes`（actuator 的 `gateway` 端點已關閉）
 
 ### 技術棧
 
-- Spring Boot 3.2.7 / Spring Cloud Gateway 2023.0.2 / Java 21
+- Spring Boot 3.5.16 / Spring Cloud 2025.0.3（Gateway 4.3）/ Java 21
 - Redis（分散式限流）/ Resilience4j（熔斷器）
 
 > 啟動指令、API 測試 curl 範例、Docker/K8s 部署、性能調優請見 [AGENTS.md](AGENTS.md)。
 
-Maya ???????????[????](docs/routing/MAYA_BEHIND_GATEWAY_PLAN.md)?
+Maya 經 Gateway 轉發的規劃見[執行計畫](docs/routing/MAYA_BEHIND_GATEWAY_PLAN.md)。
