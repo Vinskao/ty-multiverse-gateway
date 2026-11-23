@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+  id="Definitions_TYGateway" targetNamespace="https://tymultiverse.cc/business-processes/gateway">
+  <bpmn:process id="TYGateway" name="TY Gateway business processes" isExecutable="false">
+    <bpmn:startEvent id="maya_start" name="研究、行情與 AI 請求"/>
+    <bpmn:task id="maya_task" name="保留權杖與串流內容，轉發 Maya Sawa"/>
+    <bpmn:endEvent id="maya_end" name="Maya Sawa 驗證權限並回傳"/>
+    <bpmn:sequenceFlow id="maya_1" sourceRef="maya_start" targetRef="maya_task"/>
+    <bpmn:sequenceFlow id="maya_2" sourceRef="maya_task" targetRef="maya_end"/>
+    <bpmn:startEvent id="read_start" name="公開資料讀取"/>
+    <bpmn:task id="read_task" name="免登入放行，改寫路徑為 /tymb"/>
+    <bpmn:endEvent id="read_end" name="Backend 回傳資料"/>
+    <bpmn:sequenceFlow id="read_1" sourceRef="read_start" targetRef="read_task"/>
+    <bpmn:sequenceFlow id="read_2" sourceRef="read_task" targetRef="read_end"/>
+    <bpmn:startEvent id="write_start" name="受保護的請求"/>
+    <bpmn:task id="write_task" name="驗證 Keycloak JWT，改寫路徑並轉交憑證"/>
+    <bpmn:endEvent id="write_end" name="轉發 Backend 或回 401"/>
+    <bpmn:sequenceFlow id="write_1" sourceRef="write_start" targetRef="write_task"/>
+    <bpmn:sequenceFlow id="write_2" sourceRef="write_task" targetRef="write_end"/>
+    <bpmn:startEvent id="async_start" name="角色或武器請求"/>
+    <bpmn:task id="async_task" name="轉交 Backend，非同步工作等待結果佇列"/>
+    <bpmn:endEvent id="async_end" name="回傳結果或逾時"/>
+    <bpmn:sequenceFlow id="async_1" sourceRef="async_start" targetRef="async_task"/>
+    <bpmn:sequenceFlow id="async_2" sourceRef="async_task" targetRef="async_end"/>
+    <bpmn:startEvent id="login_start" name="登入、登出或權杖檢查"/>
+    <bpmn:task id="login_task" name="與 Keycloak 交換或檢查權杖"/>
+    <bpmn:endEvent id="login_end" name="導回網站或回傳狀態"/>
+    <bpmn:sequenceFlow id="login_1" sourceRef="login_start" targetRef="login_task"/>
+    <bpmn:sequenceFlow id="login_2" sourceRef="login_task" targetRef="login_end"/>
+    <bpmn:startEvent id="learn_start" name="學習請求"/>
+    <bpmn:task id="learn_task" name="公開學習放行，其餘需登入"/>
+    <bpmn:endEvent id="learn_end" name="轉發 Backend 學習模組"/>
+    <bpmn:sequenceFlow id="learn_1" sourceRef="learn_start" targetRef="learn_task"/>
+    <bpmn:sequenceFlow id="learn_2" sourceRef="learn_task" targetRef="learn_end"/>
+    <bpmn:startEvent id="palais_start" name="Palais 權限申請與審核"/>
+    <bpmn:task id="palais_task" name="驗證登入身分後轉發"/>
+    <bpmn:endEvent id="palais_end" name="Backend 執行審核規則"/>
+    <bpmn:sequenceFlow id="palais_1" sourceRef="palais_start" targetRef="palais_task"/>
+    <bpmn:sequenceFlow id="palais_2" sourceRef="palais_task" targetRef="palais_end"/>
+    <bpmn:startEvent id="ops_start" name="健康檢查與 API 文件"/>
+    <bpmn:task id="ops_task" name="檢查狀態或提供 API 文件"/>
+    <bpmn:endEvent id="ops_end" name="回傳狀態或文件"/>
+    <bpmn:sequenceFlow id="ops_1" sourceRef="ops_start" targetRef="ops_task"/>
+    <bpmn:sequenceFlow id="ops_2" sourceRef="ops_task" targetRef="ops_end"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="TYGatewayDiagram">
+    <bpmndi:BPMNPlane id="TYGatewayPlane" bpmnElement="TYGateway">
+      <bpmndi:BPMNShape id="maya_start_di" bpmnElement="maya_start"><dc:Bounds x="80" y="54" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="28" y="94" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="maya_task_di" bpmnElement="maya_task"><dc:Bounds x="220" y="40" width="240" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="maya_end_di" bpmnElement="maya_end"><dc:Bounds x="580" y="54" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="528" y="94" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="maya_1_di" bpmnElement="maya_1"><di:waypoint x="116" y="72"/><di:waypoint x="220" y="72"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="maya_2_di" bpmnElement="maya_2"><di:waypoint x="460" y="72"/><di:waypoint x="580" y="72"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="read_start_di" bpmnElement="read_start"><dc:Bounds x="80" y="164" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="28" y="204" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="read_task_di" bpmnElement="read_task"><dc:Bounds x="220" y="150" width="240" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="read_end_di" bpmnElement="read_end"><dc:Bounds x="580" y="164" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="528" y="204" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="read_1_di" bpmnElement="read_1"><di:waypoint x="116" y="182"/><di:waypoint x="220" y="182"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="read_2_di" bpmnElement="read_2"><di:waypoint x="460" y="182"/><di:waypoint x="580" y="182"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="write_start_di" bpmnElement="write_start"><dc:Bounds x="80" y="274" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="28" y="314" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="write_task_di" bpmnElement="write_task"><dc:Bounds x="220" y="260" width="240" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="write_end_di" bpmnElement="write_end"><dc:Bounds x="580" y="274" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="528" y="314" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="write_1_di" bpmnElement="write_1"><di:waypoint x="116" y="292"/><di:waypoint x="220" y="292"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="write_2_di" bpmnElement="write_2"><di:waypoint x="460" y="292"/><di:waypoint x="580" y="292"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="async_start_di" bpmnElement="async_start"><dc:Bounds x="80" y="384" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="28" y="424" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="async_task_di" bpmnElement="async_task"><dc:Bounds x="220" y="370" width="240" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="async_end_di" bpmnElement="async_end"><dc:Bounds x="580" y="384" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="528" y="424" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="async_1_di" bpmnElement="async_1"><di:waypoint x="116" y="402"/><di:waypoint x="220" y="402"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="async_2_di" bpmnElement="async_2"><di:waypoint x="460" y="402"/><di:waypoint x="580" y="402"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="login_start_di" bpmnElement="login_start"><dc:Bounds x="80" y="494" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="28" y="534" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="login_task_di" bpmnElement="login_task"><dc:Bounds x="220" y="480" width="240" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="login_end_di" bpmnElement="login_end"><dc:Bounds x="580" y="494" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="528" y="534" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="login_1_di" bpmnElement="login_1"><di:waypoint x="116" y="512"/><di:waypoint x="220" y="512"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="login_2_di" bpmnElement="login_2"><di:waypoint x="460" y="512"/><di:waypoint x="580" y="512"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="learn_start_di" bpmnElement="learn_start"><dc:Bounds x="80" y="604" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="28" y="644" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="learn_task_di" bpmnElement="learn_task"><dc:Bounds x="220" y="590" width="240" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="learn_end_di" bpmnElement="learn_end"><dc:Bounds x="580" y="604" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="528" y="644" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="learn_1_di" bpmnElement="learn_1"><di:waypoint x="116" y="622"/><di:waypoint x="220" y="622"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="learn_2_di" bpmnElement="learn_2"><di:waypoint x="460" y="622"/><di:waypoint x="580" y="622"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="palais_start_di" bpmnElement="palais_start"><dc:Bounds x="80" y="714" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="28" y="754" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="palais_task_di" bpmnElement="palais_task"><dc:Bounds x="220" y="700" width="240" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="palais_end_di" bpmnElement="palais_end"><dc:Bounds x="580" y="714" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="528" y="754" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="palais_1_di" bpmnElement="palais_1"><di:waypoint x="116" y="732"/><di:waypoint x="220" y="732"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="palais_2_di" bpmnElement="palais_2"><di:waypoint x="460" y="732"/><di:waypoint x="580" y="732"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ops_start_di" bpmnElement="ops_start"><dc:Bounds x="80" y="824" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="28" y="864" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ops_task_di" bpmnElement="ops_task"><dc:Bounds x="220" y="810" width="240" height="64"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ops_end_di" bpmnElement="ops_end"><dc:Bounds x="580" y="824" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="528" y="864" width="140" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="ops_1_di" bpmnElement="ops_1"><di:waypoint x="116" y="842"/><di:waypoint x="220" y="842"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ops_2_di" bpmnElement="ops_2"><di:waypoint x="460" y="842"/><di:waypoint x="580" y="842"/></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

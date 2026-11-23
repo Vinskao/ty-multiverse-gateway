@@ -69,6 +69,15 @@ class MayaRoutingTest {
         client.post().uri("/tymg/api/palais-access.bpmn").exchange().expectStatus().isUnauthorized();
         client.post().uri("/tymg/api/business-processes.bpmn").exchange().expectStatus().isUnauthorized();
     }
+    @Test void servesItsOwnBpmnPublicly() {
+        WebTestClient client = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
+        client.get().uri("/tymg/api/gateway.bpmn").exchange().expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith("application/xml")
+                .expectHeader().doesNotExist("X-Upstream-Path")
+                .expectBody(String.class).value(xml -> org.assertj.core.api.Assertions.assertThat(xml)
+                        .contains("bpmnElement=\"TYGateway\"").contains("<bpmndi:BPMNDiagram"));
+        client.post().uri("/tymg/api/gateway.bpmn").exchange().expectStatus().isUnauthorized();
+    }
     @Test void refusesAnonymousPalaisAccessApiRequests() {
         WebTestClient client = WebTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
         client.get().uri("/tymg/palais-access/review-queue").exchange().expectStatus().isUnauthorized();

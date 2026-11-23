@@ -128,7 +128,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.GET, "/tymg/ckeditor/**").permitAll()
                         .pathMatchers(HttpMethod.POST, "/tymg/ckeditor/get-content").permitAll()
                         // 其他 Async API - 需要 Token
-                        .pathMatchers(HttpMethod.GET, "/tymg/api/business-processes.bpmn", "/tymg/api/palais-access.bpmn").permitAll()
+                        .pathMatchers(HttpMethod.GET, "/tymg/api/business-processes.bpmn", "/tymg/api/palais-access.bpmn", "/tymg/api/gateway.bpmn").permitAll()
                         .pathMatchers("/tymg/api/**").authenticated()
 
                         // ========================================
