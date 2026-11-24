@@ -33,7 +33,7 @@ import java.util.List;
 @Configuration
 public class GatewayConfig {
 
-    private static final String BACKEND_PREFLIGHT_ORIGIN = GatewayConfig.class.getName() + ".backendPreflightOrigin";
+    public static final String BACKEND_PREFLIGHT_ORIGIN = GatewayConfig.class.getName() + ".backendPreflightOrigin";
 
 
 /**

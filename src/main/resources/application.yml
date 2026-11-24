@@ -27,11 +27,18 @@ spring:
           uri: '${BACKEND_BASE_URL:http://localhost:8080}'
           predicates:
             - Path=/tymb/health-data/workout-tcx
-            - Method=POST
           filters:
+            - ShortcutIngest
             - name: RequestSize
               args:
                 maxSize: 30MB
+
+        - id: backend-daily-lines
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+          predicates:
+            - Path=/tymb/health-data/daily-lines
+          filters:
+            - ShortcutIngest
 
         - id: backend-public-entry
           uri: '${BACKEND_BASE_URL:http://localhost:8080}'

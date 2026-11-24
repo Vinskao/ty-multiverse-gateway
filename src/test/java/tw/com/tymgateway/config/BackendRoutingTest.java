@@ -35,6 +35,7 @@ class BackendRoutingTest {
 
     @DynamicPropertySource
     static void upstreamAddress(DynamicPropertyRegistry properties) {
+        properties.add("HEALTH_INGEST_TOKEN", () -> "fixture");
         properties.add("BACKEND_BASE_URL", () -> "http://localhost:" + upstream.port());
     }
 
@@ -54,7 +55,14 @@ class BackendRoutingTest {
                 .expectHeader().valueEquals("X-Upstream-Path", "/tymb/actuator/health");
         client.post().uri(TCX).exchange()
                 .expectStatus().isUnauthorized()
-                .expectHeader().valueEquals("X-Upstream-Path", TCX);
+                .expectHeader().doesNotExist("X-Upstream-Path");
+        client.get().uri(TCX).exchange().expectStatus().isEqualTo(405);
+        client.get().uri("/tymb/health-data/daily-lines").exchange().expectStatus().isEqualTo(405);
+        client.post().uri("/tymb/health-data/daily-lines").exchange().expectStatus().isUnauthorized()
+                .expectHeader().doesNotExist("X-Upstream-Path");
+        client.post().uri("/tymb/health-data/daily-lines").header("X-Health-Token", "fixture")
+                .exchange().expectStatus().isOk()
+                .expectHeader().valueEquals("X-Upstream-Path", "/tymb/health-data/daily-lines");
     }
 
     @Test
