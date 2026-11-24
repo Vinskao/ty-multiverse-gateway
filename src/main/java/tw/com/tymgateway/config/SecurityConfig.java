@@ -135,6 +135,7 @@ public class SecurityConfig {
                         // 默认规则：需要有效 Token（JWT 验证已启用）
                         // ========================================
                         .pathMatchers("/maya-sawa/**", "/maya-v2/**", "/voyeur/**", "/paprika/**").permitAll()
+                        .pathMatchers("/tymb", "/tymb/**").permitAll() // Backend owns authorization.
                         .anyExchange().authenticated())
 
                 // OAuth2 Resource Server：JWT Token 验证
@@ -142,7 +143,8 @@ public class SecurityConfig {
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .bearerTokenConverter(exchange -> {
                             String path = exchange.getRequest().getPath().value();
-                            if (path.equals("/maya-sawa") || path.startsWith("/maya-sawa/")
+                            if (path.equals("/tymb") || path.startsWith("/tymb/")
+                                    || path.equals("/maya-sawa") || path.startsWith("/maya-sawa/")
                                     || path.equals("/maya-v2") || path.startsWith("/maya-v2/")
                                     || path.equals("/voyeur") || path.startsWith("/voyeur/")
                                     || path.equals("/paprika") || path.startsWith("/paprika/")) {

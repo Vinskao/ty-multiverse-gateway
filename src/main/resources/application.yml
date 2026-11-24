@@ -23,6 +23,20 @@ spring:
       # Spring Cloud Gateway (WebFlux) → Backend REST Controllers
       # 所有请求通过路由配置转发到 Backend REST API
       routes:
+        - id: backend-workout-tcx
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+          predicates:
+            - Path=/tymb/health-data/workout-tcx
+            - Method=POST
+          filters:
+            - name: RequestSize
+              args:
+                maxSize: 30MB
+
+        - id: backend-public-entry
+          uri: '${BACKEND_BASE_URL:http://localhost:8080}'
+          predicates:
+            - Path=/tymb,/tymb/**
         - id: maya-sawa-routes
           uri: '${MAYA_SAWA_BASE_URL:http://maya-sawa}'
           predicates:

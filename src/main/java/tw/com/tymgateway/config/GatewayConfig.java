@@ -1,10 +1,14 @@
 package tw.com.tymgateway.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.gateway.filter.headers.HttpHeadersFilter;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.server.WebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -29,12 +33,15 @@ import java.util.List;
 @Configuration
 public class GatewayConfig {
 
+    private static final String BACKEND_PREFLIGHT_ORIGIN = GatewayConfig.class.getName() + ".backendPreflightOrigin";
+
+
 /**
  * CORS 過濾器配置，使用最高優先級確保在認證過濾器之前執行
  */
 @Bean
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public CorsWebFilter corsWebFilter() {
+public WebFilter corsWebFilter() {
     CorsConfiguration corsConfig = new CorsConfiguration();
     corsConfig.setAllowCredentials(true);
     // 當 allowCredentials 為 true 時，不能使用 "*" 作為 allowedOriginPatterns
@@ -52,14 +59,42 @@ public CorsWebFilter corsWebFilter() {
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", corsConfig);
 
-    return new CorsWebFilter(exchange -> {
+    CorsWebFilter gatewayCors = new CorsWebFilter(exchange -> {
         String path = exchange.getRequest().getPath().value();
         if (path.matches("/(maya-sawa|maya-v2|voyeur|paprika)(/.*)?")) {
             return null; // Maya owns CORS, including preflight responses.
         }
         return source.getCorsConfiguration(exchange);
     });
+    return (exchange, chain) -> {
+        String path = exchange.getRequest().getPath().value();
+        if (path.equals("/tymb") || path.startsWith("/tymb/")) {
+            if (!CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+                return chain.filter(exchange);
+            }
+            // WebFlux handler mapping terminates local preflights. Restore Origin on the outbound request.
+            exchange.getAttributes().put(BACKEND_PREFLIGHT_ORIGIN, exchange.getRequest().getHeaders().getOrigin());
+            var request = exchange.getRequest().mutate()
+                    .headers(headers -> headers.remove(HttpHeaders.ORIGIN)).build();
+            return chain.filter(exchange.mutate().request(request).build());
+        }
+        return gatewayCors.filter(exchange, chain);
+    };
 }
+
+    @Bean
+    public HttpHeadersFilter backendPreflightOrigin() {
+        return (input, exchange) -> {
+            String origin = exchange.getAttribute(BACKEND_PREFLIGHT_ORIGIN);
+            if (origin == null) {
+                return input;
+            }
+            HttpHeaders outbound = new HttpHeaders();
+            outbound.addAll(input);
+            outbound.setOrigin(origin);
+            return outbound;
+        };
+    }
 
     @Value("${PUBLIC_TYMB_URL:http://localhost:8080}")
     private String backendServiceUrl;

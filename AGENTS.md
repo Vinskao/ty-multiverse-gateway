@@ -499,3 +499,5 @@ REDIS_PASSWORD=
 ```
 
 公開業務流程圖：[BPMN 路由與開發方法](docs/BUSINESS_PROCESS_BPMN.md)。
+
+Backend 公開入口與部署順序：[Backend 公開路由](docs/routing/BACKEND_PUBLIC_ROUTING.md)。
